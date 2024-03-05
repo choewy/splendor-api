@@ -1,11 +1,14 @@
-import { Entity, JoinTable, OneToMany } from 'typeorm';
+import { Column, Entity, JoinTable, OneToMany } from 'typeorm';
 
 import { AbstractFileBaseEntity } from './abstracts';
-import { AlertWidgetEntity } from './alert-widget.entity';
+import { StudioEntity } from './studio.entity';
 
 @Entity({ name: 'alert_sound' })
 export class AlertSoundEntity extends AbstractFileBaseEntity {
-  @OneToMany(() => AlertWidgetEntity, (e) => e.alertSound, { cascade: true })
+  @Column({ type: 'varchar', length: 50 })
+  alias: string;
+
+  @OneToMany(() => StudioEntity, (e) => e.alertSound, { cascade: true })
   @JoinTable()
-  alertWidgets: AlertWidgetEntity[];
+  studios: StudioEntity[];
 }

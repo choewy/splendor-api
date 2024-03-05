@@ -11,8 +11,20 @@ export class StudioRepository extends AbstractRepository<StudioEntity> {
       messageWidget: {},
     });
 
-    await this.save(studio);
+    return studio.save();
+  }
 
-    return studio;
+  async findByUserId(userId: number) {
+    return this.findOne({
+      relations: {
+        studioSetting: true,
+        messageWidget: true,
+        alertWidget: true,
+        alertSound: true,
+        ttsVoice: { ttsVoiceImage: true, ttsVoiceSampleSound: true },
+        forbiddenWords: true,
+      },
+      where: { user: { id: userId } },
+    });
   }
 }

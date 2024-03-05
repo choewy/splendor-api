@@ -1,7 +1,8 @@
 import { PassportJwtGuard, PassportJwtPayload, ReqJwtPayload } from '@libs/passport';
-import { Controller, Head, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { StudioDto } from './dtos';
 import { StudioService } from './services';
 
 @ApiTags('스튜디오')
@@ -10,10 +11,11 @@ import { StudioService } from './services';
 export class StudioController {
   constructor(private readonly studioService: StudioService) {}
 
-  @Head()
+  @Get()
   @ApiBearerAuth()
-  @ApiOperation({ summary: '내 스튜디오 초기화', description: '스튜디오가 없는 경우 생성' })
-  async initializeMyStudio(@ReqJwtPayload() jwtPayload: PassportJwtPayload) {
-    return this.studioService.initializeMyStudio(jwtPayload.userId);
+  @ApiOperation({ summary: '내 스튜디오 조회' })
+  @ApiOkResponse({ type: StudioDto })
+  async getMyStudio(@ReqJwtPayload() jwtPayload: PassportJwtPayload) {
+    return this.studioService.getMyStudio(jwtPayload.userId);
   }
 }

@@ -1,6 +1,6 @@
 import { OAuthPlatform } from '@entities/oauth.entity';
 import { PassportJwtPayload } from '@libs/passport';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { UserDto } from '../dtos';
 import { UserRepository } from '../user.repository';
@@ -14,10 +14,6 @@ export class UserService {
       relations: { oauths: true },
       where: { id: jwtPayload.userId },
     });
-
-    if (user === null) {
-      throw new InternalServerErrorException('something is wrong');
-    }
 
     return new UserDto(user, jwtPayload.platform as OAuthPlatform);
   }
