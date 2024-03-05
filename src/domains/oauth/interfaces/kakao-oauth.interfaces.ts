@@ -18,6 +18,7 @@ export interface KakaoGetProfileInformationResponse {
     nickname: string;
     profile_image: string;
     thumbnail_image: string;
+    email?: string;
   };
   kakao_account: {
     profile: {
@@ -25,6 +26,7 @@ export interface KakaoGetProfileInformationResponse {
       thumbnail_image_url: string;
       profile_image_url: string;
       is_default_image: boolean;
+      email?: string;
     };
     profile_nickname_needs_agreement: boolean;
     profile_image_needs_agreement: boolean;

@@ -25,4 +25,14 @@ export class OAuthRepository extends AbstractRepository<OAuthEntity> {
       return oauth;
     });
   }
+
+  async updateOAuth(oauth: OAuthEntity, deepPartial: DeepPartial<Pick<OAuthEntity, 'email' | 'nickname' | 'profileImageUrl'>>) {
+    oauth.email = deepPartial.email;
+    oauth.nickname = deepPartial.nickname;
+    oauth.profileImageUrl = deepPartial.profileImageUrl;
+
+    await this.update(oauth.id, deepPartial);
+
+    return oauth;
+  }
 }

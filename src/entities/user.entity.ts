@@ -20,8 +20,8 @@ export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   readonly id: number;
 
-  @Column({ type: 'varchar', length: 50 })
-  nickname: string;
+  @Column({ type: 'varchar', length: 50, default: null })
+  nickname: string | null;
 
   @OneToMany(() => OAuthEntity, (e) => e.user, { cascade: true })
   @JoinTable()

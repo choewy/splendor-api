@@ -33,6 +33,9 @@ export class OAuthEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 400, default: null })
   email: string | null;
 
+  @Column({ type: 'varchar', length: 50 })
+  nickname: string;
+
   @Column({ type: 'varchar', length: 1024, default: null })
   profileImageUrl: string | null;
 

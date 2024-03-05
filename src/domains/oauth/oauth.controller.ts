@@ -4,6 +4,7 @@ import { Response } from 'express';
 
 import {
   GetOAuthAuthorizeUrlDto,
+  OAuthAuthorizeGoogleRedirectQueryDto,
   OAuthAuthorizeKakaoRedirectQueryDto,
   OAuthAuthorizeNaverRedirectQueryDto,
   OAuthAuthorizeUrlDto,
@@ -20,6 +21,13 @@ export class OAuthController {
   @ApiCreatedResponse({ type: OAuthAuthorizeUrlDto })
   async getOAuthAuthorizeUrl(@Body() body: GetOAuthAuthorizeUrlDto) {
     return this.oauthService.getOAuthAuthorizeUrl(body.platform);
+  }
+
+  @Get('google')
+  @ApiExcludeEndpoint()
+  @ApiOperation({ summary: 'Google 계정으로 로그인/회원가입', description: 'Google 인증 Redirect' })
+  async signWithGoogle(@Res({ passthrough: true }) res: Response, @Query() query: OAuthAuthorizeGoogleRedirectQueryDto) {
+    return this.oauthService.signWithGoogle(res, query.code);
   }
 
   @Get('kakao')

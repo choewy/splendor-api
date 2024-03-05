@@ -24,13 +24,42 @@ export class OAuthService {
     private readonly naverOAuthService: NaverOAuthService,
   ) {}
 
+  private async createOrUpdate(
+    platform: OAuthPlatform,
+    oauthId: string,
+    email: string | null,
+    nickname: string,
+    profileImageUrl: string | null,
+  ) {
+    let oauth = await this.oauthRepository.findByOAuthId(platform, oauthId);
+
+    if (oauth) {
+      oauth = await this.oauthRepository.updateOAuth(oauth, {
+        email,
+        nickname,
+        profileImageUrl,
+      });
+    } else {
+      oauth = await this.oauthRepository.createOAuth({
+        platform,
+        oauthId,
+        email,
+        nickname,
+        profileImageUrl,
+        user: {},
+      });
+    }
+
+    return oauth;
+  }
+
   private redirectSignUrl(res: Response, oauth: OAuthEntity) {
     const platform = oauth.platform;
     const accessToken = this.jwtService.sign(
       {
         platform,
+        nickname: oauth.nickname,
         userId: oauth.user.id,
-        nickname: oauth.user.nickname,
       } as PassportJwtPayload,
       this.jwtConfigService.getJwtSignOptions(),
     );
@@ -64,54 +93,45 @@ export class OAuthService {
     return new OAuthAuthorizeUrlDto(platform, url);
   }
 
+  async signWithGoogle(res: Response, code: string) {
+    const platform = OAuthPlatform.Google;
+    const tokens = await this.googleOAuthService.getTokens(code);
+    const accessToken = tokens.access_token;
+    const profile = await this.googleOAuthService.getProfileInformation(accessToken);
+    const oauth = await this.createOrUpdate(platform, profile.id, profile.email, profile.name, profile.picture);
+
+    return this.redirectSignUrl(res, oauth);
+  }
+
   async signWithKakao(res: Response, code: string) {
     const platform = OAuthPlatform.Kakao;
-    const kakaoTokens = await this.kakaoOAuthService.getTokens(code);
-    const kakaoAccessToken = kakaoTokens.access_token;
-    const kakaoTokenInformation = await this.kakaoOAuthService.getTokenInformation(kakaoAccessToken);
-    const oauthId = String(kakaoTokenInformation.id);
-
-    let oauth = await this.oauthRepository.findByOAuthId(platform, oauthId);
-
-    if (oauth === null) {
-      const kakaoProfile = await this.kakaoOAuthService.getProfileInformation(kakaoAccessToken);
-      const profileImageUrl = kakaoProfile.properties.profile_image;
-      const nickname = kakaoProfile.properties.nickname;
-
-      oauth = await this.oauthRepository.createOAuth({
-        platform,
-        oauthId,
-        email: null,
-        profileImageUrl,
-        user: { nickname },
-      });
-    }
+    const tokens = await this.kakaoOAuthService.getTokens(code);
+    const accessToken = tokens.access_token;
+    const tokenInformation = await this.kakaoOAuthService.getTokenInformation(accessToken);
+    const profile = await this.kakaoOAuthService.getProfileInformation(accessToken);
+    const oauth = await this.createOrUpdate(
+      platform,
+      String(tokenInformation.id),
+      profile.properties.email,
+      profile.properties.nickname,
+      profile.properties.profile_image,
+    );
 
     return this.redirectSignUrl(res, oauth);
   }
 
   async signWithNaver(res: Response, code: string) {
     const platform = OAuthPlatform.Naver;
-    const naverTokens = await this.naverOAuthService.getTokens(code);
-    const naverAccessToken = naverTokens.access_token;
-    const naverProfile = await this.naverOAuthService.getProfileInformation(naverAccessToken);
-    const oauthId = naverProfile.response.id;
-
-    let oauth = await this.oauthRepository.findByOAuthId(platform, oauthId);
-
-    if (oauth === null) {
-      const email = naverProfile.response.email;
-      const profileImageUrl = naverProfile.response.profile_image;
-      const nickname = naverProfile.response.nickname;
-
-      oauth = await this.oauthRepository.createOAuth({
-        platform,
-        oauthId,
-        email,
-        profileImageUrl,
-        user: { nickname },
-      });
-    }
+    const tokens = await this.naverOAuthService.getTokens(code);
+    const accessToken = tokens.access_token;
+    const profile = await this.naverOAuthService.getProfileInformation(accessToken);
+    const oauth = await this.createOrUpdate(
+      platform,
+      profile.response.id,
+      profile.response.email,
+      profile.response.nickname,
+      profile.response.profile_image,
+    );
 
     return this.redirectSignUrl(res, oauth);
   }

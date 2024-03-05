@@ -1,4 +1,10 @@
-import { ConfigExModule, KakaoOAuthConfigService, NaverOAuthConfigService, OAuthConfigService } from '@libs/config';
+import {
+  ConfigExModule,
+  GoogleOAuthConfigService,
+  KakaoOAuthConfigService,
+  NaverOAuthConfigService,
+  OAuthConfigService,
+} from '@libs/config';
 import { TypeOrmExModule } from '@libs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
@@ -10,7 +16,7 @@ import { OAuthService, GoogleOAuthService, KakaoOAuthService, NaverOAuthService 
 @Module({
   imports: [
     TypeOrmExModule.forFeature([OAuthRepository]),
-    ConfigExModule.forFeature([OAuthConfigService, KakaoOAuthConfigService, NaverOAuthConfigService]),
+    ConfigExModule.forFeature([OAuthConfigService, GoogleOAuthConfigService, KakaoOAuthConfigService, NaverOAuthConfigService]),
     HttpModule,
   ],
   controllers: [OAuthController],
