@@ -13,11 +13,12 @@ export class ConfigExModule {
     };
   }
 
-  static forFeature(services: Type<AbstractConfigService>[]): DynamicModule {
+  static forFeature(services: Type<AbstractConfigService>[], opt?: { global: boolean }): DynamicModule {
     return {
       module: ConfigExModule,
       providers: services,
       exports: services,
+      global: opt?.global,
     };
   }
 }

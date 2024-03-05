@@ -1,8 +1,10 @@
+import { Injectable } from '@nestjs/common';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { LogLevel } from 'typeorm';
 
 import { AbstractConfigService } from '../abstracts';
 
+@Injectable()
 export class TypeOrmConfigService extends AbstractConfigService {
   private readonly NODE_ENV = this.configService.get<string>('NODE_ENV');
   private readonly TYPEORM_TYPE = this.configService.get('TYPEORM_TYPE');
