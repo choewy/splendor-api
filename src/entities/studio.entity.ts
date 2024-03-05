@@ -1,11 +1,11 @@
 import { BaseEntity, CreateDateColumn, Entity, JoinColumn, JoinTable, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { AlertWidgetEntity } from './alert-widget.entity';
+import { FollowEntity } from './follow.entity';
 import { ForbiddenWordEntity } from './forbidden-word.entity';
 import { MessageWidgetEntity } from './message-widget.entity';
 import { StudioSettingEntity } from './studio-setting.entity';
 import { UserEntity } from './user.entity';
-import { FollowEntity } from './follow.entity';
 
 @Entity({ name: 'studio' })
 export class StudioEntity extends BaseEntity {

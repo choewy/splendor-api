@@ -7,6 +7,9 @@ export class StudioSettingEntity extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   readonly id: number;
 
+  @Column({ type: 'varchar', length: 1000, default: null })
+  introduction: string | null;
+
   @Column({ type: 'tinyint', unsigned: true, default: 5 })
   alertSoundVolume: number;
 

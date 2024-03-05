@@ -10,10 +10,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { FollowEntity } from './follow.entity';
 import { OAuthEntity } from './oauth.entity';
 import { StudioEntity } from './studio.entity';
 import { UserProfileImageEntity } from './user-profile-image.entity';
-import { FollowEntity } from './follow.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
