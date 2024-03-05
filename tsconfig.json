@@ -19,7 +19,9 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "paths": {
-      "@libs/*": ["src/libs/*"]
+      "@libs/*": ["src/libs/*"],
+      "@domains/*": ["src/domains/*"],
+      "@entities/*": ["src/entities/*"]
     }
   }
 }
