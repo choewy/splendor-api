@@ -1,7 +1,7 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 
-import { PassportJwtValidateResult } from '../classes';
+import { PassportJwtPayload } from '../implements';
 
 export const ReqJwtPayload = createParamDecorator(
-  (_: unknown, context: ExecutionContext): PassportJwtValidateResult | null => context.switchToHttp().getRequest().user ?? null,
+  (_: unknown, context: ExecutionContext): PassportJwtPayload | null => context.switchToHttp().getRequest().user ?? null,
 );

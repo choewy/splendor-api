@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { JwtPayload } from 'jsonwebtoken';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { PassportJwtValidateResult } from '../classes';
+import { PassportJwtPayload } from '../implements';
 
 @Injectable()
 export class PassportJwtStrategy extends PassportStrategy(Strategy) {
@@ -16,7 +16,7 @@ export class PassportJwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayload): Promise<PassportJwtValidateResult> {
-    return new PassportJwtValidateResult(payload);
+  async validate(payload: JwtPayload): Promise<PassportJwtPayload> {
+    return new PassportJwtPayload(payload);
   }
 }

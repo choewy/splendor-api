@@ -1,6 +1,6 @@
 import { ConfigExModule, JwtConfigService } from '@libs/config';
 import { DynamicModule, Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 import { PassportJwtGuard } from './guards';
@@ -11,10 +11,9 @@ export class PassportExModule {
   static forRoot(): DynamicModule {
     return {
       imports: [
-        ConfigExModule.forFeature([JwtConfigService]),
+        ConfigExModule.forFeature([JwtConfigService], { global: true }),
         PassportModule,
         JwtModule.registerAsync({
-          imports: [ConfigExModule.forFeature([JwtConfigService])],
           inject: [JwtConfigService],
           useFactory(jwtConfigService: JwtConfigService) {
             return jwtConfigService.getJwtModuleOptions();
@@ -22,8 +21,9 @@ export class PassportExModule {
         }),
       ],
       module: PassportExModule,
-      providers: [PassportJwtStrategy, PassportJwtGuard],
-      exports: [PassportJwtStrategy, PassportJwtGuard],
+      providers: [JwtService, PassportJwtStrategy, PassportJwtGuard],
+      exports: [JwtService, PassportJwtStrategy, PassportJwtGuard],
+      global: true,
     };
   }
 }
