@@ -1,4 +1,4 @@
-import { AuthModule } from '@domains/auth';
+import { OAuthModule } from '@domains/oauth';
 import { StudioModule } from '@domains/studio';
 import { UserModule } from '@domains/user';
 import { ConfigExModule } from '@libs/config';
@@ -16,8 +16,8 @@ import { AppService } from './app.service';
     TypeOrmExModule.forRoot(),
     PassportExModule.forRoot(),
     HealthExModule,
+    OAuthModule,
     UserModule,
-    AuthModule,
     StudioModule,
   ],
   controllers: [AppController],

@@ -2,6 +2,7 @@ import { DynamicModule, Module, Type } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { AbstractConfigService } from './abstracts';
+import { AppConfigService } from './services';
 
 @Module({})
 export class ConfigExModule {
@@ -9,6 +10,8 @@ export class ConfigExModule {
     return {
       imports: [ConfigModule.forRoot()],
       module: ConfigExModule,
+      providers: [AppConfigService],
+      exports: [AppConfigService],
       global: true,
     };
   }
