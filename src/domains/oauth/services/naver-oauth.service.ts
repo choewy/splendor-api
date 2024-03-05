@@ -1,11 +1,12 @@
+import { OAuthPlatform } from '@entities/oauth.entity';
 import { NaverOAuthConfigService } from '@libs/config';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import Qs from 'qs';
 import { lastValueFrom } from 'rxjs';
-import { NaverGetTokensResponse, NaverProfileInformationResponse } from '../interfaces';
+
 import { GetOAuthTokenInformationError, GetOAuthTokensError } from '../implements';
-import { OAuthPlatform } from '@entities/oauth.entity';
+import { NaverGetTokensResponse, NaverProfileInformationResponse } from '../interfaces';
 
 export enum NaverOAuthApiURL {
   Authorize = 'https://nid.naver.com/oauth2.0/authorize',
