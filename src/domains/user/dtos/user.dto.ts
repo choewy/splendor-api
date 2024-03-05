@@ -1,8 +1,8 @@
+import { OAuthPlatform } from '@entities/oauth.entity';
 import { UserEntity } from '@entities/user.entity';
 import { ApiResponseProperty } from '@nestjs/swagger';
 
 import { UserOAuthDto } from './user-oauth.dto';
-import { OAuthPlatform } from '@entities/oauth.entity';
 
 export class UserDto {
   @ApiResponseProperty({ type: Number })

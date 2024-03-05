@@ -1,9 +1,9 @@
+import { OAuthPlatform } from '@entities/oauth.entity';
+import { PassportJwtPayload } from '@libs/passport';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
-import { UserRepository } from '../user.repository';
-import { PassportJwtPayload } from '@libs/passport';
 import { UserDto } from '../dtos';
-import { OAuthPlatform } from '@entities/oauth.entity';
+import { UserRepository } from '../user.repository';
 
 @Injectable()
 export class UserService {

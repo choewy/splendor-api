@@ -1,8 +1,9 @@
 import { PassportJwtGuard, PassportJwtPayload, ReqJwtPayload } from '@libs/passport';
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UserService } from './services';
+
 import { UserDto } from './dtos';
+import { UserService } from './services';
 
 @ApiTags('사용자')
 @Controller('users')
