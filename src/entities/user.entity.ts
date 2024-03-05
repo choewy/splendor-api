@@ -13,6 +13,7 @@ import {
 import { OAuthEntity } from './oauth.entity';
 import { StudioEntity } from './studio.entity';
 import { UserProfileImageEntity } from './user-profile-image.entity';
+import { FollowEntity } from './follow.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
@@ -33,6 +34,10 @@ export class UserEntity extends BaseEntity {
   @OneToOne(() => StudioEntity, (e) => e.user, { cascade: true })
   @JoinTable()
   studio: StudioEntity;
+
+  @OneToMany(() => FollowEntity, (e) => e.user, { cascade: true })
+  @JoinTable()
+  followings: FollowEntity[];
 
   @CreateDateColumn()
   readonly createdAt: Date;

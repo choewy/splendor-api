@@ -3,6 +3,7 @@ export * from './user-profile-image.entity';
 export * from './oauth.entity';
 export * from './studio.entity';
 export * from './studio-setting.entity';
+export * from './follow.entity';
 export * from './forbidden-word.entity';
 export * from './alert-sound.entity';
 export * from './alert-widget.entity';
