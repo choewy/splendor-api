@@ -89,4 +89,30 @@ export class OAuthService {
 
     return this.redirectSignUrl(res, oauth);
   }
+
+  async signWithNaver(res: Response, code: string) {
+    const platform = OAuthPlatform.Naver;
+    const naverTokens = await this.naverOAuthService.getTokens(code);
+    const naverAccessToken = naverTokens.access_token;
+    const naverProfile = await this.naverOAuthService.getProfileInformation(naverAccessToken);
+    const oauthId = naverProfile.response.id;
+
+    let oauth = await this.oauthRepository.findByOAuthId(platform, oauthId);
+
+    if (oauth === null) {
+      const email = naverProfile.response.email;
+      const profileImageUrl = naverProfile.response.profile_image;
+      const nickname = naverProfile.response.nickname;
+
+      oauth = await this.oauthRepository.createOAuth({
+        platform,
+        oauthId,
+        email,
+        profileImageUrl,
+        user: { nickname },
+      });
+    }
+
+    return this.redirectSignUrl(res, oauth);
+  }
 }
