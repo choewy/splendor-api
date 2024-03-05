@@ -1,3 +1,6 @@
+import { AuthModule } from '@domains/auth';
+import { StudioModule } from '@domains/studio';
+import { UserModule } from '@domains/user';
 import { ConfigExModule, TypeOrmConfigService } from '@libs/config';
 import { HealthExModule } from '@libs/health';
 import { Module } from '@nestjs/common';
@@ -17,6 +20,9 @@ import { AppService } from './app.service';
       },
     }),
     HealthExModule,
+    UserModule,
+    AuthModule,
+    StudioModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -13,10 +13,7 @@ export class TypeOrmConfigService extends AbstractConfigService {
   private readonly TYPEORM_LOGGING: LogLevel[] = ['error', 'warn'];
   private readonly TYPEORM_SHYNCHRONIZE = false;
   private readonly TYPEORM_AUTOLOAD_ENTITIES = true;
-  private readonly TYPEORM_ENTITIES = [
-    this.configService.get<string>('PWD') + '/dist/**/*.entity.js',
-    this.configService.get<string>('PWD') + '/src/**/*.entity.ts',
-  ];
+  private readonly TYPEORM_ENTITIES = [this.configService.get<string>('PWD') + '/dist/**/*.entity.js'];
 
   getTypeOrmOptions(): TypeOrmModuleOptions {
     return {

@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { AccountEntity } from './account.entity';
+import { OAuthEntity } from './oauth.entity';
 import { StudioEntity } from './studio.entity';
 
 @Entity({ name: 'user' })
@@ -21,9 +21,9 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50 })
   nickname: string;
 
-  @OneToMany(() => AccountEntity, (e) => e.user, { cascade: true })
+  @OneToMany(() => OAuthEntity, (e) => e.user, { cascade: true })
   @JoinTable()
-  accounts: AccountEntity[];
+  oauths: OAuthEntity[];
 
   @OneToOne(() => StudioEntity, (e) => e.user, { cascade: true })
   @JoinTable()
