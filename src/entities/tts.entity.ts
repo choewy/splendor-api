@@ -1,5 +1,16 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinTable, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
+import { MessageWidgetEntity } from './message-widget.entity';
 import { TtsImageEntity } from './tts-image.entity';
 import { TtsSampleSoundEntity } from './tts-sample-sound.entity';
 
@@ -43,4 +54,8 @@ export class TtsEntity extends BaseEntity {
   @OneToOne(() => TtsSampleSoundEntity, (e) => e.tts, { cascade: true, nullable: true })
   @JoinTable()
   ttsSampleSound: TtsSampleSoundEntity | null;
+
+  @OneToMany(() => MessageWidgetEntity, (e) => e.tts, { cascade: true })
+  @JoinTable()
+  messageWidgets: MessageWidgetEntity[];
 }

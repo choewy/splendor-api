@@ -4,6 +4,7 @@ import { LogLevel } from 'typeorm';
 import { AbstractConfigService } from '../abstracts';
 
 export class TypeOrmConfigService extends AbstractConfigService {
+  private readonly NODE_ENV = this.configService.get<string>('NODE_ENV');
   private readonly TYPEORM_TYPE = this.configService.get('TYPEORM_TYPE');
   private readonly TYPEORM_HOST = this.configService.get<string>('TYPEORM_HOST');
   private readonly TYPEORM_PORT = +this.configService.get<number>('TYPEORM_PORT');
@@ -11,9 +12,9 @@ export class TypeOrmConfigService extends AbstractConfigService {
   private readonly TYPEORM_PASSWORD = this.configService.get<string>('TYPEORM_PASSWORD');
   private readonly TYPEORM_DATABASE = this.configService.get<string>('TYPEORM_DATABASE');
   private readonly TYPEORM_LOGGING: LogLevel[] = ['error', 'warn'];
-  private readonly TYPEORM_SHYNCHRONIZE = false;
-  private readonly TYPEORM_AUTOLOAD_ENTITIES = true;
+  private readonly TYPEORM_SHYNCHRONIZE = this.configService.get<string>('TYPEORM_SHYNCHRONIZE') === 'true';
   private readonly TYPEORM_ENTITIES = [this.configService.get<string>('PWD') + '/dist/**/*.entity.js'];
+  private readonly TYPEORM_AUTOLOAD_ENTITIES = true;
 
   getTypeOrmOptions(): TypeOrmModuleOptions {
     return {
@@ -26,7 +27,7 @@ export class TypeOrmConfigService extends AbstractConfigService {
       logging: this.TYPEORM_LOGGING,
       entities: this.TYPEORM_ENTITIES,
       autoLoadEntities: this.TYPEORM_AUTOLOAD_ENTITIES,
-      synchronize: this.TYPEORM_SHYNCHRONIZE,
+      synchronize: this.NODE_ENV === 'local' ? this.TYPEORM_SHYNCHRONIZE : false,
     };
   }
 }

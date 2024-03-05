@@ -16,7 +16,7 @@ import { AppService } from './app.service';
       imports: [ConfigExModule.forFeature([TypeOrmConfigService])],
       inject: [TypeOrmConfigService],
       useFactory(typeOrmConfigService: TypeOrmConfigService) {
-        return typeOrmConfigService.changeValue('TYPEORM_SHYNCHRONIZE', true).getTypeOrmOptions();
+        return typeOrmConfigService.getTypeOrmOptions();
       },
     }),
     HealthExModule,

@@ -12,6 +12,7 @@ import {
 
 import { OAuthEntity } from './oauth.entity';
 import { StudioEntity } from './studio.entity';
+import { UserProfileImageEntity } from './user-profile-image.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
@@ -24,6 +25,10 @@ export class UserEntity extends BaseEntity {
   @OneToMany(() => OAuthEntity, (e) => e.user, { cascade: true })
   @JoinTable()
   oauths: OAuthEntity[];
+
+  @OneToOne(() => UserProfileImageEntity, (e) => e.user, { cascade: true, nullable: true })
+  @JoinTable()
+  userProfileImage: UserProfileImageEntity | null;
 
   @OneToOne(() => StudioEntity, (e) => e.user, { cascade: true })
   @JoinTable()

@@ -8,7 +8,7 @@ export class TtsSampleSoundEntity extends AbstractFileBaseEntity {
   @Column({ type: 'varchar', length: 128 })
   text: string;
 
-  @OneToOne(() => TtsEntity, (e) => e.ttsSampleSound, { onDelete: 'CASCADE' })
+  @OneToOne(() => TtsEntity, (e) => e.ttsSampleSound, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn()
-  tts: TtsEntity;
+  tts: TtsEntity | null;
 }
