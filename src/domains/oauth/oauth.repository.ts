@@ -16,7 +16,7 @@ export class OAuthRepository extends AbstractRepository<OAuthEntity> {
     return this.transaction(async (em) => {
       const userRepository = em.getRepository(UserEntity);
       const user = userRepository.create({ ...deepPartial.user });
-      await userRepository.insert(user);
+      await user.save();
 
       const oauthRepository = em.getRepository(OAuthEntity);
       const oauth = oauthRepository.create({ ...deepPartial, user });

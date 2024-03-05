@@ -12,4 +12,7 @@ export class OAuthAuthorizeGoogleRedirectQueryDto {
 
   @ApiPropertyOptional({ type: String })
   prompt?: 'consent';
+
+  @ApiPropertyOptional({ type: String })
+  state?: string;
 }

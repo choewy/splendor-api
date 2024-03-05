@@ -1,7 +1,7 @@
 import { OAuthEntity, OAuthPlatform } from '@entities/oauth.entity';
 import { JwtConfigService, OAuthConfigService } from '@libs/config';
 import { PassportJwtPayload } from '@libs/passport';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import Qs from 'qs';
@@ -30,6 +30,7 @@ export class OAuthService {
     email: string | null,
     nickname: string,
     profileImageUrl: string | null,
+    userId?: number,
   ) {
     let oauth = await this.oauthRepository.findByOAuthId(platform, oauthId);
 
@@ -46,7 +47,7 @@ export class OAuthService {
         email,
         nickname,
         profileImageUrl,
-        user: {},
+        user: { id: Number.isNaN(userId) ? undefined : userId },
       });
     }
 
@@ -73,37 +74,47 @@ export class OAuthService {
     );
   }
 
-  getOAuthAuthorizeUrl(platform: OAuthPlatform) {
+  getOAuthAuthorizeUrl(platform: OAuthPlatform, userId?: number) {
     let url: string;
 
     switch (platform) {
       case OAuthPlatform.Google:
-        url = this.googleOAuthService.getAuthorizeUrl();
+        url = this.googleOAuthService.getAuthorizeUrl(userId);
         break;
 
       case OAuthPlatform.Kakao:
-        url = this.kakaoOAuthService.getAuthorizeUrl();
+        url = this.kakaoOAuthService.getAuthorizeUrl(userId);
         break;
 
       case OAuthPlatform.Naver:
-        url = this.naverOAuthService.getAuthorizeUrl();
+        url = this.naverOAuthService.getAuthorizeUrl(userId);
         break;
     }
 
     return new OAuthAuthorizeUrlDto(platform, url);
   }
 
-  async signWithGoogle(res: Response, code: string) {
+  async connectOAuthAccount(userId: number, platform: OAuthPlatform) {
+    const has = await this.oauthRepository.existsBy({ platform, user: { id: userId } });
+
+    if (has) {
+      throw new ConflictException(`already connected ${platform}`);
+    }
+
+    return this.getOAuthAuthorizeUrl(platform);
+  }
+
+  async signWithGoogle(res: Response, code: string, userId?: number) {
     const platform = OAuthPlatform.Google;
     const tokens = await this.googleOAuthService.getTokens(code);
     const accessToken = tokens.access_token;
     const profile = await this.googleOAuthService.getProfileInformation(accessToken);
-    const oauth = await this.createOrUpdate(platform, profile.id, profile.email, profile.name, profile.picture);
+    const oauth = await this.createOrUpdate(platform, profile.id, profile.email, profile.name, profile.picture, userId);
 
     return this.redirectSignUrl(res, oauth);
   }
 
-  async signWithKakao(res: Response, code: string) {
+  async signWithKakao(res: Response, code: string, userId?: number) {
     const platform = OAuthPlatform.Kakao;
     const tokens = await this.kakaoOAuthService.getTokens(code);
     const accessToken = tokens.access_token;
@@ -115,12 +126,13 @@ export class OAuthService {
       profile.properties.email,
       profile.properties.nickname,
       profile.properties.profile_image,
+      userId,
     );
 
     return this.redirectSignUrl(res, oauth);
   }
 
-  async signWithNaver(res: Response, code: string) {
+  async signWithNaver(res: Response, code: string, userId?: number) {
     const platform = OAuthPlatform.Naver;
     const tokens = await this.naverOAuthService.getTokens(code);
     const accessToken = tokens.access_token;
@@ -131,6 +143,7 @@ export class OAuthService {
       profile.response.email,
       profile.response.nickname,
       profile.response.profile_image,
+      userId,
     );
 
     return this.redirectSignUrl(res, oauth);

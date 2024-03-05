@@ -18,16 +18,16 @@ export enum NaverOAuthApiURL {
 export class NaverOAuthService {
   constructor(private readonly naverOAuthConfigService: NaverOAuthConfigService, private readonly httpService: HttpService) {}
 
-  getAuthorizeUrl(): string {
+  getAuthorizeUrl(userId?: number): string {
     return `${NaverOAuthApiURL.Authorize}?${Qs.stringify({
       response_type: 'code',
       client_id: this.naverOAuthConfigService.getClientId(),
       redirect_uri: this.naverOAuthConfigService.getRedirectUri(),
-      state: encodeURI(this.naverOAuthConfigService.getState()),
+      state: userId ?? encodeURI(this.naverOAuthConfigService.getState()),
     })}`;
   }
 
-  async getTokens(code: string): Promise<NaverGetTokensResponse> {
+  async getTokens(code: string, userId?: number): Promise<NaverGetTokensResponse> {
     const { data } = await lastValueFrom(
       this.httpService.get(
         `${NaverOAuthApiURL.GetTokens}?${Qs.stringify({
@@ -35,7 +35,7 @@ export class NaverOAuthService {
           grant_type: 'authorization_code',
           client_id: this.naverOAuthConfigService.getClientId(),
           client_secret: this.naverOAuthConfigService.getClientSecret(),
-          state: encodeURI(this.naverOAuthConfigService.getState()),
+          state: userId ?? encodeURI(this.naverOAuthConfigService.getState()),
         })}`,
       ),
     ).catch((e) => {

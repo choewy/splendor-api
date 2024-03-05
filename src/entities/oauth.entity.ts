@@ -18,6 +18,7 @@ export enum OAuthPlatform {
   Kakao = 'kakao',
 }
 
+@Index('oauth_idx_user_id_platform', ['user.id', 'platform'])
 @Index('oauth_idx_platform_oauth_id', ['platform', 'oauthId'])
 @Entity({ name: 'oauth' })
 export class OAuthEntity extends BaseEntity {

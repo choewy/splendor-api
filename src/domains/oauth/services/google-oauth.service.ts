@@ -1,10 +1,11 @@
+import { OAuthPlatform } from '@entities/oauth.entity';
 import { GoogleOAuthConfigService } from '@libs/config';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import Qs from 'qs';
 import { lastValueFrom } from 'rxjs';
+
 import { GetOAuthProfileInformationError, GetOAuthTokensError } from '../implements';
-import { OAuthPlatform } from '@entities/oauth.entity';
 import { GoogleGetTokensResponse, GoogleProfileInformationResponse } from '../interfaces';
 
 export enum GoogleOAuthApiURL {
@@ -17,12 +18,13 @@ export enum GoogleOAuthApiURL {
 export class GoogleOAuthService {
   constructor(private readonly googleOAuthConfigService: GoogleOAuthConfigService, private readonly httpService: HttpService) {}
 
-  getAuthorizeUrl(): string {
+  getAuthorizeUrl(userId?: number): string {
     return `${GoogleOAuthApiURL.Authorize}?${Qs.stringify({
       response_type: 'code',
       client_id: this.googleOAuthConfigService.getClientId(),
       redirect_uri: this.googleOAuthConfigService.getRedirectUri(),
       scope: 'email profile',
+      state: userId,
     })}`;
   }
 

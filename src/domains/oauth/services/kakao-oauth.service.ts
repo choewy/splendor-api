@@ -19,11 +19,12 @@ export enum KakaoOAuthApiURL {
 export class KakaoOAuthService {
   constructor(private readonly kakaoOAuthConfigService: KakaoOAuthConfigService, private readonly httpService: HttpService) {}
 
-  getAuthorizeUrl(): string {
+  getAuthorizeUrl(userId?: number): string {
     return `${KakaoOAuthApiURL.Authorize}?${Qs.stringify({
       response_type: 'code',
       client_id: this.kakaoOAuthConfigService.getClientId(),
       redirect_uri: this.kakaoOAuthConfigService.getRedirectUri(),
+      state: userId,
     })}`;
   }
 
