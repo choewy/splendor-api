@@ -2,7 +2,7 @@ import { CurrentUserClaim } from '@common/decorators';
 import { Injectable } from '@nestjs/common';
 
 import { UserDto } from '../dtos';
-import { UserRepository } from '../user.repository';
+import { UserRepository } from '../repositories';
 
 @Injectable()
 export class UserService {
