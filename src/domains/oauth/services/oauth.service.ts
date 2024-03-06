@@ -56,13 +56,16 @@ export class OAuthService {
 
   private redirectSignUrl(res: Response, oauth: OAuthEntity) {
     const platform = oauth.platform;
-    const accessToken = this.jwtService.sign(CurrentUserClaim.to(oauth.user.id, oauth.platform), this.jwtConfigService.getJwtSignOptions());
+    const claim = CurrentUserClaim.to(oauth.user.id, oauth.platform);
+    const access = this.jwtService.sign(claim, this.jwtConfigService.getJwtAccessSignOptions());
+    const refresh = this.jwtService.sign(claim, this.jwtConfigService.getJwtRefreshSignOptions());
 
     return res.redirect(
       HttpStatus.FOUND,
       `${this.oauthConfigService.getRedirectUrl()}?${Qs.stringify({
         platform,
-        accessToken,
+        access,
+        refresh,
       })}`,
     );
   }
