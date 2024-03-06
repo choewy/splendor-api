@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { StudioDto } from '../dtos';
-import { StudioRepository } from '../studio.repository';
+import { StudioRepository } from '../repositories';
 
 @Injectable()
 export class StudioService {

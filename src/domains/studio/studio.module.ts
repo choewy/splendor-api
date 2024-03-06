@@ -1,9 +1,9 @@
 import { TypeOrmExModule } from '@libs/typeorm';
 import { Module } from '@nestjs/common';
 
+import { StudioRepository } from './repositories';
 import { StudioService } from './services';
 import { StudioController } from './studio.controller';
-import { StudioRepository } from './studio.repository';
 
 @Module({
   imports: [TypeOrmExModule.forFeature([StudioRepository])],
