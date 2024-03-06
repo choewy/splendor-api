@@ -5,20 +5,28 @@ import { AbstractConfigService } from '../abstracts';
 
 @Injectable()
 export class JwtConfigService extends AbstractConfigService {
-  private readonly JWT_SECRET = this.configService.get<string>('JWT_SECRET');
+  private readonly JWT_ACCESS_SECRET = this.configService.get<string>('JWT_ACCESS_SECRET');
+  private readonly JWT_REFRESH_SECRET = this.configService.get<string>('JWT_REFRESH_SECRET');
 
-  getJwtSignOptions(): JwtSignOptions {
+  getJwtAccessSignOptions(): JwtSignOptions {
     return {
-      secret: this.JWT_SECRET,
+      secret: this.JWT_ACCESS_SECRET,
       expiresIn: '1h',
+    };
+  }
+
+  getJwtRefreshSignOptions(): JwtSignOptions {
+    return {
+      secret: this.JWT_REFRESH_SECRET,
+      expiresIn: '14d',
     };
   }
 
   getJwtModuleOptions(): JwtModuleOptions {
     return {
       global: true,
-      secret: this.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
+      secret: this.JWT_ACCESS_SECRET,
+      signOptions: this.getJwtAccessSignOptions(),
     };
   }
 }

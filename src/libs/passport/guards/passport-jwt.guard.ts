@@ -1,10 +1,11 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 
 import { SKIP_PASSPORT_JWT_GUARD_METADATA_KEY } from '../decorators';
-import { PassportJwtException } from '../exceptions';
+import { TokenExpiredError } from '@nestjs/jwt';
+import { JsonWebTokenError } from 'jsonwebtoken';
 
 @Injectable()
 export class PassportJwtGuard extends AuthGuard('jwt') {
@@ -22,11 +23,17 @@ export class PassportJwtGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest<TUser = any>(error: Error, result: any): TUser {
-    if (error || !result) {
-      throw new PassportJwtException(error);
+  handleRequest<TUser = any>(e: Error, payload: any, info: Error): TUser {
+    let error = e ?? info;
+
+    if (error || payload == null) {
+      if (error?.name !== TokenExpiredError.name) {
+        error = new JsonWebTokenError(error.message);
+      }
+
+      throw new UnauthorizedException(error);
     }
 
-    return result;
+    return payload ?? null;
   }
 }
