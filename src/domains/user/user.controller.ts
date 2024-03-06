@@ -1,4 +1,5 @@
-import { PassportJwtGuard, PassportJwtPayload, ReqJwtPayload } from '@libs/passport';
+import { CurrentUser, CurrentUserClaim } from '@common/decorators';
+import { PassportJwtGuard } from '@libs/passport';
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -15,7 +16,7 @@ export class UserController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '내 프로필 조회' })
   @ApiOkResponse({ type: UserDto })
-  async getMyProfile(@ReqJwtPayload() jwtPayload: PassportJwtPayload) {
-    return this.userService.getMyProfile(jwtPayload);
+  async getMyProfile(@CurrentUser() currentUser: CurrentUserClaim) {
+    return this.userService.getMyProfile(currentUser);
   }
 }

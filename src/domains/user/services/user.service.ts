@@ -1,5 +1,4 @@
-import { OAuthPlatform } from '@entities/oauth.entity';
-import { PassportJwtPayload } from '@libs/passport';
+import { CurrentUserClaim } from '@common/decorators';
 import { Injectable } from '@nestjs/common';
 
 import { UserDto } from '../dtos';
@@ -9,12 +8,12 @@ import { UserRepository } from '../user.repository';
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async getMyProfile(jwtPayload: PassportJwtPayload) {
+  async getMyProfile(currentUser: CurrentUserClaim) {
     const user = await this.userRepository.findOne({
       relations: { oauths: true },
-      where: { id: jwtPayload.userId },
+      where: { id: currentUser.id },
     });
 
-    return new UserDto(user, jwtPayload.platform as OAuthPlatform);
+    return new UserDto(user, currentUser.platform);
   }
 }

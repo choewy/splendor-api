@@ -17,7 +17,8 @@
   "moduleNameMapper": {
     "src/(.*)$": "<rootDir>/src/$1",
     "^@libs/(.*)$": "<rootDir>/src/libs/$1",
-    "^@domains/(.*)$": "<rootDir>/src/domains/$1",
-    "^@entities/(.*)$": "<rootDir>/src/entities/$1"
+    "^@entities/(.*)$": "<rootDir>/src/entities/$1",
+    "^@common/(.*)$": "<rootDir>/src/common/$1",
+    "^@domains/(.*)$": "<rootDir>/src/domains/$1"
   }
 }

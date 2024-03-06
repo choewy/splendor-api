@@ -1,4 +1,5 @@
-import { PassportJwtGuard, PassportJwtPayload, ReqJwtPayload } from '@libs/passport';
+import { CurrentUser, CurrentUserClaim } from '@common/decorators';
+import { PassportJwtGuard } from '@libs/passport';
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -15,7 +16,7 @@ export class StudioController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '내 스튜디오 조회' })
   @ApiOkResponse({ type: StudioDto })
-  async getMyStudio(@ReqJwtPayload() jwtPayload: PassportJwtPayload) {
-    return this.studioService.getMyStudio(jwtPayload.userId);
+  async getMyStudio(@CurrentUser() currentUser: CurrentUserClaim) {
+    return this.studioService.getMyStudio(currentUser.id);
   }
 }

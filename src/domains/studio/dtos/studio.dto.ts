@@ -12,6 +12,9 @@ export class StudioDto {
   @ApiResponseProperty({ type: StudioSettingDto })
   studioSetting: StudioSettingDto;
 
+  @ApiResponseProperty({ type: Number })
+  forbiddenWordsCount: number;
+
   @ApiResponseProperty({ type: StudioAlertSoundDto })
   alertSound: StudioAlertSoundDto | null;
 
@@ -23,5 +26,6 @@ export class StudioDto {
     this.studioSetting = new StudioSettingDto(studio.studioSetting);
     this.alertSound = studio.alertSound ? new StudioAlertSoundDto(studio.alertSound) : null;
     this.ttsVoice = studio.ttsVoice ? new StudioTtsVoiceDto(studio.ttsVoice) : null;
+    this.forbiddenWordsCount = studio.forbiddenWords.length;
   }
 }
