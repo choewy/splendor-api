@@ -9,9 +9,11 @@ export class CurrentUserClaim {
     return { id, platform };
   }
 
-  static from(payload: JwtPayload) {
-    console.log(payload);
+  toPlainObject(): object {
+    return CurrentUserClaim.to(this.id, this.platform);
+  }
 
+  static from(payload: JwtPayload) {
     if (Object.hasOwn(payload, 'id') && Object.hasOwn(payload, 'platform')) {
       return new CurrentUserClaim(payload.id, payload.platform);
     } else {
