@@ -23,6 +23,9 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50, default: null })
   nickname: string | null;
 
+  @Column({ type: 'varchar', length: 1024, default: null })
+  profileImageUrl: string | null;
+
   @OneToMany(() => OAuthEntity, (e) => e.user, { cascade: true })
   @JoinTable()
   oauths: OAuthEntity[];

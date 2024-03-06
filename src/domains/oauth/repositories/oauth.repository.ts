@@ -12,10 +12,18 @@ export class OAuthRepository extends AbstractRepository<OAuthEntity> {
     });
   }
 
-  async createOAuth(deepPartial: DeepPartial<OAuthEntity>): Promise<OAuthEntity> {
+  async createOAuthWithUser(deepPartial: DeepPartial<OAuthEntity>): Promise<OAuthEntity> {
     return this.transaction(async (em) => {
       const userRepository = em.getRepository(UserEntity);
-      const user = userRepository.create({ ...deepPartial.user });
+      const user = userRepository.create({
+        nickname: deepPartial.nickname,
+        profileImageUrl: deepPartial.profileImageUrl,
+        studio: {
+          studioSetting: {},
+          alertWidget: {},
+          messageWidget: {},
+        },
+      });
       await user.save();
 
       const oauthRepository = em.getRepository(OAuthEntity);
@@ -24,6 +32,13 @@ export class OAuthRepository extends AbstractRepository<OAuthEntity> {
 
       return oauth;
     });
+  }
+
+  async createOAuthIntoUser(userId: number, deepPartial: DeepPartial<OAuthEntity>): Promise<OAuthEntity> {
+    const oauth = this.create({ ...deepPartial, user: { id: userId } });
+    await this.insert(oauth);
+
+    return oauth;
   }
 
   async updateOAuth(oauth: OAuthEntity, deepPartial: DeepPartial<Pick<OAuthEntity, 'email' | 'nickname' | 'profileImageUrl'>>) {

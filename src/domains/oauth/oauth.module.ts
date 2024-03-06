@@ -10,7 +10,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 
 import { OAuthController } from './oauth.controller';
-import { OAuthRepository } from './oauth.repository';
+import { OAuthRepository } from './repositories';
 import { OAuthService, GoogleOAuthService, KakaoOAuthService, NaverOAuthService } from './services';
 
 @Module({

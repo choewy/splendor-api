@@ -1,7 +1,8 @@
 import { CurrentUserClaim } from '@common/decorators';
+import { AlreadyConnectedOAuthPlatformException } from '@common/implements';
 import { OAuthEntity, OAuthPlatform } from '@entities/oauth.entity';
 import { JwtConfigService, OAuthConfigService } from '@libs/config';
-import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import Qs from 'qs';
@@ -10,7 +11,7 @@ import { GoogleOAuthService } from './google-oauth.service';
 import { KakaoOAuthService } from './kakao-oauth.service';
 import { NaverOAuthService } from './naver-oauth.service';
 import { OAuthAuthorizeUrlDto } from '../dtos';
-import { OAuthRepository } from '../oauth.repository';
+import { OAuthRepository } from '../repositories';
 
 @Injectable()
 export class OAuthService {
@@ -25,33 +26,20 @@ export class OAuthService {
   ) {}
 
   private async createOrUpdate(
-    platform: OAuthPlatform,
-    oauthId: string,
-    email: string | null,
-    nickname: string,
-    profileImageUrl: string | null,
+    params: Pick<OAuthEntity, 'platform' | 'oauthId' | 'email' | 'nickname' | 'profileImageUrl'>,
     userId?: number,
   ) {
-    let oauth = await this.oauthRepository.findByOAuthId(platform, oauthId);
+    const oauth = await this.oauthRepository.findByOAuthId(params.platform, params.oauthId);
 
     if (oauth) {
-      oauth = await this.oauthRepository.updateOAuth(oauth, {
-        email,
-        nickname,
-        profileImageUrl,
-      });
-    } else {
-      oauth = await this.oauthRepository.createOAuth({
-        platform,
-        oauthId,
-        email,
-        nickname,
-        profileImageUrl,
-        user: { id: Number.isNaN(userId) ? undefined : userId },
-      });
+      return this.oauthRepository.updateOAuth(oauth, params);
     }
 
-    return oauth;
+    if (Number.isNaN(userId)) {
+      return this.oauthRepository.createOAuthWithUser(params);
+    } else {
+      return this.oauthRepository.createOAuthIntoUser(userId, params);
+    }
   }
 
   private redirectSignUrl(res: Response, oauth: OAuthEntity) {
@@ -94,10 +82,10 @@ export class OAuthService {
     const has = await this.oauthRepository.existsBy({ platform, user: { id: userId } });
 
     if (has) {
-      throw new ConflictException(`already connected ${platform}`);
+      throw new AlreadyConnectedOAuthPlatformException();
     }
 
-    return this.getOAuthAuthorizeUrl(platform);
+    return this.getOAuthAuthorizeUrl(platform, userId);
   }
 
   async signWithGoogle(res: Response, code: string, userId?: number) {
@@ -105,7 +93,16 @@ export class OAuthService {
     const tokens = await this.googleOAuthService.getTokens(code);
     const accessToken = tokens.access_token;
     const profile = await this.googleOAuthService.getProfileInformation(accessToken);
-    const oauth = await this.createOrUpdate(platform, profile.id, profile.email, profile.name, profile.picture, userId);
+    const oauth = await this.createOrUpdate(
+      {
+        platform,
+        oauthId: profile.id,
+        email: profile.email,
+        nickname: profile.name,
+        profileImageUrl: profile.picture,
+      },
+      userId,
+    );
 
     return this.redirectSignUrl(res, oauth);
   }
@@ -117,11 +114,13 @@ export class OAuthService {
     const tokenInformation = await this.kakaoOAuthService.getTokenInformation(accessToken);
     const profile = await this.kakaoOAuthService.getProfileInformation(accessToken);
     const oauth = await this.createOrUpdate(
-      platform,
-      String(tokenInformation.id),
-      profile.properties.email,
-      profile.properties.nickname,
-      profile.properties.profile_image,
+      {
+        platform,
+        oauthId: String(tokenInformation.id),
+        email: profile.properties.email,
+        nickname: profile.properties.nickname,
+        profileImageUrl: profile.properties.profile_image,
+      },
       userId,
     );
 
@@ -134,11 +133,13 @@ export class OAuthService {
     const accessToken = tokens.access_token;
     const profile = await this.naverOAuthService.getProfileInformation(accessToken);
     const oauth = await this.createOrUpdate(
-      platform,
-      profile.response.id,
-      profile.response.email,
-      profile.response.nickname,
-      profile.response.profile_image,
+      {
+        platform,
+        oauthId: profile.response.id,
+        email: profile.response.email,
+        nickname: profile.response.nickname,
+        profileImageUrl: profile.response.profile_image,
+      },
       userId,
     );
 
