@@ -14,7 +14,7 @@ export class AuthController {
   @ApiOperation({ summary: '토큰 발급', description: '개발 용도로 활용' })
   @ApiCreatedResponse({ type: TokensDto })
   async createTokens(@Body() body: CreateTokensDto) {
-    return this.authService.createToken(body.id);
+    return this.authService.createTokens(body.id);
   }
 
   @Post('tokens/refresh')

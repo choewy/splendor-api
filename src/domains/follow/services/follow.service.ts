@@ -1,4 +1,5 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { CannotFollowYourSelfException, NotFoundUserException } from '@common/implements';
+import { Injectable } from '@nestjs/common';
 
 import { FollowRepository, FollowUserRepository } from '../repositories';
 
@@ -22,13 +23,13 @@ export class FollowService {
 
   async follow(userId: number, toId: number) {
     if (userId === toId) {
-      throw new ConflictException('cannot follow your self');
+      throw new CannotFollowYourSelfException();
     }
 
     const exist = await this.followUserRepository.existsById(toId);
 
     if (exist === false) {
-      throw new NotFoundException('not found user');
+      throw new NotFoundUserException();
     }
 
     const has = await this.followRepository.existsByIds(userId, toId);

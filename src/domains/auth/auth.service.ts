@@ -1,6 +1,7 @@
 import { CurrentUserClaim } from '@common/decorators';
+import { NotExistUserOAuthException, NotFoundUserException } from '@common/implements';
 import { JwtConfigService } from '@libs/config';
-import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
@@ -47,21 +48,21 @@ export class AuthService {
     }
   }
 
-  async createToken(id: number) {
+  async createTokens(id: number) {
     if (this.jwtConfigService.getNodeEnv() !== 'local') {
-      throw new ForbiddenException();
+      throw new NotFoundException();
     }
 
     const user = await this.authUserRepository.findById(id);
 
     if (user === null) {
-      throw new NotFoundException('not found user');
+      throw new NotFoundUserException();
     }
 
     const oauth = user.oauths[0] ?? null;
 
     if (oauth === null) {
-      throw new NotFoundException('not exist user oauth');
+      throw new NotExistUserOAuthException();
     }
 
     const claim = CurrentUserClaim.to(id, oauth.platform);

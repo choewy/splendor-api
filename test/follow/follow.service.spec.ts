@@ -1,7 +1,7 @@
+import { CannotFollowYourSelfException, NotFoundUserException } from '@common/implements';
 import { FollowRepository, FollowUserRepository } from '@domains/follow/repositories';
 import { FollowService } from '@domains/follow/services';
 import { AbstractRepository } from '@libs/typeorm';
-import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 describe('FollowService', () => {
@@ -18,13 +18,13 @@ describe('FollowService', () => {
 
   describe('follow', () => {
     it('should throw ConflictException(cannot follow your self)', () => {
-      expect(() => followService.follow(1, 1)).rejects.toThrow(new ConflictException('cannot follow your self'));
+      expect(() => followService.follow(1, 1)).rejects.toThrow(new CannotFollowYourSelfException());
     });
 
     it('should throw ConflictException(not found user)', () => {
       jest.spyOn(followModule.get(FollowUserRepository), 'existsById').mockResolvedValue(false);
 
-      expect(() => followService.follow(1, 2)).rejects.toThrow(new NotFoundException('not found user'));
+      expect(() => followService.follow(1, 2)).rejects.toThrow(new NotFoundUserException());
     });
   });
 });

@@ -16,7 +16,7 @@
     "start:prod": "node dist/main",
     "jest:config": "node ./test/jest-config.mjs",
     "test": "npm run jest:config && jest --config ./test/jest.json",
-    "test:watch": "npm run jest:config && jest --watch --config ./test/jest.json",
+    "test:watch": "npm run jest:config && jest --config ./test/jest.json --watchAll",
     "test:cov": "npm run jest:config && jest --coverage --config ./test/jest.json",
     "test:debug": "npm run jest:config && node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --config ./test/jest.json",
     "test:e2e": "npm run jest:config && jest --config ./test/jest-e2e.json"
