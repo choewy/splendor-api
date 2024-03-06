@@ -1,6 +1,6 @@
+import { CurrentUserClaim } from '@common/decorators';
 import { OAuthEntity, OAuthPlatform } from '@entities/oauth.entity';
 import { JwtConfigService, OAuthConfigService } from '@libs/config';
-import { PassportJwtPayload } from '@libs/passport';
 import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
@@ -56,14 +56,7 @@ export class OAuthService {
 
   private redirectSignUrl(res: Response, oauth: OAuthEntity) {
     const platform = oauth.platform;
-    const accessToken = this.jwtService.sign(
-      {
-        platform,
-        nickname: oauth.nickname,
-        userId: oauth.user.id,
-      } as PassportJwtPayload,
-      this.jwtConfigService.getJwtSignOptions(),
-    );
+    const accessToken = this.jwtService.sign(CurrentUserClaim.to(oauth.user.id, oauth.platform), this.jwtConfigService.getJwtSignOptions());
 
     return res.redirect(
       HttpStatus.FOUND,

@@ -1,4 +1,5 @@
-import { PassportJwtGuard, PassportJwtPayload, ReqJwtPayload } from '@libs/passport';
+import { CurrentUser, CurrentUserClaim } from '@common/decorators';
+import { PassportJwtGuard } from '@libs/passport';
 import { Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -29,8 +30,8 @@ export class OAuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'OAuth 계정 연동하기' })
   @ApiCreatedResponse({ type: OAuthAuthorizeUrlDto })
-  async connectOAuthAccount(@ReqJwtPayload() jwtPayload: PassportJwtPayload, @Body() body: GetOAuthAuthorizeUrlDto) {
-    return this.oauthService.connectOAuthAccount(jwtPayload.userId, body.platform);
+  async connectOAuthAccount(@CurrentUser() currentUser: CurrentUserClaim, @Body() body: GetOAuthAuthorizeUrlDto) {
+    return this.oauthService.connectOAuthAccount(currentUser.id, body.platform);
   }
 
   @Get('google')
