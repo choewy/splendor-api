@@ -20,8 +20,9 @@
     "esModuleInterop": true,
     "paths": {
       "@libs/*": ["src/libs/*"],
-      "@domains/*": ["src/domains/*"],
-      "@entities/*": ["src/entities/*"]
+      "@entities/*": ["src/entities/*"],
+      "@common/*": ["src/common/*"],
+      "@domains/*": ["src/domains/*"]
     }
   }
 }
