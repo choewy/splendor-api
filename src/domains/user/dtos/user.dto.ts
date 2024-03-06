@@ -11,12 +11,16 @@ export class UserDto {
   @ApiResponseProperty({ type: String })
   nickname: string;
 
+  @ApiResponseProperty({ type: String })
+  profileImageUrl: string;
+
   @ApiResponseProperty({ type: [UserOAuthDto] })
   oauths: UserOAuthDto[];
 
   constructor(user: UserEntity, currentOAuthPlatform?: OAuthPlatform) {
     this.id = user.id;
     this.nickname = user.nickname;
+    this.profileImageUrl = user.profileImageUrl;
     this.oauths = user.oauths.map((oauth) => new UserOAuthDto(oauth, currentOAuthPlatform));
   }
 }
