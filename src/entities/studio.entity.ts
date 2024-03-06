@@ -13,7 +13,6 @@ import {
 
 import { AlertSoundEntity } from './alert-sound.entity';
 import { AlertWidgetEntity } from './alert-widget.entity';
-import { FollowEntity } from './follow.entity';
 import { ForbiddenWordEntity } from './forbidden-word.entity';
 import { MessageWidgetEntity } from './message-widget.entity';
 import { StudioSettingEntity } from './studio-setting.entity';
@@ -42,10 +41,6 @@ export class StudioEntity extends BaseEntity {
   @ManyToOne(() => AlertSoundEntity, (e) => e.studios, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn()
   alertSound: AlertSoundEntity | null;
-
-  @OneToMany(() => FollowEntity, (e) => e.studio, { cascade: true })
-  @JoinTable()
-  followers: FollowEntity[];
 
   @OneToOne(() => StudioSettingEntity, (e) => e.studio, { cascade: true })
   @JoinTable()

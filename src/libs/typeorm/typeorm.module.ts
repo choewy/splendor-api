@@ -23,7 +23,7 @@ export class TypeOrmExModule {
     };
   }
 
-  static forFeature<IRepository extends AbstractRepository<any>>(Repositories: Type<IRepository>[]): DynamicModule {
+  static forFeature(Repositories: Type<AbstractRepository<any>>[]): DynamicModule {
     const repositoryProviders: FactoryProvider[] = [];
 
     for (const Repository of Repositories) {

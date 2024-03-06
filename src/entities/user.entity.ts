@@ -35,9 +35,13 @@ export class UserEntity extends BaseEntity {
   @JoinTable()
   studio: StudioEntity;
 
-  @OneToMany(() => FollowEntity, (e) => e.user, { cascade: true })
+  @OneToMany(() => FollowEntity, (e) => e.from, { cascade: true })
   @JoinTable()
   followings: FollowEntity[];
+
+  @OneToMany(() => FollowEntity, (e) => e.to, { cascade: true })
+  @JoinTable()
+  followers: FollowEntity[];
 
   @CreateDateColumn()
   readonly createdAt: Date;

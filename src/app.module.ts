@@ -1,6 +1,3 @@
-import { OAuthModule } from '@domains/oauth';
-import { StudioModule } from '@domains/studio';
-import { UserModule } from '@domains/user';
 import { ConfigExModule } from '@libs/config';
 import { HealthExModule } from '@libs/health';
 import { PassportExModule } from '@libs/passport';
@@ -9,17 +6,10 @@ import { Module } from '@nestjs/common';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DomainModule } from './domains';
 
 @Module({
-  imports: [
-    ConfigExModule.forRoot(),
-    TypeOrmExModule.forRoot(),
-    PassportExModule.forRoot(),
-    HealthExModule,
-    OAuthModule,
-    UserModule,
-    StudioModule,
-  ],
+  imports: [ConfigExModule.forRoot(), TypeOrmExModule.forRoot(), PassportExModule.forRoot(), HealthExModule, DomainModule],
   controllers: [AppController],
   providers: [AppService],
 })

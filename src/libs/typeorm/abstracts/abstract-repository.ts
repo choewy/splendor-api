@@ -6,8 +6,8 @@ export abstract class AbstractRepository<E extends ObjectLiteral> extends Reposi
     return {
       provide: MockRepository,
       useFactory() {
-        const mockRepository = new MockRepository(null);
-        const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(mockRepository));
+        const repository = new MockRepository(null);
+        const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(repository));
         const mock = {};
 
         for (const method of methods) {

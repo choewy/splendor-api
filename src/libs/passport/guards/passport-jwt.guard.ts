@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, FactoryProvider, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { TokenExpiredError } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
@@ -11,6 +11,23 @@ import { SKIP_PASSPORT_JWT_GUARD_METADATA_KEY } from '../decorators';
 export class PassportJwtGuard extends AuthGuard('jwt') {
   constructor(private readonly reflector: Reflector) {
     super();
+  }
+
+  static mock(): FactoryProvider {
+    return {
+      provide: PassportJwtGuard,
+      useFactory() {
+        const passportJwtGuard = new PassportJwtGuard(new Reflector());
+        const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(passportJwtGuard));
+        const mock = {};
+
+        for (const method of methods) {
+          mock[method] = () => null;
+        }
+
+        return mock as PassportJwtGuard;
+      },
+    };
   }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
