@@ -27,9 +27,7 @@ export class FollowRepository extends AbstractRepository<FollowEntity> {
 
   async findManyByFromId(fromId: number, skip: number, take: number, nickname?: string) {
     return this.findAndCount({
-      relations: {
-        to: { userProfileImage: true },
-      },
+      relations: { to: true },
       where: {
         from: { id: fromId },
         to: { nickname: nickname ? Like(nickname) : undefined },
@@ -41,9 +39,7 @@ export class FollowRepository extends AbstractRepository<FollowEntity> {
 
   async findManyByToId(toId: number, skip: number, take: number, nickname?: string) {
     return this.findAndCount({
-      relations: {
-        from: { userProfileImage: true },
-      },
+      relations: { from: true },
       where: {
         to: { id: toId },
         from: { nickname: nickname ? Like(nickname) : undefined },

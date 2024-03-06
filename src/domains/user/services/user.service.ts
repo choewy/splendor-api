@@ -16,4 +16,17 @@ export class UserService {
 
     return new UserDto(user, currentUser.platform);
   }
+
+  async updateMyProfileNickname(currentUser: CurrentUserClaim, nickname: string) {
+    const user = await this.userRepository.findOne({
+      relations: { oauths: true },
+      where: { id: currentUser.id },
+    });
+
+    user.nickname = nickname;
+
+    await this.userRepository.update(currentUser.id, { nickname });
+
+    return new UserDto(user, currentUser.platform);
+  }
 }

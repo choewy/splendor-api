@@ -1,9 +1,9 @@
 import { CurrentUser, CurrentUserClaim } from '@common/decorators';
 import { PassportJwtGuard } from '@libs/passport';
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { UserDto } from './dtos';
+import { UpdateProfileNicnameDto, UserDto } from './dtos';
 import { UserService } from './services';
 
 @ApiTags('사용자')
@@ -18,5 +18,13 @@ export class UserController {
   @ApiOkResponse({ type: UserDto })
   async getMyProfile(@CurrentUser() currentUser: CurrentUserClaim) {
     return this.userService.getMyProfile(currentUser);
+  }
+
+  @Patch('me/nickname')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '내 프로필 닉네임 변경' })
+  @ApiOkResponse({ type: UserDto })
+  async updateMyProfileNickname(@CurrentUser() currentUser: CurrentUserClaim, @Body() body: UpdateProfileNicnameDto) {
+    return this.userService.updateMyProfileNickname(currentUser, body.nickname);
   }
 }

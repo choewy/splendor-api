@@ -21,7 +21,7 @@ export class FollowingDto {
   constructor(follow: FollowEntity) {
     this.id = follow.to.id;
     this.nickname = follow.to.nickname;
-    this.profileImage = follow.to.userProfileImage?.key ?? null;
+    this.profileImage = follow.to.profileImageUrl ?? null;
     this.createdAt = follow.createdAt;
     this.days = -Math.floor(DateTime.fromJSDate(follow.createdAt).diffNow('days').get('days'));
   }
