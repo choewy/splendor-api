@@ -5,8 +5,13 @@ import { AbstractConfigService } from '../abstracts';
 
 @Injectable()
 export class JwtConfigService extends AbstractConfigService {
+  private readonly NODE_ENV = this.configService.get<string>('NODE_ENV');
   private readonly JWT_ACCESS_SECRET = this.configService.get<string>('JWT_ACCESS_SECRET');
   private readonly JWT_REFRESH_SECRET = this.configService.get<string>('JWT_REFRESH_SECRET');
+
+  getNodeEnv() {
+    return this.NODE_ENV;
+  }
 
   getJwtAccessSignOptions(): JwtSignOptions {
     return {

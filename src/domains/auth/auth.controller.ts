@@ -3,14 +3,21 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiCreatedResponse } from '@nestj
 import { Request } from 'express';
 
 import { AuthService } from './auth.service';
-import { RefreshTokensDto, TokensDto } from './dtos';
+import { CreateTokensDto, RefreshTokensDto, TokensDto } from './dtos';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('refresh')
+  @Post('tokens')
+  @ApiOperation({ summary: '토큰 발급', description: '개발 용도로 활용' })
+  @ApiCreatedResponse({ type: TokensDto })
+  async createTokens(@Body() body: CreateTokensDto) {
+    return this.authService.createToken(body.id);
+  }
+
+  @Post('tokens/refresh')
   @ApiBearerAuth()
   @ApiOperation({ summary: '토큰 갱신/재발급' })
   @ApiCreatedResponse({ type: TokensDto })

@@ -1,15 +1,21 @@
 import { CurrentUserClaim } from '@common/decorators';
+import { UserEntity } from '@entities/user.entity';
 import { JwtConfigService } from '@libs/config';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
+import { DataSource } from 'typeorm';
 
 import { TokensDto } from './dtos';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtConfigService: JwtConfigService, private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly jwtConfigService: JwtConfigService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   private getTokenFromRequestHeaders(req: Request): string {
     return (req.headers.authorization ?? '').replace('Bearer ', '');
@@ -40,6 +46,34 @@ export class AuthService {
     } catch (e) {
       throw new UnauthorizedException(e);
     }
+  }
+
+  async createToken(id: number) {
+    if (this.jwtConfigService.getNodeEnv() !== 'local') {
+      throw new ForbiddenException();
+    }
+
+    const user = await this.dataSource.getRepository(UserEntity).findOne({
+      relations: { oauths: true },
+      where: { id },
+    });
+
+    if (user === null) {
+      throw new NotFoundException('not found user');
+    }
+
+    const oauth = user.oauths[0] ?? null;
+
+    if (oauth === null) {
+      throw new NotFoundException('not exist user oauth');
+    }
+
+    const claim = CurrentUserClaim.to(id, oauth.platform);
+
+    return new TokensDto(
+      this.jwtService.sign(claim, this.jwtConfigService.getJwtAccessSignOptions()),
+      this.jwtService.sign(claim, this.jwtConfigService.getJwtRefreshSignOptions()),
+    );
   }
 
   async refreshTokens(req: Request, access: string, refresh: string) {
