@@ -1,9 +1,9 @@
 import { CurrentUser, CurrentUserClaim } from '@common/decorators';
 import { PassportJwtGuard } from '@libs/passport';
-import { Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { FollowParamDto } from './dtos';
+import { FollowParamDto, FollowerPaginationDto, FollowingPaginationDto, GetFollowsDto } from './dtos';
 import { FollowService } from './services';
 
 @ApiTags('팔로우')
@@ -15,22 +15,24 @@ export class FollowController {
   @Get('followings')
   @ApiBearerAuth()
   @ApiOperation({ summary: '내 계정 팔로잉(스튜디오들) 조회' })
-  async getMyFollowings(@CurrentUser() user: CurrentUserClaim) {
-    return this.followService.getMyFollowings(user.id);
+  @ApiOkResponse({ type: FollowingPaginationDto })
+  async getMyFollowings(@CurrentUser() user: CurrentUserClaim, @Query() query: GetFollowsDto) {
+    return this.followService.getMyFollowings(user.id, query);
   }
 
   @Get('followers')
   @ApiBearerAuth()
   @ApiOperation({ summary: '내 스튜디오 팔로워(사용자들) 조회' })
-  @ApiOkResponse()
-  async getMyFollowers(@CurrentUser() user: CurrentUserClaim) {
-    return this.followService.getMyFollowers(user.id);
+  @ApiOkResponse({ type: FollowerPaginationDto })
+  async getMyFollowers(@CurrentUser() user: CurrentUserClaim, @Query() query: GetFollowsDto) {
+    return this.followService.getMyFollowers(user.id, query);
   }
 
   @Post(':toId(\\d+)')
   @ApiBearerAuth()
   @ApiOperation({ summary: '팔로우' })
   async follow(@CurrentUser() user: CurrentUserClaim, @Param() param: FollowParamDto) {
+    console.log(param);
     return this.followService.follow(user.id, param.toId);
   }
 

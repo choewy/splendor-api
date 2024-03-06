@@ -1,5 +1,6 @@
 import { FollowEntity } from '@entities/follow.entity';
 import { AbstractRepository, InjectableRepository } from '@libs/typeorm';
+import { Like } from 'typeorm';
 
 @InjectableRepository(FollowEntity)
 export class FollowRepository extends AbstractRepository<FollowEntity> {
@@ -24,18 +25,29 @@ export class FollowRepository extends AbstractRepository<FollowEntity> {
     });
   }
 
-  async findManyByFrom(fromId: number, skip: number, take: number) {
-    return this.find({
-      relations: { to: true },
-      where: { from: { id: fromId } },
+  async findManyByFromId(fromId: number, skip: number, take: number, nickname?: string) {
+    return this.findAndCount({
+      relations: {
+        to: { userProfileImage: true },
+      },
+      where: {
+        from: { id: fromId },
+        to: { nickname: nickname ? Like(nickname) : undefined },
+      },
       skip,
       take,
     });
   }
-  async findManyByTo(toId: number, skip: number, take: number) {
-    return this.find({
-      relations: { from: true },
-      where: { to: { id: toId } },
+
+  async findManyByToId(toId: number, skip: number, take: number, nickname?: string) {
+    return this.findAndCount({
+      relations: {
+        from: { userProfileImage: true },
+      },
+      where: {
+        to: { id: toId },
+        from: { nickname: nickname ? Like(nickname) : undefined },
+      },
       skip,
       take,
     });

@@ -1,24 +1,29 @@
 import { CannotFollowYourSelfException, NotFoundUserException } from '@common/implements';
 import { Injectable } from '@nestjs/common';
 
+import { FollowerDto, FollowerPaginationDto, FollowingDto, FollowingPaginationDto, GetFollowsDto } from '../dtos';
 import { FollowRepository, FollowUserRepository } from '../repositories';
 
 @Injectable()
 export class FollowService {
   constructor(private readonly followRepository: FollowRepository, private readonly followUserRepository: FollowUserRepository) {}
 
-  /** @todo */
-  async getMyFollowings(userId: number) {
-    const followings = await this.followRepository.findManyByFrom(userId, 0, 20);
+  async getMyFollowings(userId: number, params: GetFollowsDto) {
+    const [followings, total] = await this.followRepository.findManyByFromId(userId, params.skip, params.take, params.nickname);
 
-    return followings;
+    return new FollowingPaginationDto(
+      followings.map((following) => new FollowingDto(following)),
+      total,
+    );
   }
 
-  /** @todo */
-  async getMyFollowers(userId: number) {
-    const followers = await this.followRepository.findManyByTo(userId, 0, 20);
+  async getMyFollowers(userId: number, params: GetFollowsDto) {
+    const [followers, total] = await this.followRepository.findManyByToId(userId, params.skip, params.take, params.nickname);
 
-    return followers;
+    return new FollowerPaginationDto(
+      followers.map((follower) => new FollowerDto(follower)),
+      total,
+    );
   }
 
   async follow(userId: number, toId: number) {
