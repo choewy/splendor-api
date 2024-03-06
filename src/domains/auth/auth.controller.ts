@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { CreateTokensDto, RefreshTokensDto, TokensDto } from './dtos';
 
-@ApiTags('Auth')
+@ApiTags('인증')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

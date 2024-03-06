@@ -1,18 +1,17 @@
 import { CurrentUserClaim } from '@common/decorators';
-import { UserEntity } from '@entities/user.entity';
 import { JwtConfigService } from '@libs/config';
 import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
-import { DataSource } from 'typeorm';
 
+import { AuthUserRepository } from './auth-user.repository';
 import { TokensDto } from './dtos';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly dataSource: DataSource,
+    private readonly authUserRepository: AuthUserRepository,
     private readonly jwtConfigService: JwtConfigService,
     private readonly jwtService: JwtService,
   ) {}
@@ -53,10 +52,7 @@ export class AuthService {
       throw new ForbiddenException();
     }
 
-    const user = await this.dataSource.getRepository(UserEntity).findOne({
-      relations: { oauths: true },
-      where: { id },
-    });
+    const user = await this.authUserRepository.findById(id);
 
     if (user === null) {
       throw new NotFoundException('not found user');
