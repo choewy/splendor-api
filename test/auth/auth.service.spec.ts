@@ -22,20 +22,20 @@ describe('AuthService', () => {
   });
 
   describe('createTokens', () => {
-    it('should throw ForbiddenException', () => {
+    it('should throw NotFoundException', () => {
       jest.spyOn(authModule.get(JwtConfigService), 'getNodeEnv').mockReturnValue('develop');
 
       expect(authService.createTokens(1)).rejects.toThrow(new NotFoundException());
     });
 
-    it('should throw NotFoundException(not found user)', () => {
+    it('should throw NotFoundUserException', () => {
       jest.spyOn(authModule.get(JwtConfigService), 'getNodeEnv').mockReturnValue('local');
       jest.spyOn(authModule.get(AuthUserRepository), 'findById').mockResolvedValue(null);
 
       expect(authService.createTokens(1)).rejects.toThrow(new NotFoundUserException());
     });
 
-    it('should throw NotFoundException(not exist user oauth)', () => {
+    it('should throw NotExistUserOAuthException', () => {
       jest.spyOn(authModule.get(JwtConfigService), 'getNodeEnv').mockReturnValue('local');
       jest.spyOn(authModule.get(AuthUserRepository), 'findById').mockResolvedValue({ oauths: [] } as UserEntity);
 

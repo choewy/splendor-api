@@ -17,11 +17,11 @@ describe('FollowService', () => {
   });
 
   describe('follow', () => {
-    it('should throw ConflictException(cannot follow your self)', () => {
+    it('should throw CannotFollowYourSelfException', () => {
       expect(() => followService.follow(1, 1)).rejects.toThrow(new CannotFollowYourSelfException());
     });
 
-    it('should throw ConflictException(not found user)', () => {
+    it('should throw NotFoundUserException', () => {
       jest.spyOn(followModule.get(FollowUserRepository), 'existsById').mockResolvedValue(false);
 
       expect(() => followService.follow(1, 2)).rejects.toThrow(new NotFoundUserException());
