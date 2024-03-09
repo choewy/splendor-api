@@ -14,6 +14,7 @@
     "env": "sh scripts/envs.sh",
     "docker": "sh scripts/docker.sh",
     "docker:mysql": "sh scripts/docker-mysql.sh",
+    "docker:redis": "sh scripts/docker-redis.sh",
     "initializer": "nest start initializer",
     "admin": "nest start admin",
     "admin:dev": "nest start admin --watch",

@@ -28,6 +28,16 @@ services:
     networks:
       - ensemble
 
+  redis:
+    build:
+      context: ./redis
+      dockerfile: dockerfile
+    command: redis-server --port 6379
+    ports:
+      - 6380:6379
+    volumes:
+      - ./data:/data
+
   admin:
     build:
       context: .
