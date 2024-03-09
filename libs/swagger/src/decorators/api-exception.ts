@@ -56,7 +56,7 @@ export const ApiException = (...Exceptions: Type<HttpException>[]) => {
   return applyDecorators(...decorators);
 };
 
-export const ApiExtendsAuthException = (...Exceptions: Type<HttpException>[]) => ApiException(UnauthorizedException, ...Exceptions);
-export const ApiExtendsPipeException = (...Exceptions: Type<HttpException>[]) => ApiException(ValidationFailException, ...Exceptions);
+export const ApiAuthException = (...Exceptions: Type<HttpException>[]) => ApiException(UnauthorizedException, ...Exceptions);
+export const ApiPipeException = (...Exceptions: Type<HttpException>[]) => ApiException(ValidationFailException, ...Exceptions);
 export const ApiExtendsException = (...Exceptions: Type<HttpException>[]) =>
   ApiException(UnauthorizedException, ValidationFailException, ...Exceptions);
