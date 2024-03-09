@@ -2,8 +2,12 @@
 /dist
 /node_modules
 /build
-
-.eslintcache
+/temp
+/docker/mysql/lib
+/docker/mysql/log
+/docker/mysql/disk
+/docker/**/build.tar.gz
+/docker/**/logs
 
 # Logs
 logs
