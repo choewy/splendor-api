@@ -1,5 +1,6 @@
 import {
   GoogleOAuthConfig,
+  JwtClientConfig,
   KakaoOAuthConfig,
   NaverOAuthConfig,
   TYPEORM_MYSQL_CONFIG,
@@ -13,13 +14,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth';
 import { OAuthModule } from './oauth';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [TypeOrmMySQLConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
+      load: [TypeOrmMySQLConfig, JwtClientConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
     }),
     TypeOrmLibsModule.forRootAsync({
       inject: [ConfigService],
@@ -27,6 +29,7 @@ import { OAuthModule } from './oauth';
         return configService.get<TypeOrmMySQLConfigReturnType>(TYPEORM_MYSQL_CONFIG)(entities);
       },
     }),
+    AuthModule,
     OAuthModule,
   ],
   controllers: [AppController],

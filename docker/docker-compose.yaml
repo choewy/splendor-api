@@ -47,7 +47,7 @@ services:
       JWT_ADMIN_ACCESS_SECRET: jwt-admin-atk
       JWT_ADMIN_REFRESH_SECRET: jwt-admin-rtk
     ports:
-      - 4000:4000
+      - 7000:7000
     volumes:
       - ./admin/logs:/var/app/logs
     networks:
@@ -62,7 +62,7 @@ services:
       JWT_CLIENT_ACCESS_SECRET: jwt-client-atk
       JWT_CLIENT_REFRESH_SECRET: jwt-client-rtk
     ports:
-      - 4001:4001
+      - 4000:4000
     volumes:
       - ./client/logs:/var/app/logs
     networks:
@@ -77,7 +77,7 @@ services:
       JWT_CLIENT_ACCESS_SECRET: jwt-client-atk
       JWT_CLIENT_REFRESH_SECRET: jwt-client-rtk
     ports:
-      - 4002:4002
+      - 4001:4001
     volumes:
       - ./stream/logs:/var/app/logs
     networks:

@@ -20,7 +20,7 @@ async function bootstrap() {
   app.useGlobalFilters(...options.filters);
   app.useGlobalInterceptors(...options.interceptors);
 
-  await app.listen(4001);
+  await app.listen(4000);
 }
 
 bootstrap();
