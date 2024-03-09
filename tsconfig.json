@@ -19,26 +19,72 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "paths": {
-      "@apps/admin": ["apps/admin/src"],
-      "@apps/admin/*": ["apps/admin/src/*"],
-      "@apps/client": ["apps/client/src"],
-      "@apps/client/*": ["apps/client/src/*"],
-      "@apps/stream": ["apps/stream/src"],
-      "@apps/stream/*": ["apps/stream/src/*"],
-      "@libs/typeorm": ["libs/typeorm/src"],
-      "@libs/typeorm/*": ["libs/typeorm/src/*"],
-      "@libs/health": ["libs/health/src"],
-      "@libs/health/*": ["libs/health/src/*"],
-      "@libs/logger": ["libs/logger/src"],
-      "@libs/logger/*": ["libs/logger/src/*"],
-      "@libs/entity": ["libs/entity/src"],
-      "@libs/entity/*": ["libs/entity/src/*"],
-      "@libs/bootstrap": ["libs/bootstrap/src"],
-      "@libs/bootstrap/*": ["libs/bootstrap/src/*"],
-      "@libs/testing": ["libs/testing/src"],
-      "@libs/testing/*": ["libs/testing/src/*"],
-      "@libs/swagger": ["libs/swagger/src"],
-      "@libs/swagger/*": ["libs/swagger/src/*"]
+      "@apps/admin": [
+        "apps/admin/src"
+      ],
+      "@apps/admin/*": [
+        "apps/admin/src/*"
+      ],
+      "@apps/client": [
+        "apps/client/src"
+      ],
+      "@apps/client/*": [
+        "apps/client/src/*"
+      ],
+      "@apps/stream": [
+        "apps/stream/src"
+      ],
+      "@apps/stream/*": [
+        "apps/stream/src/*"
+      ],
+      "@libs/typeorm": [
+        "libs/typeorm/src"
+      ],
+      "@libs/typeorm/*": [
+        "libs/typeorm/src/*"
+      ],
+      "@libs/health": [
+        "libs/health/src"
+      ],
+      "@libs/health/*": [
+        "libs/health/src/*"
+      ],
+      "@libs/logger": [
+        "libs/logger/src"
+      ],
+      "@libs/logger/*": [
+        "libs/logger/src/*"
+      ],
+      "@libs/entity": [
+        "libs/entity/src"
+      ],
+      "@libs/entity/*": [
+        "libs/entity/src/*"
+      ],
+      "@libs/bootstrap": [
+        "libs/bootstrap/src"
+      ],
+      "@libs/bootstrap/*": [
+        "libs/bootstrap/src/*"
+      ],
+      "@libs/testing": [
+        "libs/testing/src"
+      ],
+      "@libs/testing/*": [
+        "libs/testing/src/*"
+      ],
+      "@libs/swagger": [
+        "libs/swagger/src"
+      ],
+      "@libs/swagger/*": [
+        "libs/swagger/src/*"
+      ],
+      "@libs/configs": [
+        "libs/configs/src"
+      ],
+      "@libs/configs/*": [
+        "libs/configs/src/*"
+      ]
     }
   }
 }

@@ -1,9 +1,26 @@
+import { createBootstrapOptions } from '@libs/bootstrap';
+import { WinstonLogger } from '@libs/logger';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import { ClientModule } from './client.module';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ClientModule);
-  await app.listen(3000);
+  const logger = WinstonLogger.create('client');
+  const app = await NestFactory.create(AppModule, { logger });
+
+  const builder = new DocumentBuilder().setTitle('Ensemble Client APIs').addBearerAuth();
+  const document = SwaggerModule.createDocument(app, builder.build());
+
+  SwaggerModule.setup('/swagger', app, document);
+
+  const options = createBootstrapOptions(app);
+
+  app.useGlobalPipes(...options.pipes);
+  app.useGlobalFilters(...options.filters);
+  app.useGlobalInterceptors(...options.interceptors);
+
+  await app.listen(4001);
 }
+
 bootstrap();
