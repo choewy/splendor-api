@@ -1,0 +1,12 @@
+FROM node:20
+
+WORKDIR /var/app
+
+COPY build.tar.gz .
+
+RUN tar -xzvf build.tar.gz
+RUN rm build.tar.gz
+
+RUN npm ci
+
+CMD ["node", "dist/apps/stream/src/main.js"]
