@@ -1,0 +1,33 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": "../../..",
+  "testRegex": "apps/stream/test/.*\\.e2e-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "collectCoverageFrom": [
+    "**/*.(t|j)s"
+  ],
+  "coverageDirectory": "./coverage",
+  "testEnvironment": "node",
+  "roots": [
+    "<rootDir>/apps/stream",
+    "<rootDir>/libs/"
+  ],
+  "moduleNameMapper": {
+    "^@apps/admin(|/.*)$": "<rootDir>/apps/admin/src/$1",
+    "^@apps/client(|/.*)$": "<rootDir>/apps/client/src/$1",
+    "^@apps/stream(|/.*)$": "<rootDir>/apps/stream/src/$1",
+    "^@libs/typeorm(|/.*)$": "<rootDir>/libs/typeorm/src/$1",
+    "^@libs/health(|/.*)$": "<rootDir>/libs/health/src/$1",
+    "^@libs/logger(|/.*)$": "<rootDir>/libs/logger/src/$1",
+    "^@libs/entity(|/.*)$": "<rootDir>/libs/entity/src/$1",
+    "^@libs/bootstrap(|/.*)$": "<rootDir>/libs/bootstrap/src/$1",
+    "^@libs/testing(|/.*)$": "<rootDir>/libs/testing/src/$1",
+    "^@libs/swagger(|/.*)$": "<rootDir>/libs/swagger/src/$1"
+  }
+}
