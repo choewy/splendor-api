@@ -3,6 +3,7 @@ import {
   JwtClientConfig,
   KakaoOAuthConfig,
   NaverOAuthConfig,
+  SystemConfig,
   TYPEORM_MYSQL_CONFIG,
   TypeOrmMySQLConfig,
   TypeOrmMySQLConfigReturnType,
@@ -21,7 +22,7 @@ import { OAuthModule } from './oauth';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [TypeOrmMySQLConfig, JwtClientConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
+      load: [SystemConfig, TypeOrmMySQLConfig, JwtClientConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
     }),
     TypeOrmLibsModule.forRootAsync({
       inject: [ConfigService],
