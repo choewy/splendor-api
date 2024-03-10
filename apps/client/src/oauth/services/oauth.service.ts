@@ -2,7 +2,7 @@ import { AuthService } from '@apps/client/auth';
 import { GOOGLE_OAUTH_CONFIG, KAKAO_OAUTH_CONFIG, NAVER_OAUTH_CONFIG } from '@libs/configs';
 import { OAuthEntity, OAuthPlatform, OAuthRepository, UserEntity, UserRepository } from '@libs/entity';
 import { HttpService } from '@nestjs/axios';
-import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import QueryString from 'qs';
@@ -18,9 +18,19 @@ import {
   GetGoogleOAuthTokensDto,
   GetKakaoOAuthProfileDto,
   GetKakaoOAuthTokensDto,
+  GetNaverOAuthProfileDto,
+  GetNaverOAuthTokensDto,
   OAuthStateDto,
 } from '../dtos';
-import { GoogleOAuthProfile, GoogleOAuthTokens, KakaoOAuthProfile, KakaoOAuthTokens } from '../interfaces';
+import { OAuthGetProfileError, OAuthGetTokenError } from '../implements';
+import {
+  GoogleOAuthProfile,
+  GoogleOAuthTokens,
+  KakaoOAuthProfile,
+  KakaoOAuthTokens,
+  NaverOAuthProfile,
+  NaverOAuthTokens,
+} from '../interfaces';
 
 @Injectable()
 export class OAuthService {
@@ -82,7 +92,7 @@ export class OAuthService {
   async getGoogleOAuthTokens(code: string) {
     const dto = new GetGoogleOAuthTokensDto(code, this.configService.get(GOOGLE_OAUTH_CONFIG));
     const res = await lastValueFrom(this.httpService.post<GoogleOAuthTokens>(dto.url, dto.body)).catch((e) => {
-      throw new UnauthorizedException(e?.response?.data ?? e);
+      throw new OAuthGetTokenError(OAuthPlatform.Google, e);
     });
 
     return res.data;
@@ -91,7 +101,7 @@ export class OAuthService {
   async getGoogleOAuthProfile(accessToken: string) {
     const dto = new GetGoogleOAuthProfileDto(accessToken);
     const res = await lastValueFrom(this.httpService.get<GoogleOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
-      throw new UnauthorizedException(e);
+      throw new OAuthGetProfileError(OAuthPlatform.Google, e);
     });
 
     return res.data;
@@ -100,7 +110,7 @@ export class OAuthService {
   async getKakaoOAuthTokens(code: string) {
     const dto = new GetKakaoOAuthTokensDto(code, this.configService.get(KAKAO_OAUTH_CONFIG));
     const res = await lastValueFrom(this.httpService.post<KakaoOAuthTokens>(dto.url, dto.body, { headers: dto.headers })).catch((e) => {
-      throw new UnauthorizedException(e);
+      throw new OAuthGetTokenError(OAuthPlatform.Kakao, e);
     });
 
     return res.data;
@@ -109,7 +119,25 @@ export class OAuthService {
   async getKakaoOAuthProfile(accessToken: string) {
     const dto = new GetKakaoOAuthProfileDto(accessToken);
     const res = await lastValueFrom(this.httpService.get<KakaoOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
-      throw new UnauthorizedException(e);
+      throw new OAuthGetProfileError(OAuthPlatform.Kakao, e);
+    });
+
+    return res.data;
+  }
+
+  async getNaverOAuthTokens(code: string, state: OAuthStateDto) {
+    const dto = new GetNaverOAuthTokensDto(code, state, this.configService.get(NAVER_OAUTH_CONFIG));
+    const res = await lastValueFrom(this.httpService.get<NaverOAuthTokens>(dto.url)).catch((e) => {
+      throw new OAuthGetTokenError(OAuthPlatform.Naver, e);
+    });
+
+    return res.data;
+  }
+
+  async getNaverOAuthProfile(accessToken: string) {
+    const dto = new GetNaverOAuthProfileDto(accessToken);
+    const res = await lastValueFrom(this.httpService.get<NaverOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
+      throw new OAuthGetProfileError(OAuthPlatform.Naver, e);
     });
 
     return res.data;
@@ -170,7 +198,27 @@ export class OAuthService {
   async signFromNaver(res: Response, command: SignFromNaverCommand) {
     const platform = OAuthPlatform.Naver;
     const state = OAuthStateDto.decode(command.state);
+    const oauthTokens = await this.getNaverOAuthTokens(command.code, state);
+    const oauthProfile = await this.getNaverOAuthProfile(oauthTokens.access_token);
 
-    return;
+    const deepPartial: DeepPartial<OAuthEntity> = {
+      platform,
+      oauthId: String(oauthProfile.response.id),
+      nickname: oauthProfile.response.nickname,
+      email: oauthProfile.response.email,
+      profileImageUrl: oauthProfile.response.profile_image,
+    };
+
+    let user = await this.updateOAuth(deepPartial);
+
+    if (user === null) {
+      if (typeof state.userId === 'number') {
+        user = await this.inserOAuth(state.userId, deepPartial);
+      } else {
+        user = await this.createUser(deepPartial);
+      }
+    }
+
+    return this.redirect(res, platform, user, state.redirectUrl);
   }
 }

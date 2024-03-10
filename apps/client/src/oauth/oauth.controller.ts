@@ -1,10 +1,11 @@
 import { ApiController, ApiPipeException } from '@libs/swagger';
-import { Body, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Get, Post, Query, Res, UseFilters } from '@nestjs/common';
 import { ApiCreatedResponse, ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { Response } from 'express';
 
 import { CreateOAuthUrlCommand, SignFromGoogleCommand, SignFromKakaoCommand, SignFromNaverCommand } from './commands';
 import { CreateOAuthUrlDto } from './dtos';
+import { OAuthErrorFilter } from './filters';
 import { OAuthService } from './services';
 
 @ApiController('oauth', 'OAuth')
@@ -28,18 +29,21 @@ export class OAuthController {
   }
 
   @Get('google')
+  @UseFilters(OAuthErrorFilter)
   @ApiExcludeEndpoint()
   async signFromGoogle(@Res({ passthrough: true }) res: Response, @Query() command: SignFromGoogleCommand) {
     return this.oauthService.signFromGoogle(res, command);
   }
 
   @Get('kakao')
+  @UseFilters(OAuthErrorFilter)
   @ApiExcludeEndpoint()
   async signFromKakao(@Res({ passthrough: true }) res: Response, @Query() command: SignFromKakaoCommand) {
     return this.oauthService.signFromKakao(res, command);
   }
 
   @Get('naver')
+  @UseFilters(OAuthErrorFilter)
   @ApiExcludeEndpoint()
   async signFromNaver(@Res({ passthrough: true }) res: Response, @Query() command: SignFromNaverCommand) {
     return this.oauthService.signFromNaver(res, command);

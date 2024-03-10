@@ -7,3 +7,5 @@ export * from './get-google-oauth-tokens.dto';
 export * from './get-google-oauth-profile.dto';
 export * from './get-kakao-oauth-tokens.dto';
 export * from './get-kakao-oauth-profile.dto';
+export * from './get-naver-oauth-tokens.dto';
+export * from './get-naver-oauth-profile.dto';
