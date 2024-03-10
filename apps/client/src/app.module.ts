@@ -20,6 +20,8 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth';
 import { ClientJwtModule } from './jwt';
 import { OAuthModule } from './oauth';
+import { ProfileModule } from './profile';
+import { UserModule } from './user';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { OAuthModule } from './oauth';
     }),
     AuthModule,
     OAuthModule,
+    ProfileModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
