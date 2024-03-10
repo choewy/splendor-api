@@ -1,17 +1,24 @@
 import { HttpException } from '@nestjs/common';
 
-import { HttpExceptionErrorDto } from './http-exception-error.dto';
-
 export class HttpExceptionDto {
   name: string;
   message: string;
   statusCode: number;
-  error: HttpExceptionErrorDto | null;
+  error?: object;
 
   constructor(e: HttpException) {
     this.name = e.name;
     this.message = e.message;
     this.statusCode = e.getStatus();
-    this.error = e.cause ? new HttpExceptionErrorDto(e.cause) : null;
+
+    if (e.cause instanceof Error) {
+      this.error = {
+        name: e.cause.name,
+        message: e.cause.message,
+        cause: e.cause.cause,
+      };
+    } else if (typeof e.cause === 'object') {
+      this.error = e.cause;
+    }
   }
 }
