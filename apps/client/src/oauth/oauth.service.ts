@@ -152,7 +152,7 @@ export class OAuthService implements OAuthServiceImpl {
         return this.getKakaoOAuthProfile(token);
 
       case OAuthPlatform.Naver:
-        return this.getKakaoOAuthProfile(token);
+        return this.getNaverOAuthProfile(token);
     }
   }
 

@@ -1,10 +1,11 @@
 import { ClientJwtService } from '@apps/client/jwt';
 import { CreateOAuthUrlCommand } from '@apps/client/oauth/commands';
 import { CreateGoogleOAuthUrlDto, CreateKakaoOAuthUrlDto, CreateNaverOAuthUrlDto, OAuthStateDto } from '@apps/client/oauth/dtos';
+import { OAuthProfile } from '@apps/client/oauth/interfaces';
 import { OAuthService } from '@apps/client/oauth/oauth.service';
-import { OAuthPlatform, OAuthRepository, UserRepository } from '@libs/entity';
+import { OAuthEntity, OAuthPlatform, OAuthRepository, UserRepository } from '@libs/entity';
 import { TestingFixture, TestingRepository } from '@libs/testing';
-import { HttpModule, HttpService } from '@nestjs/axios';
+import { HttpModule } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -107,6 +108,54 @@ describe(OAuthService.name, () => {
       expect(getGoogleOAuthToken).toHaveBeenCalledTimes(0);
       expect(getKakaoOAuthToken).toHaveBeenCalledTimes(0);
       expect(getNaverOAuthToken).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getOAuthProfile', () => {
+    let getGoogleOAuthProfile: jest.SpyInstance<Promise<OAuthProfile>, [token: string]>;
+    let getKakaoOAuthProfile: jest.SpyInstance<Promise<OAuthProfile>, [token: string]>;
+    let getNaverOAuthProfile: jest.SpyInstance<Promise<OAuthProfile>, [token: string]>;
+
+    beforeEach(() => {
+      if (getGoogleOAuthProfile) {
+        getGoogleOAuthProfile.mockClear();
+      }
+
+      if (getKakaoOAuthProfile) {
+        getKakaoOAuthProfile.mockClear();
+      }
+
+      if (getNaverOAuthProfile) {
+        getNaverOAuthProfile.mockClear();
+      }
+
+      getGoogleOAuthProfile = jest.spyOn(service, 'getGoogleOAuthProfile').mockResolvedValue(TestingFixture.of(OAuthEntity));
+      getKakaoOAuthProfile = jest.spyOn(service, 'getKakaoOAuthProfile').mockResolvedValue(TestingFixture.of(OAuthEntity));
+      getNaverOAuthProfile = jest.spyOn(service, 'getNaverOAuthProfile').mockResolvedValue(TestingFixture.of(OAuthEntity));
+    });
+
+    it('platform이 google인 경우 Google OAuth Profile만 요청해야 한다.', async () => {
+      await service.getOAuthProfile(OAuthPlatform.Google, '');
+
+      expect(getGoogleOAuthProfile).toHaveBeenCalledTimes(1);
+      expect(getKakaoOAuthProfile).toHaveBeenCalledTimes(0);
+      expect(getNaverOAuthProfile).toHaveBeenCalledTimes(0);
+    });
+
+    it('platform이 kakao인 경우 Kakao OAuth Profile만 요청해야 한다.', async () => {
+      await service.getOAuthProfile(OAuthPlatform.Kakao, '');
+
+      expect(getGoogleOAuthProfile).toHaveBeenCalledTimes(0);
+      expect(getKakaoOAuthProfile).toHaveBeenCalledTimes(1);
+      expect(getNaverOAuthProfile).toHaveBeenCalledTimes(0);
+    });
+
+    it('platform이 naver인 경우 Naver OAuth Profile만 요청해야 한다.', async () => {
+      await service.getOAuthProfile(OAuthPlatform.Naver, '');
+
+      expect(getGoogleOAuthProfile).toHaveBeenCalledTimes(0);
+      expect(getKakaoOAuthProfile).toHaveBeenCalledTimes(0);
+      expect(getNaverOAuthProfile).toHaveBeenCalledTimes(1);
     });
   });
 });
