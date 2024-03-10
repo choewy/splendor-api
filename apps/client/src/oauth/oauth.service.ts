@@ -1,4 +1,3 @@
-import { AuthService } from '@apps/client/auth';
 import { GOOGLE_OAUTH_CONFIG, KAKAO_OAUTH_CONFIG, NAVER_OAUTH_CONFIG } from '@libs/configs';
 import { OAuthEntity, OAuthPlatform, OAuthRepository, UserEntity, UserRepository } from '@libs/entity';
 import { HttpService } from '@nestjs/axios';
@@ -9,7 +8,7 @@ import QueryString from 'qs';
 import { lastValueFrom } from 'rxjs';
 import { DeepPartial } from 'typeorm';
 
-import { CreateOAuthUrlCommand, SignFromGoogleCommand, SignFromKakaoCommand, SignFromNaverCommand } from '../commands';
+import { CreateOAuthUrlCommand, SignFromGoogleCommand, SignFromKakaoCommand, SignFromNaverCommand } from './commands';
 import {
   CreateGoogleOAuthUrlDto,
   CreateKakaoOAuthUrlDto,
@@ -21,8 +20,8 @@ import {
   GetNaverOAuthProfileDto,
   GetNaverOAuthTokensDto,
   OAuthStateDto,
-} from '../dtos';
-import { OAuthGetProfileError, OAuthGetTokenError } from '../implements';
+} from './dtos';
+import { OAuthGetProfileError, OAuthGetTokenError } from './implements';
 import {
   GoogleOAuthProfile,
   GoogleOAuthTokens,
@@ -30,20 +29,21 @@ import {
   KakaoOAuthTokens,
   NaverOAuthProfile,
   NaverOAuthTokens,
-} from '../interfaces';
+} from './interfaces';
+import { ClientJwtService } from '../jwt';
 
 @Injectable()
 export class OAuthService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-    private readonly authService: AuthService,
+    private readonly clientJwtService: ClientJwtService,
     private readonly userRepository: UserRepository,
     private readonly oauthRepository: OAuthRepository,
   ) {}
 
   redirect(res: Response, platform: OAuthPlatform, user: UserEntity, redirectUrl: string) {
-    res.redirect(HttpStatus.FOUND, `${redirectUrl}?${QueryString.stringify(this.authService.createTokens(platform, user.id))}`);
+    res.redirect(HttpStatus.FOUND, `${redirectUrl}?${QueryString.stringify(this.clientJwtService.createTokens(platform, user.id))}`);
   }
 
   createOAuthUrl(command: CreateOAuthUrlCommand, userId?: number) {

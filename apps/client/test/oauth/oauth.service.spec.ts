@@ -1,7 +1,7 @@
-import { AuthService } from '@apps/client/auth';
+import { ClientJwtService } from '@apps/client/jwt';
 import { CreateOAuthUrlCommand } from '@apps/client/oauth/commands';
 import { CreateGoogleOAuthUrlDto, CreateKakaoOAuthUrlDto, CreateNaverOAuthUrlDto } from '@apps/client/oauth/dtos';
-import { OAuthService } from '@apps/client/oauth/services';
+import { OAuthService } from '@apps/client/oauth/oauth.service';
 import { OAuthPlatform, OAuthRepository, UserRepository } from '@libs/entity';
 import { TestingFixture, TestingRepository } from '@libs/testing';
 import { HttpModule } from '@nestjs/axios';
@@ -17,12 +17,12 @@ describe(OAuthService.name, () => {
     module = await Test.createTestingModule({
       imports: [HttpModule],
       providers: [
-        AuthService,
         OAuthService,
-        ConfigService,
-        JwtService,
         TestingRepository.mock(UserRepository),
         TestingRepository.mock(OAuthRepository),
+        ConfigService,
+        ClientJwtService,
+        JwtService,
       ],
     }).compile();
 

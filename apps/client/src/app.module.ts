@@ -16,6 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth';
+import { ClientJwtModule } from './jwt';
 import { OAuthModule } from './oauth';
 
 @Module({
@@ -30,6 +31,7 @@ import { OAuthModule } from './oauth';
         return configService.get<TypeOrmMySQLConfigReturnType>(TYPEORM_MYSQL_CONFIG)(entities);
       },
     }),
+    ClientJwtModule,
     AuthModule,
     OAuthModule,
   ],

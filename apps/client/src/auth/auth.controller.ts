@@ -6,10 +6,11 @@ import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { CreateTokensCommand, RefreshTokensCommand } from './command';
 import { ClientTokensDto } from './dto';
+import { ClientJwtService } from '../jwt';
 
 @ApiController('auth', '인증')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService, private readonly clientJwtService: ClientJwtService) {}
 
   @Post('tokens')
   @ApiOperation({ summary: '인증 토큰 생성(개발용)' })
@@ -25,6 +26,6 @@ export class AuthController {
   @ApiCreatedResponse({ type: ClientTokensDto })
   @ApiExtendsException()
   async refreshTokens(@Req() req: Request, @Body() command: RefreshTokensCommand) {
-    return this.authService.refreshTokens(req, command);
+    return this.clientJwtService.refreshTokens(req, command.refresh);
   }
 }

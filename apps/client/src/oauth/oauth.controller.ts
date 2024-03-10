@@ -6,7 +6,7 @@ import { Response } from 'express';
 import { CreateOAuthUrlCommand, SignFromGoogleCommand, SignFromKakaoCommand, SignFromNaverCommand } from './commands';
 import { CreateOAuthUrlDto } from './dtos';
 import { OAuthErrorFilter } from './filters';
-import { OAuthService } from './services';
+import { OAuthService } from './oauth.service';
 
 @ApiController('oauth', 'OAuth')
 export class OAuthController {
