@@ -16,9 +16,11 @@ import {
   CreateNaverOAuthUrlDto,
   GetGoogleOAuthProfileDto,
   GetGoogleOAuthTokensDto,
+  GetKakaoOAuthProfileDto,
+  GetKakaoOAuthTokensDto,
   OAuthStateDto,
 } from '../dtos';
-import { GoogleOAuthProfile, GoogleOAuthTokens } from '../interfaces';
+import { GoogleOAuthProfile, GoogleOAuthTokens, KakaoOAuthProfile, KakaoOAuthTokens } from '../interfaces';
 
 @Injectable()
 export class OAuthService {
@@ -95,6 +97,24 @@ export class OAuthService {
     return res.data;
   }
 
+  async getKakaoOAuthTokens(code: string) {
+    const dto = new GetKakaoOAuthTokensDto(code, this.configService.get(KAKAO_OAUTH_CONFIG));
+    const res = await lastValueFrom(this.httpService.post<KakaoOAuthTokens>(dto.url, dto.body, { headers: dto.headers })).catch((e) => {
+      throw new UnauthorizedException(e);
+    });
+
+    return res.data;
+  }
+
+  async getKakaoOAuthProfile(accessToken: string) {
+    const dto = new GetKakaoOAuthProfileDto(accessToken);
+    const res = await lastValueFrom(this.httpService.get<KakaoOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
+      throw new UnauthorizedException(e);
+    });
+
+    return res.data;
+  }
+
   async signFromGoogle(res: Response, command: SignFromGoogleCommand) {
     const platform = OAuthPlatform.Google;
     const state = OAuthStateDto.decode(command.state);
@@ -109,6 +129,7 @@ export class OAuthService {
     };
 
     let user = await this.updateOAuth(deepPartial);
+
     if (user === null) {
       if (typeof state.userId === 'number') {
         user = await this.inserOAuth(state.userId, deepPartial);
@@ -123,8 +144,27 @@ export class OAuthService {
   async signFromKakao(res: Response, command: SignFromKakaoCommand) {
     const platform = OAuthPlatform.Kakao;
     const state = OAuthStateDto.decode(command.state);
+    const oauthTokens = await this.getKakaoOAuthTokens(command.code);
+    const oauthProfile = await this.getKakaoOAuthProfile(oauthTokens.access_token);
+    const deepPartial: DeepPartial<OAuthEntity> = {
+      platform,
+      oauthId: String(oauthProfile.id),
+      nickname: oauthProfile.properties.nickname,
+      email: oauthProfile.properties.email,
+      profileImageUrl: oauthProfile.properties.profile_image,
+    };
 
-    return;
+    let user = await this.updateOAuth(deepPartial);
+
+    if (user === null) {
+      if (typeof state.userId === 'number') {
+        user = await this.inserOAuth(state.userId, deepPartial);
+      } else {
+        user = await this.createUser(deepPartial);
+      }
+    }
+
+    return this.redirect(res, platform, user, state.redirectUrl);
   }
 
   async signFromNaver(res: Response, command: SignFromNaverCommand) {

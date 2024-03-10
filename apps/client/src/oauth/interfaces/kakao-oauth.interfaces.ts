@@ -6,12 +6,6 @@ export interface KakaoOAuthTokens {
   refresh_token_expires_in: number;
 }
 
-export interface KakaoOAuthTokenInfo {
-  id: number;
-  expires_in: number;
-  app_id: number;
-}
-
 export interface KakaoOAuthProfile {
   id: number;
   properties: {
