@@ -1,15 +1,17 @@
-import { ClientJwtService } from '@apps/client/jwt';
-import { CreateOAuthUrlCommand } from '@apps/client/oauth/commands';
+import { ClientJwtService, ClientTokensDto } from '@apps/client/jwt';
+import { CreateOAuthUrlCommand, SignWithGoogleCommand } from '@apps/client/oauth/commands';
 import { CreateGoogleOAuthUrlDto, CreateKakaoOAuthUrlDto, CreateNaverOAuthUrlDto, OAuthStateDto } from '@apps/client/oauth/dtos';
+import { OAuthGetProfileError, OAuthGetTokenError } from '@apps/client/oauth/implements';
 import { OAuthProfile } from '@apps/client/oauth/interfaces';
 import { OAuthService } from '@apps/client/oauth/oauth.service';
 import { OAuthEntity, OAuthPlatform, OAuthRepository, UserEntity, UserRepository } from '@libs/entity';
 import { TestingFixture, TestingRepository } from '@libs/testing';
 import { HttpModule } from '@nestjs/axios';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Response } from 'express';
 
 describe(OAuthService.name, () => {
   let module: TestingModule;
@@ -25,6 +27,7 @@ describe(OAuthService.name, () => {
         ConfigService,
         ClientJwtService,
         JwtService,
+        Logger,
       ],
     }).compile();
 
@@ -218,6 +221,132 @@ describe(OAuthService.name, () => {
       expect(result).toBeInstanceOf(UserEntity);
       expect(module.get(OAuthRepository).insert).toHaveBeenCalledTimes(1);
       expect(module.get(OAuthRepository).insert).toHaveBeenCalledWith({ ...profile, user });
+    });
+  });
+
+  describe('createUserOrUpdateOAuth', () => {
+    const profile = TestingFixture.of(OAuthEntity);
+
+    beforeEach(() => {
+      const oauthRepositoryUpdate = jest
+        .spyOn(module.get(OAuthRepository), 'update')
+        .mockResolvedValue({ affected: 1, raw: {}, generatedMaps: [] });
+
+      oauthRepositoryUpdate.mockClear();
+    });
+
+    it('OAuthEntity가 이미 존재하는 경우 OAuthEntity를 OAuthProfile 정보로 수정한다.', async () => {
+      const existingOAuth = TestingFixture.of(OAuthEntity, { id: 1, user: TestingFixture.of(UserEntity) });
+      const result = await service.createUserOrUpdateOAuth(existingOAuth, profile);
+
+      jest.spyOn(module.get(UserRepository), 'create').mockReturnValue(TestingFixture.of(UserEntity));
+
+      expect(result).toBeInstanceOf(UserEntity);
+      expect(module.get(UserRepository).create).toHaveBeenCalledTimes(0);
+      expect(module.get(OAuthRepository).update).toHaveBeenCalledTimes(1);
+      expect(module.get(OAuthRepository).update).toHaveBeenCalledWith(1, profile);
+    });
+
+    it('OAuthEntity가 존재하지 않는 경우 OAuthProfile로 UserEntity를 생성한다.', async () => {
+      const existingOAuth = null;
+      const user = TestingFixture.of(UserEntity);
+
+      jest.spyOn(module.get(UserRepository), 'create').mockReturnValue(user);
+      jest.spyOn(user, 'save').mockResolvedValue(user);
+
+      const result = await service.createUserOrUpdateOAuth(existingOAuth, profile);
+
+      expect(result).toBeInstanceOf(UserEntity);
+      expect(user.save).toHaveBeenCalledTimes(1);
+      expect(module.get(UserRepository).create).toHaveBeenCalledTimes(1);
+      expect(module.get(OAuthRepository).update).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('saveOAuth', () => {
+    const profile = TestingFixture.of(OAuthEntity);
+
+    beforeEach(() => {
+      jest.spyOn(module.get(OAuthRepository), 'findOne').mockResolvedValue(null);
+
+      const insertOrUpdateUserOwnOAuth = jest.spyOn(service, 'insertOrUpdateUserOwnOAuth').mockResolvedValue(TestingFixture.of(UserEntity));
+      const createUserOrUpdateOAuth = jest.spyOn(service, 'createUserOrUpdateOAuth').mockResolvedValue(TestingFixture.of(UserEntity));
+
+      insertOrUpdateUserOwnOAuth.mockClear();
+      createUserOrUpdateOAuth.mockClear();
+    });
+
+    it('OAuth 플랫폼으로부터 state로 넘겨받은 userId가 number 타입인 경우 insertOrUpdateUserOwnOAuth를 호출한다.', async () => {
+      await service.saveOAuth(profile, 1);
+
+      expect(service.insertOrUpdateUserOwnOAuth).toHaveBeenCalledTimes(1);
+      expect(service.createUserOrUpdateOAuth).toHaveBeenCalledTimes(0);
+    });
+
+    it('OAuth 플랫폼으로부터 state로 넘겨받은 userId가 number 타입이 아닌 경우 createUserOrUpdateOAuth를 호출한다.', async () => {
+      await service.saveOAuth(profile);
+
+      expect(service.insertOrUpdateUserOwnOAuth).toHaveBeenCalledTimes(0);
+      expect(service.createUserOrUpdateOAuth).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('signWithOAuth', () => {
+    const res = { redirect: () => undefined } as unknown as Response;
+    const platform = OAuthPlatform.Google;
+    const command = TestingFixture.of(SignWithGoogleCommand, { state: TestingFixture.of(OAuthStateDto).encode() });
+
+    beforeAll(() => {
+      jest.spyOn(module.get(ClientJwtService), 'createTokens').mockReturnValue(TestingFixture.of(ClientTokensDto));
+    });
+
+    beforeEach(() => {
+      const loggerVerbose = jest.spyOn(Logger, 'verbose').mockReturnValue();
+      const loggerWarn = jest.spyOn(Logger, 'warn').mockReturnValue();
+
+      loggerVerbose.mockClear();
+      loggerWarn.mockClear();
+    });
+
+    it('OAuth 토큰을 가져오는데 실패하면 실패 로그가 기록되어야 한다.', async () => {
+      jest.spyOn(service, 'getOAuthToken').mockRejectedValue(new OAuthGetTokenError(platform, new Error()));
+
+      await service.signWithOAuth(res, platform, command);
+
+      expect(Logger.verbose).toHaveBeenCalledTimes(0);
+      expect(Logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('OAuth 프로필 정보를 가져오는데 실패하면 실패 로그가 기록되어야 한다.', async () => {
+      jest.spyOn(service, 'getOAuthToken').mockResolvedValue('');
+      jest.spyOn(service, 'getOAuthProfile').mockRejectedValue(new OAuthGetProfileError(platform, new Error()));
+
+      await service.signWithOAuth(res, platform, command);
+
+      expect(Logger.verbose).toHaveBeenCalledTimes(0);
+      expect(Logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('OAuthEntity를 생성 및 수정하는 과정에 오류가 발생하면 warn 로그가 기록되어야 한다.', async () => {
+      jest.spyOn(service, 'getOAuthToken').mockResolvedValue('');
+      jest.spyOn(service, 'getOAuthProfile').mockResolvedValue(TestingFixture.of(OAuthEntity));
+      jest.spyOn(service, 'saveOAuth').mockRejectedValue(new ConflictException());
+
+      await service.signWithOAuth(res, platform, command);
+
+      expect(Logger.verbose).toHaveBeenCalledTimes(0);
+      expect(Logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('OAuth 토큰 발급, OAuth 프로필 조회, OAuthEntity 생성 및 수정이 정상적으로 수행되었다면 verbose 로그가 기록되어야 한다.', async () => {
+      jest.spyOn(service, 'getOAuthToken').mockResolvedValue('');
+      jest.spyOn(service, 'getOAuthProfile').mockResolvedValue(TestingFixture.of(OAuthEntity));
+      jest.spyOn(service, 'saveOAuth').mockResolvedValue(TestingFixture.of(UserEntity));
+
+      await service.signWithOAuth(res, platform, command);
+
+      expect(Logger.verbose).toHaveBeenCalledTimes(1);
+      expect(Logger.warn).toHaveBeenCalledTimes(0);
     });
   });
 });
