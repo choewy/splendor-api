@@ -16,8 +16,8 @@ export class AuthController {
   @ApiOperation({ summary: '인증 토큰 생성(개발용)' })
   @ApiCreatedResponse({ type: ClientTokensDto })
   @ApiPipeException(NotFoundException)
-  async createTokens(@Body() command: CreateTokensCommand) {
-    return this.authService.createTokensExistsUser(command);
+  async createTokensWithFindUser(@Body() command: CreateTokensCommand) {
+    return this.authService.createTokensWithFindUser(command);
   }
 
   @Post('tokens/refresh')

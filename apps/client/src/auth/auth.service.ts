@@ -14,7 +14,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async createTokensExistsUser(command: CreateTokensCommand) {
+  async createTokensWithFindUser(command: CreateTokensCommand) {
     if (this.configService.get<SystemConfigReturnType>(SYSTEM_CONFIG).env === NodeEnv.Production) {
       throw new NotFoundException();
     }
@@ -32,6 +32,16 @@ export class AuthService {
       throw new NotFoundException('not exists user oauths');
     }
 
-    return this.clientJwtService.createTokens(user.id, user.oauths[0].platform);
+    let i = 0;
+
+    if (command.platform) {
+      i = user.oauths.findIndex((oauth) => oauth.platform === command.platform);
+
+      if (i === -1) {
+        throw new NotFoundException('not exists user oauths');
+      }
+    }
+
+    return this.clientJwtService.createTokens(user.id, user.oauths[i].platform);
   }
 }
