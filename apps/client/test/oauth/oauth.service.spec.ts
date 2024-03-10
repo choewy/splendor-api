@@ -3,9 +3,10 @@ import { CreateOAuthUrlCommand } from '@apps/client/oauth/commands';
 import { CreateGoogleOAuthUrlDto, CreateKakaoOAuthUrlDto, CreateNaverOAuthUrlDto, OAuthStateDto } from '@apps/client/oauth/dtos';
 import { OAuthProfile } from '@apps/client/oauth/interfaces';
 import { OAuthService } from '@apps/client/oauth/oauth.service';
-import { OAuthEntity, OAuthPlatform, OAuthRepository, UserRepository } from '@libs/entity';
+import { OAuthEntity, OAuthPlatform, OAuthRepository, UserEntity, UserRepository } from '@libs/entity';
 import { TestingFixture, TestingRepository } from '@libs/testing';
 import { HttpModule } from '@nestjs/axios';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -156,6 +157,67 @@ describe(OAuthService.name, () => {
       expect(getGoogleOAuthProfile).toHaveBeenCalledTimes(0);
       expect(getKakaoOAuthProfile).toHaveBeenCalledTimes(0);
       expect(getNaverOAuthProfile).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('insertOrUpdateUserOwnOAuth', () => {
+    beforeEach(() => {
+      const oauthRepositoryInsert = jest
+        .spyOn(module.get(OAuthRepository), 'insert')
+        .mockResolvedValue({ generatedMaps: [], raw: {}, identifiers: [] });
+
+      const oauthRepositoryUpdate = jest
+        .spyOn(module.get(OAuthRepository), 'update')
+        .mockResolvedValue({ generatedMaps: [], raw: {}, affected: 1 });
+
+      oauthRepositoryInsert.mockClear();
+      oauthRepositoryUpdate.mockClear();
+    });
+
+    it('userId로 조회한 UserEntity가 없는 경우 NotFouneException을 던진다.', () => {
+      const profile = TestingFixture.of(OAuthEntity);
+      const user = null;
+
+      jest.spyOn(module.get(UserRepository), 'findOneBy').mockResolvedValue(user);
+
+      expect(service.insertOrUpdateUserOwnOAuth(null, profile, 1)).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('OAuthEntity가 이미 존재하나, OAuthEntity의 userId와 요청자의 userId가 서로 다른 경우 ConflictException을 던진다.', () => {
+      const existingOAuth = TestingFixture.of(OAuthEntity, { user: TestingFixture.of(UserEntity, { id: 2 }) });
+      const profile = TestingFixture.of(OAuthEntity);
+      const user = TestingFixture.of(UserEntity, { id: 1 });
+
+      jest.spyOn(module.get(UserRepository), 'findOneBy').mockResolvedValue(user);
+
+      expect(service.insertOrUpdateUserOwnOAuth(existingOAuth, profile, 1)).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('OAuthEntity가 이미 존재하고, OAuthEntity의 userId와 요청자의 userId가 같은 경우 OAuthEntity를 최신 OAuthProfile 정보로 수정한다.', async () => {
+      const existingOAuth = TestingFixture.of(OAuthEntity, { id: 1, user: TestingFixture.of(UserEntity, { id: 1 }) });
+      const profile = TestingFixture.of(OAuthEntity);
+      const user = TestingFixture.of(UserEntity, { id: 1 });
+
+      jest.spyOn(module.get(UserRepository), 'findOneBy').mockResolvedValue(user);
+
+      const result = await service.insertOrUpdateUserOwnOAuth(existingOAuth, profile, 1);
+
+      expect(result).toBeInstanceOf(UserEntity);
+      expect(module.get(OAuthRepository).update).toHaveBeenCalledTimes(1);
+      expect(module.get(OAuthRepository).update).toHaveBeenCalledWith(1, profile);
+    });
+
+    it('OAuthEntity가 존재하지 않는 경우, 요청자의 userId에 OAuthEntity를 추가한다.', async () => {
+      const user = TestingFixture.of(UserEntity, { id: 1 });
+      const profile = TestingFixture.of(OAuthEntity);
+
+      jest.spyOn(module.get(UserRepository), 'findOneBy').mockResolvedValue(user);
+
+      const result = await service.insertOrUpdateUserOwnOAuth(null, profile, 1);
+
+      expect(result).toBeInstanceOf(UserEntity);
+      expect(module.get(OAuthRepository).insert).toHaveBeenCalledTimes(1);
+      expect(module.get(OAuthRepository).insert).toHaveBeenCalledWith({ ...profile, user });
     });
   });
 });
