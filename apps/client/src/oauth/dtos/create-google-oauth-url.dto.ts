@@ -7,12 +7,12 @@ import { OAuthStateDto } from './oauth-state.dto';
 export class CreateGoogleOAuthUrlDto implements CreateOAuthUrlDto {
   url = 'https://accounts.google.com/o/oauth2/v2/auth';
 
-  constructor(googleOAuthConfig: GoogleOAuthConfigReturnType, redirectUrl: string, userId?: number) {
+  constructor(googleOAuthConfig: GoogleOAuthConfigReturnType, state: OAuthStateDto) {
     this.url += `?${QueryString.stringify({
       response_type: 'code',
       client_id: googleOAuthConfig.clientId,
       redirect_uri: googleOAuthConfig.redirectUri,
-      state: new OAuthStateDto(redirectUrl, userId).encode(),
+      state: state.encode(),
       scope: 'email profile',
     })}`;
   }

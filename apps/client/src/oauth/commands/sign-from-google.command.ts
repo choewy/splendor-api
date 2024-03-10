@@ -1,4 +1,4 @@
-export class SignFromGoogleCommand {
+export class SignWithGoogleCommand {
   code?: string;
   scope?: string;
   authuser?: string;

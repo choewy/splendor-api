@@ -1,7 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
-import { ClientTokenPayload } from '../implements';
+import { ClientContext } from '../implements';
 
-export const ReqClient = createParamDecorator((_, ctx: ExecutionContext): ClientTokenPayload | null =>
-  ClientTokenPayload.fromReq(ctx.switchToHttp().getRequest()),
-);
+export const ReqClient = createParamDecorator((_, ctx: ExecutionContext): ClientContext | null => ctx.switchToHttp().getRequest().user);

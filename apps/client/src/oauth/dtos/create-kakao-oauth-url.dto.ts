@@ -7,12 +7,12 @@ import { OAuthStateDto } from './oauth-state.dto';
 export class CreateKakaoOAuthUrlDto implements CreateOAuthUrlDto {
   url = 'https://kauth.kakao.com/oauth/authorize';
 
-  constructor(kakaoOAuthConfig: KakaoOAuthConfigReturnType, redirectUrl: string, userId?: number) {
+  constructor(kakaoOAuthConfig: KakaoOAuthConfigReturnType, state: OAuthStateDto) {
     this.url += `?${QueryString.stringify({
       response_type: 'code',
       client_id: kakaoOAuthConfig.clientId,
       redirect_uri: kakaoOAuthConfig.redirectUri,
-      state: new OAuthStateDto(redirectUrl, userId).encode(),
+      state: state.encode(),
     })}`;
   }
 }

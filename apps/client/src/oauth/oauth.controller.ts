@@ -1,12 +1,13 @@
+import { OAuthPlatform } from '@libs/entity';
 import { ApiController, ApiPipeException } from '@libs/swagger';
-import { Body, Get, Post, Query, Res, UseFilters } from '@nestjs/common';
-import { ApiCreatedResponse, ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
+import { Body, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { Response } from 'express';
 
-import { CreateOAuthUrlCommand, SignFromGoogleCommand, SignFromKakaoCommand, SignFromNaverCommand } from './commands';
+import { CreateOAuthUrlCommand, SignWithGoogleCommand, SignWithKakaoCommand, SignWithNaverCommand } from './commands';
 import { CreateOAuthUrlDto } from './dtos';
-import { OAuthErrorFilter } from './filters';
 import { OAuthService } from './oauth.service';
+import { ClientContext, ClientJwtGuard, ReqClient } from '../jwt';
 
 @ApiController('oauth', 'OAuth')
 export class OAuthController {
@@ -20,32 +21,30 @@ export class OAuthController {
     return this.oauthService.createOAuthUrl(command);
   }
 
-  /** @todo after jwt auth guard */
   @Post('connect')
+  @UseGuards(ClientJwtGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'OAuth 계정 추가 연동' })
   @ApiCreatedResponse()
-  async connecOtherOAuth() {
-    return;
+  async connecOtherOAuth(@ReqClient() client: ClientContext, @Body() command: CreateOAuthUrlCommand) {
+    return this.oauthService.createOAuthUrl(command, client.id);
   }
 
   @Get('google')
-  @UseFilters(OAuthErrorFilter)
   @ApiExcludeEndpoint()
-  async signFromGoogle(@Res({ passthrough: true }) res: Response, @Query() command: SignFromGoogleCommand) {
-    return this.oauthService.signFromGoogle(res, command);
+  async signWithGoogle(@Res({ passthrough: true }) res: Response, @Query() command: SignWithGoogleCommand) {
+    return this.oauthService.signWithOAuth(res, OAuthPlatform.Google, command);
   }
 
   @Get('kakao')
-  @UseFilters(OAuthErrorFilter)
   @ApiExcludeEndpoint()
-  async signFromKakao(@Res({ passthrough: true }) res: Response, @Query() command: SignFromKakaoCommand) {
-    return this.oauthService.signFromKakao(res, command);
+  async signWithKakao(@Res({ passthrough: true }) res: Response, @Query() command: SignWithKakaoCommand) {
+    return this.oauthService.signWithOAuth(res, OAuthPlatform.Kakao, command);
   }
 
   @Get('naver')
-  @UseFilters(OAuthErrorFilter)
   @ApiExcludeEndpoint()
-  async signFromNaver(@Res({ passthrough: true }) res: Response, @Query() command: SignFromNaverCommand) {
-    return this.oauthService.signFromNaver(res, command);
+  async signWithNaver(@Res({ passthrough: true }) res: Response, @Query() command: SignWithNaverCommand) {
+    return this.oauthService.signWithOAuth(res, OAuthPlatform.Naver, command);
   }
 }

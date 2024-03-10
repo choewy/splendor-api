@@ -1,4 +1,4 @@
-export class SignFromKakaoCommand {
+export class SignWithKakaoCommand {
   code?: string;
   error?: string;
   error_description?: string;

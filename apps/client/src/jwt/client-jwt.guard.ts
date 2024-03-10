@@ -12,6 +12,8 @@ export class ClientJwtGuard extends AuthGuard(CLIENT_JWT_STRATEGY) {
     super();
   }
 
+  validate;
+
   handleRequest<TUser = any>(e: Error, payload: any, info: Error, ctx: ExecutionContext): TUser {
     const isIgnoreError = this.reflector.getAllAndOverride<boolean>(IGNORE_CLIENT_JWT_ERROR, [ctx.getClass(), ctx.getHandler()]);
 

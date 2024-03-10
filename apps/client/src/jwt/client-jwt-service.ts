@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 import { ClientTokensDto } from './dtos';
-import { ClientTokenPayload } from './implements';
+import { ClientContext } from './implements';
 
 @Injectable()
 export class ClientJwtService {
@@ -14,7 +14,7 @@ export class ClientJwtService {
 
   createTokens(id: number, platform: OAuthPlatform) {
     const config = this.configService.get<JwtConfigReturnType>(JWT_CLIENT_CONFIG);
-    const payload = new ClientTokenPayload(id, platform).plainObject();
+    const payload = new ClientContext(id, platform).toPlainObject();
 
     return new ClientTokensDto(
       this.jwtService.sign(payload, config.access.signOptions),

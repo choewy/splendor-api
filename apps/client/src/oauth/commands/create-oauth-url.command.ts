@@ -7,7 +7,11 @@ export class CreateOAuthUrlCommand {
   @IsEnum(OAuthPlatform)
   platform: OAuthPlatform;
 
-  @ApiProperty({ type: String, example: 'http://localhost:3000/sign' })
+  @ApiProperty({ type: String, example: 'http://localhost:3000/sign/ok' })
   @IsUrl({ require_tld: false })
-  redirectUrl: string;
+  successUrl: string;
+
+  @ApiProperty({ type: String, example: 'http://localhost:3000/sign/error' })
+  @IsUrl({ require_tld: false })
+  failUrl: string;
 }

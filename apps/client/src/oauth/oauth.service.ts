@@ -1,14 +1,13 @@
 import { GOOGLE_OAUTH_CONFIG, KAKAO_OAUTH_CONFIG, NAVER_OAUTH_CONFIG } from '@libs/configs';
-import { OAuthEntity, OAuthPlatform, OAuthRepository, UserEntity, UserRepository } from '@libs/entity';
+import { OAuthEntity, OAuthPlatform, OAuthRepository, UserRepository } from '@libs/entity';
 import { HttpService } from '@nestjs/axios';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import QueryString from 'qs';
 import { lastValueFrom } from 'rxjs';
-import { DeepPartial } from 'typeorm';
 
-import { CreateOAuthUrlCommand, SignFromGoogleCommand, SignFromKakaoCommand, SignFromNaverCommand } from './commands';
+import { CreateOAuthUrlCommand, SignWithGoogleCommand, SignWithKakaoCommand, SignWithNaverCommand } from './commands';
 import {
   CreateGoogleOAuthUrlDto,
   CreateKakaoOAuthUrlDto,
@@ -21,7 +20,7 @@ import {
   GetNaverOAuthTokensDto,
   OAuthStateDto,
 } from './dtos';
-import { OAuthGetProfileError, OAuthGetTokenError } from './implements';
+import { OAuthGetProfileError, OAuthGetTokenError, OAuthLog } from './implements';
 import {
   GoogleOAuthProfile,
   GoogleOAuthTokens,
@@ -29,11 +28,13 @@ import {
   KakaoOAuthTokens,
   NaverOAuthProfile,
   NaverOAuthTokens,
+  OAuthProfile,
+  OAuthServiceImpl,
 } from './interfaces';
 import { ClientJwtService } from '../jwt';
 
 @Injectable()
-export class OAuthService {
+export class OAuthService implements OAuthServiceImpl {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
@@ -42,183 +43,196 @@ export class OAuthService {
     private readonly oauthRepository: OAuthRepository,
   ) {}
 
-  redirect(res: Response, platform: OAuthPlatform, user: UserEntity, redirectUrl: string) {
-    res.redirect(HttpStatus.FOUND, `${redirectUrl}?${QueryString.stringify(this.clientJwtService.createTokens(user.id, platform))}`);
-  }
-
   createOAuthUrl(command: CreateOAuthUrlCommand, userId?: number) {
+    const state = new OAuthStateDto(command.successUrl, command.failUrl, userId);
+
     switch (command.platform) {
       case OAuthPlatform.Google:
-        return new CreateGoogleOAuthUrlDto(this.configService.get(GOOGLE_OAUTH_CONFIG), command.redirectUrl, userId);
+        return new CreateGoogleOAuthUrlDto(this.configService.get(GOOGLE_OAUTH_CONFIG), state);
 
       case OAuthPlatform.Kakao:
-        return new CreateKakaoOAuthUrlDto(this.configService.get(KAKAO_OAUTH_CONFIG), command.redirectUrl, userId);
+        return new CreateKakaoOAuthUrlDto(this.configService.get(KAKAO_OAUTH_CONFIG), state);
 
       case OAuthPlatform.Naver:
-        return new CreateNaverOAuthUrlDto(this.configService.get(NAVER_OAUTH_CONFIG), command.redirectUrl, userId);
+        return new CreateNaverOAuthUrlDto(this.configService.get(NAVER_OAUTH_CONFIG), state);
     }
   }
 
-  async updateOAuth(deepPartial: DeepPartial<OAuthEntity>) {
-    const oauth = await this.oauthRepository.findOne({
-      relations: { user: true },
-      where: { platform: deepPartial.platform, oauthId: deepPartial.oauthId },
-    });
-
-    if (oauth) {
-      await this.oauthRepository.update(oauth.id, deepPartial);
-    }
-
-    return oauth?.user ?? null;
-  }
-
-  async inserOAuth(userId: number, deepPartial: DeepPartial<OAuthEntity>) {
-    const user = await this.userRepository.findOneBy({ id: userId });
-    await this.oauthRepository.insert({ ...deepPartial, user });
-    return user;
-  }
-
-  async createUser(deepPartial: DeepPartial<OAuthEntity>) {
-    const user = this.userRepository.create({
-      nickname: deepPartial.nickname,
-      profileImageUrl: deepPartial.profileImageUrl,
-      oauths: [deepPartial],
-      studio: { studioSetting: {}, alertWidget: {}, messageWidget: {} },
-    });
-    await user.save();
-    return user;
-  }
-
-  async getGoogleOAuthTokens(code: string) {
+  async getGoogleOAuthToken(code: string): Promise<string> {
     const dto = new GetGoogleOAuthTokensDto(code, this.configService.get(GOOGLE_OAUTH_CONFIG));
     const res = await lastValueFrom(this.httpService.post<GoogleOAuthTokens>(dto.url, dto.body)).catch((e) => {
       throw new OAuthGetTokenError(OAuthPlatform.Google, e);
     });
 
-    return res.data;
+    return res.data.access_token;
   }
 
-  async getGoogleOAuthProfile(accessToken: string) {
-    const dto = new GetGoogleOAuthProfileDto(accessToken);
-    const res = await lastValueFrom(this.httpService.get<GoogleOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
-      throw new OAuthGetProfileError(OAuthPlatform.Google, e);
-    });
-
-    return res.data;
-  }
-
-  async getKakaoOAuthTokens(code: string) {
+  async getKakaoOAuthToken(code: string): Promise<string> {
     const dto = new GetKakaoOAuthTokensDto(code, this.configService.get(KAKAO_OAUTH_CONFIG));
     const res = await lastValueFrom(this.httpService.post<KakaoOAuthTokens>(dto.url, dto.body, { headers: dto.headers })).catch((e) => {
       throw new OAuthGetTokenError(OAuthPlatform.Kakao, e);
     });
 
-    return res.data;
+    return res.data.access_token;
   }
 
-  async getKakaoOAuthProfile(accessToken: string) {
-    const dto = new GetKakaoOAuthProfileDto(accessToken);
-    const res = await lastValueFrom(this.httpService.get<KakaoOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
-      throw new OAuthGetProfileError(OAuthPlatform.Kakao, e);
-    });
-
-    return res.data;
-  }
-
-  async getNaverOAuthTokens(code: string, state: OAuthStateDto) {
+  async getNaverOAuthToken(code: string, state: OAuthStateDto): Promise<string> {
     const dto = new GetNaverOAuthTokensDto(code, state, this.configService.get(NAVER_OAUTH_CONFIG));
     const res = await lastValueFrom(this.httpService.get<NaverOAuthTokens>(dto.url)).catch((e) => {
       throw new OAuthGetTokenError(OAuthPlatform.Naver, e);
     });
 
-    return res.data;
+    return res.data.access_token;
   }
 
-  async getNaverOAuthProfile(accessToken: string) {
+  async getGoogleOAuthProfile(accessToken: string): Promise<OAuthProfile> {
+    const dto = new GetGoogleOAuthProfileDto(accessToken);
+    const res = await lastValueFrom(this.httpService.get<GoogleOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
+      throw new OAuthGetProfileError(OAuthPlatform.Google, e);
+    });
+
+    return {
+      platform: OAuthPlatform.Google,
+      oauthId: res.data.id,
+      nickname: res.data.name,
+      email: res.data.email,
+      profileImageUrl: res.data.picture,
+    };
+  }
+
+  async getKakaoOAuthProfile(accessToken: string): Promise<OAuthProfile> {
+    const dto = new GetKakaoOAuthProfileDto(accessToken);
+    const res = await lastValueFrom(this.httpService.get<KakaoOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
+      throw new OAuthGetProfileError(OAuthPlatform.Kakao, e);
+    });
+
+    return {
+      platform: OAuthPlatform.Kakao,
+      oauthId: String(res.data.id),
+      nickname: res.data.properties.nickname,
+      email: res.data.properties.email,
+      profileImageUrl: res.data.properties.profile_image,
+    };
+  }
+
+  async getNaverOAuthProfile(accessToken: string): Promise<OAuthProfile> {
     const dto = new GetNaverOAuthProfileDto(accessToken);
     const res = await lastValueFrom(this.httpService.get<NaverOAuthProfile>(dto.url, { headers: dto.headers })).catch((e) => {
       throw new OAuthGetProfileError(OAuthPlatform.Naver, e);
     });
 
-    return res.data;
+    return {
+      platform: OAuthPlatform.Naver,
+      oauthId: res.data.response.id,
+      nickname: res.data.response.nickname,
+      email: res.data.response.email,
+      profileImageUrl: res.data.response.profile_image,
+    };
   }
 
-  async signFromGoogle(res: Response, command: SignFromGoogleCommand) {
-    const platform = OAuthPlatform.Google;
-    const state = OAuthStateDto.decode(command.state);
-    const oauthTokens = await this.getGoogleOAuthTokens(command.code);
-    const oauthProfile = await this.getGoogleOAuthProfile(oauthTokens.access_token);
-    const deepPartial: DeepPartial<OAuthEntity> = {
-      platform,
-      oauthId: oauthProfile.id,
-      nickname: oauthProfile.name,
-      email: oauthProfile.email,
-      profileImageUrl: oauthProfile.picture,
-    };
+  async getOAuthToken(platform: OAuthPlatform, code: string, state: OAuthStateDto) {
+    switch (platform) {
+      case OAuthPlatform.Google:
+        return this.getGoogleOAuthToken(code);
 
-    let user = await this.updateOAuth(deepPartial);
+      case OAuthPlatform.Kakao:
+        return this.getKakaoOAuthToken(code);
 
-    if (user === null) {
-      if (typeof state.userId === 'number') {
-        user = await this.inserOAuth(state.userId, deepPartial);
-      } else {
-        user = await this.createUser(deepPartial);
-      }
+      case OAuthPlatform.Naver:
+        return this.getNaverOAuthToken(code, state);
     }
-
-    return this.redirect(res, platform, user, state.redirectUrl);
   }
 
-  async signFromKakao(res: Response, command: SignFromKakaoCommand) {
-    const platform = OAuthPlatform.Kakao;
-    const state = OAuthStateDto.decode(command.state);
-    const oauthTokens = await this.getKakaoOAuthTokens(command.code);
-    const oauthProfile = await this.getKakaoOAuthProfile(oauthTokens.access_token);
-    const deepPartial: DeepPartial<OAuthEntity> = {
-      platform,
-      oauthId: String(oauthProfile.id),
-      nickname: oauthProfile.properties.nickname,
-      email: oauthProfile.properties.email,
-      profileImageUrl: oauthProfile.properties.profile_image,
-    };
+  async getOAuthProfile(platform: OAuthPlatform, token: string) {
+    switch (platform) {
+      case OAuthPlatform.Google:
+        return this.getGoogleOAuthProfile(token);
 
-    let user = await this.updateOAuth(deepPartial);
+      case OAuthPlatform.Kakao:
+        return this.getKakaoOAuthProfile(token);
 
-    if (user === null) {
-      if (typeof state.userId === 'number') {
-        user = await this.inserOAuth(state.userId, deepPartial);
-      } else {
-        user = await this.createUser(deepPartial);
-      }
+      case OAuthPlatform.Naver:
+        return this.getKakaoOAuthProfile(token);
     }
-
-    return this.redirect(res, platform, user, state.redirectUrl);
   }
 
-  async signFromNaver(res: Response, command: SignFromNaverCommand) {
-    const platform = OAuthPlatform.Naver;
-    const state = OAuthStateDto.decode(command.state);
-    const oauthTokens = await this.getNaverOAuthTokens(command.code, state);
-    const oauthProfile = await this.getNaverOAuthProfile(oauthTokens.access_token);
-
-    const deepPartial: DeepPartial<OAuthEntity> = {
-      platform,
-      oauthId: String(oauthProfile.response.id),
-      nickname: oauthProfile.response.nickname,
-      email: oauthProfile.response.email,
-      profileImageUrl: oauthProfile.response.profile_image,
-    };
-
-    let user = await this.updateOAuth(deepPartial);
+  async insertOrUpdateUserOwnOAuth(oauth: OAuthEntity | null, profile: OAuthProfile, userId: number) {
+    const user = await this.userRepository.findOneBy({ id: userId });
 
     if (user === null) {
-      if (typeof state.userId === 'number') {
-        user = await this.inserOAuth(state.userId, deepPartial);
-      } else {
-        user = await this.createUser(deepPartial);
-      }
+      throw new NotFoundException('not found user');
     }
 
-    return this.redirect(res, platform, user, state.redirectUrl);
+    if (oauth) {
+      if (oauth.user.id !== user.id) {
+        throw new ConflictException('already connected oauth', {
+          cause: {
+            platform: oauth.platform,
+            oauthId: oauth.oauthId,
+            userId: oauth.user.id,
+          },
+        });
+      }
+
+      await this.oauthRepository.update(oauth.id, profile);
+    } else {
+      await this.oauthRepository.insert({ ...profile, user });
+    }
+
+    return user;
+  }
+
+  async createUserOrUpdateOAuth(oauth: OAuthEntity | null, profile: OAuthProfile) {
+    if (oauth) {
+      await this.oauthRepository.update(oauth.id, profile);
+
+      return oauth.user;
+    }
+
+    const user = this.userRepository.create({
+      nickname: profile.nickname,
+      profileImageUrl: profile.profileImageUrl,
+      oauths: [profile],
+      studio: { studioSetting: {}, alertWidget: {}, messageWidget: {} },
+    });
+
+    return user.save();
+  }
+
+  async saveOAuth(profile: OAuthProfile, userId?: number) {
+    const oauth = await this.oauthRepository.findOne({
+      relations: { user: true },
+      where: { platform: profile.platform, oauthId: profile.oauthId },
+    });
+
+    if (typeof userId === 'number') {
+      return this.insertOrUpdateUserOwnOAuth(oauth, profile, userId);
+    } else {
+      return this.createUserOrUpdateOAuth(oauth, profile);
+    }
+  }
+
+  async signWithOAuth(
+    res: Response,
+    platform: OAuthPlatform,
+    command: SignWithGoogleCommand | SignWithKakaoCommand | SignWithNaverCommand,
+  ) {
+    const state = OAuthStateDto.decode(command.state);
+    const log = new OAuthLog(platform, state, OAuthService.name, this.signWithOAuth.name);
+
+    try {
+      const token = await this.getOAuthToken(platform, command.code, state);
+      const profile = await this.getOAuthProfile(platform, token);
+      const user = await this.saveOAuth(profile, state.userId);
+      const tokens = this.clientJwtService.createTokens(user.id, platform);
+
+      Logger.verbose(log.toSuccess());
+
+      res.redirect(HttpStatus.FOUND, `${state.successUrl}?${QueryString.stringify(tokens)}`);
+    } catch (e) {
+      Logger.warn(log.toError(e));
+
+      res.redirect(HttpStatus.FOUND, `${state.failUrl}?${QueryString.stringify({ name: e.name, message: e.message })}`);
+    }
   }
 }

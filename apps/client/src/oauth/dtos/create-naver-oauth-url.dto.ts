@@ -7,12 +7,12 @@ import { OAuthStateDto } from './oauth-state.dto';
 export class CreateNaverOAuthUrlDto implements CreateOAuthUrlDto {
   url = 'https://nid.naver.com/oauth2.0/authorize';
 
-  constructor(naverOAuthConfig: NaverOAuthConfigReturnType, redirectUrl: string, userId?: number) {
+  constructor(naverOAuthConfig: NaverOAuthConfigReturnType, state: OAuthStateDto) {
     this.url += `?${QueryString.stringify({
       response_type: 'code',
       client_id: naverOAuthConfig.clientId,
       redirect_uri: naverOAuthConfig.redirectUri,
-      state: new OAuthStateDto(redirectUrl, userId).encode(),
+      state: state.encode(),
     })}`;
   }
 }

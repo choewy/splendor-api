@@ -1,4 +1,4 @@
-export class SignFromNaverCommand {
+export class SignWithNaverCommand {
   code?: string;
   error?: string;
   error_description?: string;
