@@ -6,19 +6,19 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 import { ClientTokensDto } from './dtos';
+import { ClientTokenPayload } from './implements';
 
 @Injectable()
 export class ClientJwtService {
   constructor(private readonly configService: ConfigService, private readonly jwtService: JwtService) {}
 
-  createTokens(platform: OAuthPlatform, id: number) {
+  createTokens(id: number, platform: OAuthPlatform) {
     const config = this.configService.get<JwtConfigReturnType>(JWT_CLIENT_CONFIG);
-
-    const payload = { platform, id };
+    const payload = new ClientTokenPayload(id, platform).plainObject();
 
     return new ClientTokensDto(
-      this.jwtService.sign(payload, { ...config.access.signOptions, secret: config.access.secret }),
-      this.jwtService.sign(payload, { ...config.refresh.signOptions, secret: config.refresh.secret }),
+      this.jwtService.sign(payload, config.access.signOptions),
+      this.jwtService.sign(payload, config.refresh.signOptions),
     );
   }
 
@@ -27,16 +27,14 @@ export class ClientJwtService {
 
     const access = (req.headers.authorization ?? '').replace('Bearer ', '');
     const accessPayload = await this.jwtService
-      .verifyAsync(access, { ...config.access.verifyOptions, secret: config.access.secret, ignoreExpiration: true })
+      .verifyAsync(access, { ...config.access.verifyOptions, ignoreExpiration: true })
       .catch((e) => {
         throw new UnauthorizedException(e);
       });
 
-    const refreshPayload = await this.jwtService
-      .verifyAsync(refreshToken, { ...config.refresh.verifyOptions, secret: config.refresh.secret })
-      .catch((e) => {
-        throw new UnauthorizedException(e);
-      });
+    const refreshPayload = await this.jwtService.verifyAsync(refreshToken, config.refresh.verifyOptions).catch((e) => {
+      throw new UnauthorizedException(e);
+    });
 
     if (accessPayload.id === refreshPayload.id && accessPayload.platform === refreshPayload.platform) {
       return this.createTokens(accessPayload.platform, accessPayload.id);

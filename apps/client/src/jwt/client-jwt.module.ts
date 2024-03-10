@@ -1,20 +1,19 @@
-import { JWT_CLIENT_CONFIG, JwtConfigReturnType } from '@libs/configs';
-import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { DynamicModule, Module } from '@nestjs/common';
+import { JwtModule, JwtModuleAsyncOptions } from '@nestjs/jwt';
 
 import { ClientJwtService } from './client-jwt-service';
+import { ClientJwtGuard } from './client-jwt.guard';
+import { ClientJwtStrategy } from './client-jwt.strategy';
 
-@Module({
-  imports: [
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory(configService: ConfigService) {
-        return configService.get<JwtConfigReturnType>(JWT_CLIENT_CONFIG).access;
-      },
-    }),
-  ],
-  providers: [ClientJwtService],
-  exports: [ClientJwtService],
-})
-export class ClientJwtModule {}
+@Module({})
+export class ClientJwtModule {
+  static forRoot(options: JwtModuleAsyncOptions): DynamicModule {
+    return {
+      global: true,
+      imports: [JwtModule.registerAsync({ global: true, ...options })],
+      providers: [ClientJwtService, ClientJwtStrategy, ClientJwtGuard],
+      exports: [ClientJwtService, ClientJwtStrategy, ClientJwtGuard],
+      module: ClientJwtModule,
+    };
+  }
+}

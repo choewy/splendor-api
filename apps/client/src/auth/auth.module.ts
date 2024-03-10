@@ -4,12 +4,12 @@ import { Module } from '@nestjs/common';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { ClientJwtModule } from '../jwt/client-jwt.module';
+import { ClientJwtService } from '../jwt';
 
 @Module({
-  imports: [ClientJwtModule, TypeOrmLibsModule.forFeature([UserRepository])],
+  imports: [TypeOrmLibsModule.forFeature([UserRepository])],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, ClientJwtService],
   exports: [AuthService],
 })
 export class AuthModule {}

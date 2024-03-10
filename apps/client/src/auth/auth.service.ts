@@ -32,6 +32,6 @@ export class AuthService {
       throw new NotFoundException('not exists user oauths');
     }
 
-    return this.clientJwtService.createTokens(user.oauths[0].platform, user.id);
+    return this.clientJwtService.createTokens(user.id, user.oauths[0].platform);
   }
 }

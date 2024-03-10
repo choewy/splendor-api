@@ -1,7 +1,8 @@
 import { registerAs } from '@nestjs/config';
-import { JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
+import { JwtModuleOptions, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 
 export type JwtConfigReturnType = {
+  moduleOptions: JwtModuleOptions;
   access: { secret: string; signOptions: JwtSignOptions; verifyOptions: JwtVerifyOptions };
   refresh: { secret: string; signOptions: JwtSignOptions; verifyOptions: JwtVerifyOptions };
 };
@@ -19,8 +20,17 @@ export const JwtAdminConfig = registerAs(JWT_ADMIN_CONFIG, (): JwtConfigReturnTy
   const refreshVerifyOptions: JwtVerifyOptions = { subject: 'refresh', audience: 'admin' };
 
   return {
-    access: { secret: accessSecret, signOptions: accessSignOptions, verifyOptions: accessVerifyOptions },
-    refresh: { secret: refreshSecret, signOptions: refreshSignOptions, verifyOptions: refreshVerifyOptions },
+    moduleOptions: { secret: accessSecret, signOptions: accessSignOptions, verifyOptions: accessVerifyOptions },
+    access: {
+      secret: accessSecret,
+      signOptions: { ...accessSignOptions, secret: accessSecret },
+      verifyOptions: { ...accessVerifyOptions, secret: accessSecret },
+    },
+    refresh: {
+      secret: refreshSecret,
+      signOptions: { ...refreshSignOptions, secret: refreshSecret },
+      verifyOptions: { ...refreshVerifyOptions, secret: refreshSecret },
+    },
   };
 });
 
@@ -34,7 +44,16 @@ export const JwtClientConfig = registerAs(JWT_CLIENT_CONFIG, (): JwtConfigReturn
   const refreshVerifyOptions: JwtVerifyOptions = { subject: 'refresh', audience: 'client' };
 
   return {
-    access: { secret: accessSecret, signOptions: accessSignOptions, verifyOptions: accessVerifyOptions },
-    refresh: { secret: refreshSecret, signOptions: refreshSignOptions, verifyOptions: refreshVerifyOptions },
+    moduleOptions: { secret: accessSecret, signOptions: accessSignOptions, verifyOptions: accessVerifyOptions },
+    access: {
+      secret: accessSecret,
+      signOptions: { ...accessSignOptions, secret: accessSecret },
+      verifyOptions: { ...accessVerifyOptions, secret: accessSecret },
+    },
+    refresh: {
+      secret: refreshSecret,
+      signOptions: { ...refreshSignOptions, secret: refreshSecret },
+      verifyOptions: { ...refreshVerifyOptions, secret: refreshSecret },
+    },
   };
 });

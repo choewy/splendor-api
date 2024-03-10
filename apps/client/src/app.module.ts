@@ -1,6 +1,8 @@
 import {
   GoogleOAuthConfig,
+  JWT_CLIENT_CONFIG,
   JwtClientConfig,
+  JwtConfigReturnType,
   KakaoOAuthConfig,
   NaverOAuthConfig,
   SystemConfig,
@@ -31,7 +33,12 @@ import { OAuthModule } from './oauth';
         return configService.get<TypeOrmMySQLConfigReturnType>(TYPEORM_MYSQL_CONFIG)(entities);
       },
     }),
-    ClientJwtModule,
+    ClientJwtModule.forRoot({
+      inject: [ConfigService],
+      useFactory(configService: ConfigService) {
+        return configService.get<JwtConfigReturnType>(JWT_CLIENT_CONFIG).moduleOptions;
+      },
+    }),
     AuthModule,
     OAuthModule,
   ],

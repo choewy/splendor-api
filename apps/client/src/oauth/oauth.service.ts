@@ -43,7 +43,7 @@ export class OAuthService {
   ) {}
 
   redirect(res: Response, platform: OAuthPlatform, user: UserEntity, redirectUrl: string) {
-    res.redirect(HttpStatus.FOUND, `${redirectUrl}?${QueryString.stringify(this.clientJwtService.createTokens(platform, user.id))}`);
+    res.redirect(HttpStatus.FOUND, `${redirectUrl}?${QueryString.stringify(this.clientJwtService.createTokens(user.id, platform))}`);
   }
 
   createOAuthUrl(command: CreateOAuthUrlCommand, userId?: number) {
