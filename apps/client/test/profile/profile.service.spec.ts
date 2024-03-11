@@ -1,3 +1,4 @@
+import { UpdateProfileCommand } from '@apps/client/profile/commands';
 import { ProfileDto } from '@apps/client/profile/dtos';
 import { ProfileService } from '@apps/client/profile/profile.service';
 import { UserEntity, UserRepository } from '@libs/entity';
@@ -32,6 +33,27 @@ describe(ProfileService.name, () => {
       jest.spyOn(module.get(UserRepository), 'findOne').mockResolvedValue(TestingFixture.of(UserEntity));
 
       expect(service.getProfile(1)).resolves.toBeInstanceOf(ProfileDto);
+    });
+  });
+
+  describe('updateProfile', () => {
+    const command = TestingFixture.of(UpdateProfileCommand);
+
+    beforeAll(() => {
+      jest.spyOn(module.get(UserRepository), 'create').mockReturnValue(TestingFixture.of(UserEntity));
+      jest.spyOn(module.get(UserRepository), 'update').mockResolvedValue({ affected: 1, raw: {}, generatedMaps: [] });
+    });
+
+    it('회원 정보가 존재하지 않으면 NotFoundException을 던진다.', () => {
+      jest.spyOn(module.get(UserRepository), 'findOne').mockResolvedValue(null);
+
+      expect(service.updateProfile(1, command)).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('회원 정보 수정을 완료하면 ProfileDto를 반환한다.', () => {
+      jest.spyOn(module.get(UserRepository), 'findOne').mockResolvedValue(TestingFixture.of(UserEntity));
+
+      expect(service.updateProfile(1, command)).resolves.toBeInstanceOf(ProfileDto);
     });
   });
 });

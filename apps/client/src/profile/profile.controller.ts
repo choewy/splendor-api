@@ -24,8 +24,9 @@ export class ProfileController {
   @Patch()
   @ApiBearerAuth()
   @ApiOperation({ summary: '프로필 수정' })
+  @ApiOkResponse({ type: ProfileDto })
   async updateProfile(@ReqJwtUser() userId: number, @Body() command: UpdateProfileCommand) {
-    return;
+    return this.profileService.updateProfile(userId, command);
   }
 
   @Patch('image')
