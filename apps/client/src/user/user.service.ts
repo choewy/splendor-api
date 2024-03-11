@@ -1,5 +1,6 @@
 import { UserRepository } from '@libs/entity';
 import { Injectable } from '@nestjs/common';
+import { Not } from 'typeorm';
 
 import { SearchUsersResultDto } from './dtos';
 import { SearchUsersQuery } from './queries';
@@ -19,14 +20,14 @@ export class UserService {
 
     if (userId) {
       queryBuilder
-        .andWhere('user.id != :userId', { userId })
+        .andWhere({ userId: Not(userId) })
         .leftJoinAndMapOne('user.following', 'user.followers', 'following', 'following.fromId = :userId AND following.toId = user.id', {
           userId,
         });
     }
 
     if (query.nickname) {
-      queryBuilder.andWhere(`user.nickname LIKE %${query.nickname}%`);
+      queryBuilder.andWhere(`BINARY(user.nickname) LIKE "%${query.nickname}%"`);
     }
 
     const [rows, total] = await queryBuilder.getManyAndCount();
