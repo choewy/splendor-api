@@ -20,6 +20,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth';
+import { FollowModule } from './follow';
 import { OAuthModule } from './oauth';
 import { ProfileModule } from './profile';
 import { UserModule } from './user';
@@ -45,8 +46,9 @@ import { UserModule } from './user';
     }),
     AuthModule,
     OAuthModule,
-    ProfileModule,
     UserModule,
+    ProfileModule,
+    FollowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
