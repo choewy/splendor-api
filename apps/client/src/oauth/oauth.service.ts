@@ -1,5 +1,5 @@
 import { GOOGLE_OAUTH_CONFIG, KAKAO_OAUTH_CONFIG, NAVER_OAUTH_CONFIG } from '@libs/configs';
-import { OAuthEntity, OAuthPlatform, OAuthRepository, UserRepository } from '@libs/entity';
+import { OAuthEntity, OAuthPlatform, OAuthRepository, StudioRepository, UserRepository } from '@libs/entity';
 import { JwtLibsService } from '@libs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { ConflictException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import QueryString from 'qs';
 import { lastValueFrom } from 'rxjs';
+import { v4 } from 'uuid';
 
 import { CreateOAuthUrlCommand, SignWithGoogleCommand, SignWithKakaoCommand, SignWithNaverCommand } from './commands';
 import {
@@ -41,6 +42,7 @@ export class OAuthService implements OAuthServiceImpl {
     private readonly jwtLibsService: JwtLibsService,
     private readonly userRepository: UserRepository,
     private readonly oauthRepository: OAuthRepository,
+    private readonly studioRepository: StudioRepository,
   ) {}
 
   createOAuthUrl(command: CreateOAuthUrlCommand, userId?: number) {
@@ -182,6 +184,28 @@ export class OAuthService implements OAuthServiceImpl {
     return user;
   }
 
+  async createStudioUniqueAlias(platform: OAuthPlatform, nickname: string) {
+    let loop = 0;
+    let exists = true;
+    let alias = `${platform.toLowerCase().charAt(0)}_${nickname.toLowerCase()}`.substring(0, 25);
+
+    do {
+      exists = await this.studioRepository.exists({
+        select: { alias: true },
+        where: { alias },
+      });
+
+      loop++;
+
+      if (exists) {
+        const str = `_${v4().substring(0, loop)}`;
+        alias = alias.substring(0, 25 - str.length) + str;
+      }
+    } while (exists);
+
+    return alias;
+  }
+
   async createUserOrUpdateOAuth(oauth: OAuthEntity | null, profile: OAuthProfile) {
     if (oauth) {
       await this.oauthRepository.update(oauth.id, profile);
@@ -195,7 +219,7 @@ export class OAuthService implements OAuthServiceImpl {
       userWallet: {},
       userFollowCount: {},
       oauths: [profile],
-      studio: { studioSetting: {}, alertWidget: {}, messageWidget: {} },
+      studio: { alias: await this.createStudioUniqueAlias(profile.platform, profile.nickname), alertWidget: {}, messageWidget: {} },
     });
 
     return user.save();

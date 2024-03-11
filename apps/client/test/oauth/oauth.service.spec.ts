@@ -3,7 +3,7 @@ import { CreateGoogleOAuthUrlDto, CreateKakaoOAuthUrlDto, CreateNaverOAuthUrlDto
 import { OAuthGetProfileError, OAuthGetTokenError } from '@apps/client/oauth/implements';
 import { OAuthProfile } from '@apps/client/oauth/interfaces';
 import { OAuthService } from '@apps/client/oauth/oauth.service';
-import { OAuthEntity, OAuthPlatform, OAuthRepository, UserEntity, UserRepository } from '@libs/entity';
+import { OAuthEntity, OAuthPlatform, OAuthRepository, StudioRepository, UserEntity, UserRepository } from '@libs/entity';
 import { JwtLibsService } from '@libs/jwt';
 import { TestingFixture, TestingRepository } from '@libs/testing';
 import { HttpModule } from '@nestjs/axios';
@@ -26,6 +26,7 @@ describe(OAuthService.name, () => {
         JwtLibsService.mock(),
         TestingRepository.mock(UserRepository),
         TestingRepository.mock(OAuthRepository),
+        TestingRepository.mock(StudioRepository),
       ],
     }).compile();
 
@@ -249,6 +250,7 @@ describe(OAuthService.name, () => {
       const existingOAuth = null;
       const user = TestingFixture.of(UserEntity);
 
+      jest.spyOn(service, 'createStudioUniqueAlias').mockResolvedValue('alias');
       jest.spyOn(module.get(UserRepository), 'create').mockReturnValue(user);
       jest.spyOn(user, 'save').mockResolvedValue(user);
 

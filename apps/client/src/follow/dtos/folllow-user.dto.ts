@@ -30,7 +30,7 @@ export class FollowUserDto {
     this.id = user.id;
     this.nickname = user.nickname;
     this.profileImageUrl = user.profileImageUrl;
-    this.introduction = user.studio?.studioSetting?.introduction ?? '';
+    this.introduction = user.studio?.introduction ?? '';
     this.followingCount = user.userFollowCount?.followings ?? 0;
     this.followerCount = user.userFollowCount?.followers ?? 0;
     this.followed = followed;
