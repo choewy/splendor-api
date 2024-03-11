@@ -10,6 +10,7 @@ export class HttpLogDto {
   query: Record<string, any>;
   ip: string;
   xforwaredfor: string;
+  user?: object;
   message = '';
   status = -1;
   error?: object;
@@ -24,6 +25,7 @@ export class HttpLogDto {
     this.query = req.query;
     this.ip = req.ip;
     this.xforwaredfor = req.header['x-forwared-for'];
+    this.user = req.user;
   }
 
   toSuccess(res: Response) {

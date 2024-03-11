@@ -16,8 +16,7 @@ export class UserService {
       .take(query.take)
       .where('1')
       .leftJoinAndMapOne('user.userFollowCount', 'user.userFollowCount', 'userFollowCount')
-      .innerJoinAndMapOne('user.studio', 'user.studio', 'studio')
-      .innerJoinAndMapOne('studio.studioSetting', 'studio.studioSetting', 'studioSetting');
+      .innerJoinAndMapOne('user.studio', 'user.studio', 'studio');
 
     if (userId) {
       queryBuilder

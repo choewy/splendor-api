@@ -27,7 +27,6 @@ export class FollowService {
       .innerJoinAndMapOne('follow.to', 'follow.to', 'user')
       .innerJoinAndMapOne('user.userFollowCount', 'user.userFollowCount', 'userFollowCount')
       .innerJoinAndMapOne('user.studio', 'user.studio', 'studio')
-      .innerJoinAndMapOne('studio.studioSetting', 'studio.studioSetting', 'studioSetting')
       .getManyAndCount();
 
     return new GetFollowingsResultDto(rows, total, userId);
@@ -44,7 +43,6 @@ export class FollowService {
       .innerJoinAndMapOne('follow.from', 'follow.from', 'user')
       .innerJoinAndMapOne('user.userFollowCount', 'user.userFollowCount', 'userFollowCount')
       .innerJoinAndMapOne('user.studio', 'user.studio', 'studio')
-      .innerJoinAndMapOne('studio.studioSetting', 'studio.studioSetting', 'studioSetting')
       .getManyAndCount();
 
     return new GetFollowersResultDto(rows, total, userId);
