@@ -15,10 +15,10 @@ export class SearchedUserDto {
   introduction: string;
 
   @ApiResponseProperty({ type: Number })
-  followings: number;
+  followingCount: number;
 
   @ApiResponseProperty({ type: Number })
-  followers: number;
+  followerCount: number;
 
   @ApiResponseProperty({ type: Boolean })
   followed: boolean;
@@ -28,8 +28,8 @@ export class SearchedUserDto {
     this.nickname = user.nickname;
     this.profileImageUrl = user.profileImageUrl;
     this.introduction = user.studio?.studioSetting?.introduction ?? '';
-    this.followings = user.count?.followings ?? 0;
-    this.followers = user.count?.followers ?? 0;
+    this.followingCount = user.userFollowCount?.followings ?? 0;
+    this.followerCount = user.userFollowCount?.followers ?? 0;
     this.followed = user.followed instanceof FollowEntity;
   }
 }

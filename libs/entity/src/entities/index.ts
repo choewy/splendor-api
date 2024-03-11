@@ -1,5 +1,5 @@
 export * from './user.entity';
-export * from './user-count.entity';
+export * from './user-follow-count.entity';
 export * from './user-profile-image.entity';
 export * from './oauth.entity';
 export * from './studio.entity';
@@ -24,13 +24,13 @@ import { StudioEntity } from './studio.entity';
 import { TtsVoiceImageEntity } from './tts-voice-image.entity';
 import { TtsVoiceSampleSoundEntity } from './tts-voice-sample-sound.entity';
 import { TtsVoiceEntity } from './tts-voice.entity';
-import { UserCountEntity } from './user-count.entity';
+import { UserFollowCountEntity } from './user-follow-count.entity';
 import { UserProfileImageEntity } from './user-profile-image.entity';
 import { UserEntity } from './user.entity';
 
 export const entities = [
   UserEntity,
-  UserCountEntity,
+  UserFollowCountEntity,
   UserProfileImageEntity,
   OAuthEntity,
   StudioEntity,

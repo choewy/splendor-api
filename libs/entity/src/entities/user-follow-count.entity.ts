@@ -2,8 +2,8 @@ import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToOne, Pri
 
 import { UserEntity } from './user.entity';
 
-@Entity({ name: 'user_count' })
-export class UserCountEntity extends BaseEntity {
+@Entity({ name: 'user_follow_count' })
+export class UserFollowCountEntity extends BaseEntity {
   @PrimaryColumn({ type: 'int', unsigned: true, primary: false })
   readonly userId: number;
 
@@ -19,7 +19,7 @@ export class UserCountEntity extends BaseEntity {
   @UpdateDateColumn()
   readonly updatedAt: Date;
 
-  @OneToOne(() => UserEntity, (e) => e.count, { onDelete: 'CASCADE' })
+  @OneToOne(() => UserEntity, (e) => e.userFollowCount, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: UserEntity;
 }

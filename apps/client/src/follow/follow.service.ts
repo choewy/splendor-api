@@ -1,4 +1,4 @@
-import { FollowEntity, FollowRepository, UserCountEntity, UserRepository } from '@libs/entity';
+import { FollowEntity, FollowRepository, UserFollowCountEntity, UserRepository } from '@libs/entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { GetFollowersResultDto, GetFollowingsResultDto } from './dtos';
@@ -25,7 +25,7 @@ export class FollowService {
       .take(query.take)
       .where('follow.fromId = :fromId', { fromId })
       .innerJoinAndMapOne('follow.to', 'follow.to', 'user')
-      .innerJoinAndMapOne('user.count', 'user.count', 'count')
+      .innerJoinAndMapOne('user.userFollowCount', 'user.userFollowCount', 'userFollowCount')
       .innerJoinAndMapOne('user.studio', 'user.studio', 'studio')
       .innerJoinAndMapOne('studio.studioSetting', 'studio.studioSetting', 'studioSetting')
       .getManyAndCount();
@@ -42,7 +42,7 @@ export class FollowService {
       .take(query.take)
       .where('follow.toId = :toId', { toId })
       .innerJoinAndMapOne('follow.from', 'follow.from', 'user')
-      .innerJoinAndMapOne('user.count', 'user.count', 'count')
+      .innerJoinAndMapOne('user.userFollowCount', 'user.userFollowCount', 'userFollowCount')
       .innerJoinAndMapOne('user.studio', 'user.studio', 'studio')
       .innerJoinAndMapOne('studio.studioSetting', 'studio.studioSetting', 'studioSetting')
       .getManyAndCount();
@@ -63,15 +63,15 @@ export class FollowService {
       const followRepository = em.getRepository(FollowEntity);
       await followRepository.insert({ fromId, toId });
 
-      const userCountRepository = em.getRepository(UserCountEntity);
-      await userCountRepository
+      const userFollowCountRepository = em.getRepository(UserFollowCountEntity);
+      await userFollowCountRepository
         .createQueryBuilder()
         .update()
         .set({ followings: () => 'followings + 1' })
         .where({ userId: fromId })
         .execute();
 
-      await userCountRepository
+      await userFollowCountRepository
         .createQueryBuilder()
         .update()
         .set({ followers: () => 'followers + 1' })
@@ -93,15 +93,15 @@ export class FollowService {
       const followRepository = em.getRepository(FollowEntity);
       await followRepository.delete({ fromId, toId });
 
-      const userCountRepository = em.getRepository(UserCountEntity);
-      await userCountRepository
+      const userFollowCountRepository = em.getRepository(UserFollowCountEntity);
+      await userFollowCountRepository
         .createQueryBuilder()
         .update()
         .set({ followings: () => 'IF(followings = 0, 0, followings - 1)' })
         .where({ userId: fromId })
         .execute();
 
-      await userCountRepository
+      await userFollowCountRepository
         .createQueryBuilder()
         .update()
         .set({ followers: () => 'IF(followers = 0, 0, followers - 1)' })

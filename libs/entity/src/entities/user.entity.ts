@@ -13,7 +13,7 @@ import {
 import { FollowEntity } from './follow.entity';
 import { OAuthEntity } from './oauth.entity';
 import { StudioEntity } from './studio.entity';
-import { UserCountEntity } from './user-count.entity';
+import { UserFollowCountEntity } from './user-follow-count.entity';
 import { UserProfileImageEntity } from './user-profile-image.entity';
 
 @Entity({ name: 'user' })
@@ -31,13 +31,13 @@ export class UserEntity extends BaseEntity {
   @JoinTable()
   oauths: OAuthEntity[];
 
-  @OneToOne(() => UserCountEntity, (e) => e.user, { cascade: true })
+  @OneToOne(() => UserFollowCountEntity, (e) => e.user, { cascade: true })
   @JoinTable()
-  count: UserCountEntity;
+  userFollowCount: UserFollowCountEntity;
 
   @OneToOne(() => UserProfileImageEntity, (e) => e.user, { cascade: true, nullable: true })
   @JoinTable()
-  profileImage: UserProfileImageEntity | null;
+  userProfileImage: UserProfileImageEntity | null;
 
   @OneToOne(() => StudioEntity, (e) => e.user, { cascade: true })
   @JoinTable()
