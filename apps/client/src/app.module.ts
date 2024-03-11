@@ -24,6 +24,7 @@ import { FollowModule } from './follow';
 import { OAuthModule } from './oauth';
 import { ProfileModule } from './profile';
 import { StudioModule } from './studio';
+import { StudioSettingModule } from './studio-setting';
 import { UserModule } from './user';
 
 @Module({
@@ -51,6 +52,7 @@ import { UserModule } from './user';
     ProfileModule,
     FollowModule,
     StudioModule,
+    StudioSettingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
