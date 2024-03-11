@@ -27,10 +27,6 @@ export class AuthService {
       throw new NotFoundException('not found user');
     }
 
-    if (user.oauths.length === 0) {
-      throw new NotFoundException('not exists user oauths');
-    }
-
     return this.jwtLibsService.createTokens(user.id);
   }
 }

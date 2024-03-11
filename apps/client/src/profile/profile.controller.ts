@@ -32,8 +32,8 @@ export class ProfileController {
   @Patch('image')
   @ApiFile('image', { localOptions: { fileFilter: FileFilter.Image } })
   @ApiBearerAuth()
-  @ApiOperation({ summary: '프로필 이미지 업로드' })
+  @ApiOperation({ summary: '프로필 이미지 업로드', description: '`@todo`' })
   async uploadProfileImage(@ReqJwtUser() userId: number, @UploadedFile() image: Express.Multer.File) {
-    return;
+    return { userId, filename: image.filename };
   }
 }

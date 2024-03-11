@@ -1,11 +1,14 @@
-import { BaseEntity, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { UserEntity } from './user.entity';
 
 @Entity({ name: 'follow' })
 export class FollowEntity extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
-  readonly id: number;
+  @PrimaryColumn({ type: 'int', unsigned: true, primary: false })
+  fromId: number;
+
+  @PrimaryColumn({ type: 'int', unsigned: true, primary: false })
+  toId: number;
 
   @CreateDateColumn()
   readonly createdAt: Date;

@@ -51,4 +51,7 @@ export class UserEntity extends BaseEntity {
 
   @UpdateDateColumn()
   readonly updatedAt: Date;
+
+  @JoinTable()
+  following: FollowEntity | null;
 }

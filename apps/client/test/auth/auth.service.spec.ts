@@ -45,13 +45,6 @@ describe(AuthService.name, () => {
       expect(service.createTokensWithFindUser(command)).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('UserEntity의 OAuthEntity가 하나도 없는 경우 NotFoundException을 던진다.', () => {
-      jest.spyOn(module.get(ConfigService), 'get').mockReturnValue({ env: NodeEnv.Local });
-      jest.spyOn(module.get(UserRepository), 'findOne').mockResolvedValue(TestingFixture.of(UserEntity, { oauths: [] }));
-
-      expect(service.createTokensWithFindUser(command)).rejects.toBeInstanceOf(NotFoundException);
-    });
-
     it('토큰 생성에 성공하면 ClientTokensDto를 반환한다.', () => {
       jest.spyOn(module.get(ConfigService), 'get').mockReturnValue({ env: NodeEnv.Local });
       jest
