@@ -29,10 +29,10 @@ async function bootstrap() {
 
     if (appConfig.swaggerUserId) {
       const jwtLibsService = app.get(JwtLibsService);
-      const value = jwtLibsService.createTokens(appConfig.swaggerUserId);
+      const value = jwtLibsService.createTokens(appConfig.swaggerUserId).access;
 
       swaggerOptions.authAction = {
-        bearer: { schema: { type: 'http', scheme: 'bearer' }, value },
+        bearer: { schema: { type: 'http' }, value },
       };
     }
 
