@@ -2,9 +2,10 @@ import { FileFilter } from '@libs/bootstrap';
 import { JwtGuard, ReqJwtUser } from '@libs/jwt';
 import { ApiController, ApiFile } from '@libs/swagger';
 import { Body, Get, Patch, UploadedFile, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 
 import { UpdateProfileCommand } from './commands';
+import { ProfileDto } from './dtos';
 import { ProfileService } from './profile.service';
 
 @ApiController('profile', '프로필')
@@ -15,8 +16,9 @@ export class ProfileController {
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: '내 프로필 조회' })
+  @ApiOkResponse({ type: ProfileDto })
   async getProfile(@ReqJwtUser() userId: number) {
-    return;
+    return this.profileService.getProfile(userId);
   }
 
   @Patch()
