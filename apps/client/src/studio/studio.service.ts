@@ -17,6 +17,7 @@ import {
   StudioPlaySettingDto,
   StudioStreamSettingsDto,
   StudioSettingsDto,
+  StudioWithSettingsDto,
 } from './dtos';
 import { GetForbiddenWordsQuery } from './queries';
 
@@ -63,6 +64,19 @@ export class StudioService {
     const [streamSettingCount, forbiddenWordsCount] = await this.getStudioStreamSettingAndForbiddenWordsCount(studio.id);
 
     return new StudioDto(studio, streamSettingCount, forbiddenWordsCount);
+  }
+
+  async getOtherStudio(userId: number) {
+    const studio = await this.studioRepository.findOne({
+      relations: {
+        studioDonationSetting: true,
+        studioPlaySetting: true,
+        studioStreamSettings: true,
+      },
+      where: { user: { id: userId } },
+    });
+
+    return new StudioWithSettingsDto(studio);
   }
 
   async updateStudio(userId: number, command: UpdateStudioCommand) {

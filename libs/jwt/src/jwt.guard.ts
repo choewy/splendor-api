@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 
-import { IGNORE_JWT_ERROR } from './decorators';
+import { IGNORE_JWT_ERROR, SKIP_JWT_GUARD } from './decorators';
 import { JWT_STRATEGY } from './jwt.strategy';
 
 @Injectable()
@@ -13,6 +13,12 @@ export class JwtGuard extends AuthGuard(JWT_STRATEGY) {
   }
 
   handleRequest<TUser = any>(e: Error, payload: any, info: Error, ctx: ExecutionContext): TUser {
+    const isSkipGuard = this.reflector.getAllAndOverride<boolean>(SKIP_JWT_GUARD, [ctx.getClass(), ctx.getHandler()]);
+
+    if (isSkipGuard) {
+      return null;
+    }
+
     const isIgnoreError = this.reflector.getAllAndOverride<boolean>(IGNORE_JWT_ERROR, [ctx.getClass(), ctx.getHandler()]);
 
     let error = e ?? info;

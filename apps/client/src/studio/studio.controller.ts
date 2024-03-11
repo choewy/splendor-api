@@ -1,12 +1,12 @@
-import { JwtGuard, ReqJwtUser } from '@libs/jwt';
+import { JwtGuard, ReqJwtUser, SkipJwtGuard } from '@libs/jwt';
 import { ApiController } from '@libs/swagger';
-import { Body, Get, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 
 import { UpdateStudioCommand } from './commands';
-import { ForbiddenWordsDto, StudioDonationSettingDto, StudioPlaySettingDto, StudioSettingsDto } from './dtos';
+import { ForbiddenWordsDto, StudioDonationSettingDto, StudioPlaySettingDto, StudioSettingsDto, StudioWithSettingsDto } from './dtos';
 import { StudioStreamSettingsDto } from './dtos/studio-stream-settings.dto';
-import { GetForbiddenWordsQuery } from './queries';
+import { GetForbiddenWordsQuery, GetStudioQuery } from './queries';
 import { StudioService } from './studio.service';
 
 @ApiController('studio', '스튜디오')
@@ -20,6 +20,14 @@ export class StudioController {
   @ApiOkResponse()
   async getStudio(@ReqJwtUser() userId: number) {
     return this.studioService.getStudio(userId);
+  }
+
+  @Get(':userId(\\d+)')
+  @SkipJwtGuard()
+  @ApiOperation({ summary: '스튜디오 조회' })
+  @ApiOkResponse({ type: StudioWithSettingsDto })
+  async getOtherStudio(@Param() query: GetStudioQuery) {
+    return this.studioService.getOtherStudio(query.userId);
   }
 
   @Patch()
