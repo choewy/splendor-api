@@ -1,18 +1,25 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Module, Provider } from '@nestjs/common';
+import { Redis } from 'ioredis';
 
 import { RedisLibsModuleAsyncOptions } from './interfaces';
-import { RedisLibsService } from './redis.service';
 
 @Module({})
 export class RedisLibsModule {
   static forRootAsync(redisModuleAsyncOptions: RedisLibsModuleAsyncOptions): DynamicModule {
-    const redisLibService = RedisLibsService.createProvider(redisModuleAsyncOptions);
+    const redis: Provider = {
+      inject: redisModuleAsyncOptions.inject,
+      provide: Redis,
+      async useFactory(...dependencies) {
+        const redisOptions = await redisModuleAsyncOptions.useFactory(...dependencies);
+        return new Redis(redisOptions);
+      },
+    };
 
     return {
       global: true,
       module: RedisLibsModule,
-      providers: [redisLibService],
-      exports: [redisLibService],
+      providers: [redis],
+      exports: [redis],
     };
   }
 }

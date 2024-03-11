@@ -14,6 +14,7 @@ import {
   TypeOrmMySQLConfigReturnType,
 } from '@libs/configs';
 import { entities } from '@libs/entity';
+import { HealthLibsModule } from '@libs/health';
 import { JwtLibsModule } from '@libs/jwt';
 import { RedisLibsModule } from '@libs/redis';
 import { TypeOrmLibsModule } from '@libs/typeorm';
@@ -55,6 +56,7 @@ import { UserModule } from './user';
         return configService.get<JwtConfigReturnType>(JWT_CONFIG);
       },
     }),
+    HealthLibsModule.register(),
     AuthModule,
     OAuthModule,
     UserModule,
