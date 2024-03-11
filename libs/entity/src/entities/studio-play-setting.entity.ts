@@ -17,10 +17,10 @@ export class StudioPlaySettingEntity extends BaseEntity {
   messageVolume: number;
 
   @Column({ type: 'decimal', precision: 3, scale: 1, default: '1.0' })
-  delay: number;
+  delay: string;
 
   @Column({ type: 'decimal', precision: 3, scale: 1, default: '5.0' })
-  maxSeconds: number;
+  maxSeconds: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;

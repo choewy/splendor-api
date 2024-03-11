@@ -14,7 +14,7 @@ export class StudioDonationSettingEntity extends BaseEntity {
   max: number;
 
   @Column({ type: 'boolean', default: true })
-  canDonate: boolean;
+  status: boolean;
 
   @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;

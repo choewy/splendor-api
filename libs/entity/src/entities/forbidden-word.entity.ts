@@ -10,6 +10,9 @@ export class ForbiddenWordEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 200 })
   word: string;
 
+  @Column({ type: 'boolean', default: true })
+  status: boolean;
+
   @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
 
