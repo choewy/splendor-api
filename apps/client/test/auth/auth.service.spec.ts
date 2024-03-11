@@ -1,12 +1,12 @@
 import { AuthService } from '@apps/client/auth';
 import { CreateTokensCommand } from '@apps/client/auth/command';
-import { ClientJwtService, ClientTokensDto } from '@apps/client/jwt';
 import { NodeEnv } from '@libs/configs';
 import { OAuthEntity, OAuthPlatform, UserEntity, UserRepository } from '@libs/entity';
+import { JwtLibsService } from '@libs/jwt';
+import { JwtTokens } from '@libs/jwt/implements';
 import { TestingFixture, TestingRepository } from '@libs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
 describe(AuthService.name, () => {
@@ -15,7 +15,7 @@ describe(AuthService.name, () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [AuthService, TestingRepository.mock(UserRepository), ConfigService, ClientJwtService, JwtService],
+      providers: [AuthService, ConfigService, TestingRepository.mock(UserRepository), JwtLibsService.mock()],
     }).compile();
 
     service = module.get(AuthService);
@@ -29,7 +29,7 @@ describe(AuthService.name, () => {
     const command = TestingFixture.of(CreateTokensCommand, { id: 1, platform: OAuthPlatform.Google });
 
     beforeAll(() => {
-      jest.spyOn(module.get(ClientJwtService), 'createTokens').mockReturnValue(TestingFixture.of(ClientTokensDto));
+      jest.spyOn(module.get(JwtLibsService), 'createTokens').mockReturnValue(TestingFixture.of(JwtTokens));
     });
 
     it('NODE_ENV가 local이 아닌 경우 NotFoundException을 던진다.', () => {
@@ -67,7 +67,7 @@ describe(AuthService.name, () => {
         .spyOn(module.get(UserRepository), 'findOne')
         .mockResolvedValue(TestingFixture.of(UserEntity, { oauths: [TestingFixture.of(OAuthEntity, { platform: OAuthPlatform.Google })] }));
 
-      expect(service.createTokensWithFindUser(command)).resolves.toBeInstanceOf(ClientTokensDto);
+      expect(service.createTokensWithFindUser(command)).resolves.toBeInstanceOf(JwtTokens);
     });
   });
 });

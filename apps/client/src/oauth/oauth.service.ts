@@ -1,5 +1,6 @@
 import { GOOGLE_OAUTH_CONFIG, KAKAO_OAUTH_CONFIG, NAVER_OAUTH_CONFIG } from '@libs/configs';
 import { OAuthEntity, OAuthPlatform, OAuthRepository, UserRepository } from '@libs/entity';
+import { JwtLibsService } from '@libs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { ConflictException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -31,14 +32,13 @@ import {
   OAuthProfile,
   OAuthServiceImpl,
 } from './interfaces';
-import { ClientJwtService } from '../jwt';
 
 @Injectable()
 export class OAuthService implements OAuthServiceImpl {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-    private readonly clientJwtService: ClientJwtService,
+    private readonly jwtLibsService: JwtLibsService,
     private readonly userRepository: UserRepository,
     private readonly oauthRepository: OAuthRepository,
   ) {}
@@ -224,7 +224,7 @@ export class OAuthService implements OAuthServiceImpl {
       const token = await this.getOAuthToken(platform, command.code, state);
       const profile = await this.getOAuthProfile(platform, token);
       const user = await this.saveOAuth(profile, state.userId);
-      const tokens = this.clientJwtService.createTokens(user.id, platform);
+      const tokens = this.jwtLibsService.createTokens(user.id);
 
       Logger.verbose(log.toSuccess());
 

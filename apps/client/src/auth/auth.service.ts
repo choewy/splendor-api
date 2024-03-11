@@ -1,16 +1,16 @@
 import { NodeEnv, SYSTEM_CONFIG, SystemConfigReturnType } from '@libs/configs';
 import { UserRepository } from '@libs/entity';
+import { JwtLibsService } from '@libs/jwt';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { CreateTokensCommand } from './command';
-import { ClientJwtService } from '../jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly clientJwtService: ClientJwtService,
+    private readonly jwtLibsService: JwtLibsService,
     private readonly userRepository: UserRepository,
   ) {}
 
@@ -42,6 +42,6 @@ export class AuthService {
       }
     }
 
-    return this.clientJwtService.createTokens(user.id, user.oauths[i].platform);
+    return this.jwtLibsService.createTokens(user.id);
   }
 }

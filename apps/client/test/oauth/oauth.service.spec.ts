@@ -1,15 +1,14 @@
-import { ClientJwtService, ClientTokensDto } from '@apps/client/jwt';
 import { CreateOAuthUrlCommand, SignWithGoogleCommand } from '@apps/client/oauth/commands';
 import { CreateGoogleOAuthUrlDto, CreateKakaoOAuthUrlDto, CreateNaverOAuthUrlDto, OAuthStateDto } from '@apps/client/oauth/dtos';
 import { OAuthGetProfileError, OAuthGetTokenError } from '@apps/client/oauth/implements';
 import { OAuthProfile } from '@apps/client/oauth/interfaces';
 import { OAuthService } from '@apps/client/oauth/oauth.service';
 import { OAuthEntity, OAuthPlatform, OAuthRepository, UserEntity, UserRepository } from '@libs/entity';
+import { JwtLibsService } from '@libs/jwt';
 import { TestingFixture, TestingRepository } from '@libs/testing';
 import { HttpModule } from '@nestjs/axios';
 import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Response } from 'express';
 
@@ -21,13 +20,12 @@ describe(OAuthService.name, () => {
     module = await Test.createTestingModule({
       imports: [HttpModule],
       providers: [
+        Logger,
         OAuthService,
+        ConfigService,
+        JwtLibsService.mock(),
         TestingRepository.mock(UserRepository),
         TestingRepository.mock(OAuthRepository),
-        ConfigService,
-        ClientJwtService,
-        JwtService,
-        Logger,
       ],
     }).compile();
 
@@ -296,16 +294,12 @@ describe(OAuthService.name, () => {
     const platform = OAuthPlatform.Google;
     const command = TestingFixture.of(SignWithGoogleCommand, { state: TestingFixture.of(OAuthStateDto).encode() });
 
-    beforeAll(() => {
-      jest.spyOn(module.get(ClientJwtService), 'createTokens').mockReturnValue(TestingFixture.of(ClientTokensDto));
-    });
-
     beforeEach(() => {
-      const loggerVerbose = jest.spyOn(Logger, 'verbose').mockReturnValue();
-      const loggerWarn = jest.spyOn(Logger, 'warn').mockReturnValue();
+      jest.spyOn(Logger, 'verbose').mockClear();
+      jest.spyOn(Logger, 'warn').mockClear();
 
-      loggerVerbose.mockClear();
-      loggerWarn.mockClear();
+      jest.spyOn(Logger, 'verbose').mockReturnValue();
+      jest.spyOn(Logger, 'warn').mockReturnValue();
     });
 
     it('OAuth 토큰을 가져오는데 실패하면 실패 로그가 기록되어야 한다.', async () => {

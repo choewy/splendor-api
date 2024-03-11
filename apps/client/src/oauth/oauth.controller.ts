@@ -1,4 +1,5 @@
 import { OAuthPlatform } from '@libs/entity';
+import { JwtGuard, ReqJwtUser } from '@libs/jwt';
 import { ApiController, ApiPipeException } from '@libs/swagger';
 import { Body, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
@@ -7,7 +8,6 @@ import { Response } from 'express';
 import { CreateOAuthUrlCommand, SignWithGoogleCommand, SignWithKakaoCommand, SignWithNaverCommand } from './commands';
 import { CreateOAuthUrlDto } from './dtos';
 import { OAuthService } from './oauth.service';
-import { ClientContext, ClientJwtGuard, ReqClient } from '../jwt';
 
 @ApiController('oauth', 'OAuth')
 export class OAuthController {
@@ -22,12 +22,12 @@ export class OAuthController {
   }
 
   @Post('connect')
-  @UseGuards(ClientJwtGuard)
+  @UseGuards(JwtGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'OAuth 계정 추가 연동' })
   @ApiCreatedResponse()
-  async connecOtherOAuth(@ReqClient() client: ClientContext, @Body() command: CreateOAuthUrlCommand) {
-    return this.oauthService.createOAuthUrl(command, client.id);
+  async connecOtherOAuth(@ReqJwtUser() userId: number, @Body() command: CreateOAuthUrlCommand) {
+    return this.oauthService.createOAuthUrl(command, userId);
   }
 
   @Get('google')

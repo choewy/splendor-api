@@ -1,7 +1,8 @@
 import {
+  AppConfig,
   GoogleOAuthConfig,
-  JWT_CLIENT_CONFIG,
-  JwtClientConfig,
+  JWT_CONFIG,
+  JwtConfig,
   JwtConfigReturnType,
   KakaoOAuthConfig,
   NaverOAuthConfig,
@@ -11,6 +12,7 @@ import {
   TypeOrmMySQLConfigReturnType,
 } from '@libs/configs';
 import { entities } from '@libs/entity';
+import { JwtLibsModule } from '@libs/jwt';
 import { TypeOrmLibsModule } from '@libs/typeorm';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -18,7 +20,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth';
-import { ClientJwtModule } from './jwt';
 import { OAuthModule } from './oauth';
 import { ProfileModule } from './profile';
 import { UserModule } from './user';
@@ -27,7 +28,8 @@ import { UserModule } from './user';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [SystemConfig, TypeOrmMySQLConfig, JwtClientConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
+      load: [SystemConfig, AppConfig, TypeOrmMySQLConfig, JwtConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
+      envFilePath: ['.envs/.env', '.envs/.env.client'],
     }),
     TypeOrmLibsModule.forRootAsync({
       inject: [ConfigService],
@@ -35,10 +37,10 @@ import { UserModule } from './user';
         return configService.get<TypeOrmMySQLConfigReturnType>(TYPEORM_MYSQL_CONFIG)(entities);
       },
     }),
-    ClientJwtModule.forRoot({
+    JwtLibsModule.forRoot({
       inject: [ConfigService],
       useFactory(configService: ConfigService) {
-        return configService.get<JwtConfigReturnType>(JWT_CLIENT_CONFIG).moduleOptions;
+        return configService.get<JwtConfigReturnType>(JWT_CONFIG);
       },
     }),
     AuthModule,
