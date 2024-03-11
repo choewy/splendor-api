@@ -84,6 +84,12 @@
       ],
       "@libs/configs/*": [
         "libs/configs/src/*"
+      ],
+      "@libs/jwt": [
+        "libs/jwt/src"
+      ],
+      "@libs/jwt/*": [
+        "libs/jwt/src/*"
       ]
     }
   }

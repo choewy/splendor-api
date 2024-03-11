@@ -129,7 +129,8 @@
       "^@libs/bootstrap(|/.*)$": "<rootDir>/libs/bootstrap/src/$1",
       "^@libs/testing(|/.*)$": "<rootDir>/libs/testing/src/$1",
       "^@libs/swagger(|/.*)$": "<rootDir>/libs/swagger/src/$1",
-      "^@libs/configs(|/.*)$": "<rootDir>/libs/configs/src/$1"
+      "^@libs/configs(|/.*)$": "<rootDir>/libs/configs/src/$1",
+      "^@libs/jwt(|/.*)$": "<rootDir>/libs/jwt/src/$1"
     }
   }
 }

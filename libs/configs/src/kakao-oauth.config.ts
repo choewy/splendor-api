@@ -10,7 +10,7 @@ export const KAKAO_OAUTH_CONFIG = '__kakao_oauth_config__';
 export const KakaoOAuthConfig = registerAs(
   KAKAO_OAUTH_CONFIG,
   (): KakaoOAuthConfigReturnType => ({
-    clientId: process.env.KAKAO_OAUTH_REST_API_KEY,
+    clientId: process.env.KAKAO_OAUTH_CLIENT_ID,
     redirectUri: process.env.KAKAO_OAUTH_REDIRECT_URI,
   }),
 );
