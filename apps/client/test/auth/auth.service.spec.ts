@@ -26,7 +26,7 @@ describe(AuthService.name, () => {
   });
 
   describe('createTokensWithFindUser', () => {
-    const command = TestingFixture.of(CreateTokensCommand, { id: 1, platform: OAuthPlatform.Google });
+    const command = TestingFixture.of(CreateTokensCommand, { id: 1 });
 
     beforeAll(() => {
       jest.spyOn(module.get(JwtLibsService), 'createTokens').mockReturnValue(TestingFixture.of(JwtTokens));
@@ -48,15 +48,6 @@ describe(AuthService.name, () => {
     it('UserEntity의 OAuthEntity가 하나도 없는 경우 NotFoundException을 던진다.', () => {
       jest.spyOn(module.get(ConfigService), 'get').mockReturnValue({ env: NodeEnv.Local });
       jest.spyOn(module.get(UserRepository), 'findOne').mockResolvedValue(TestingFixture.of(UserEntity, { oauths: [] }));
-
-      expect(service.createTokensWithFindUser(command)).rejects.toBeInstanceOf(NotFoundException);
-    });
-
-    it('UserEntity의 OAuthEntity 중에 CreateTokensCommand의 platform과 일치하는 OAuthEntity가 없는 경우 NotFoundException을 던진다.', () => {
-      jest.spyOn(module.get(ConfigService), 'get').mockReturnValue({ env: NodeEnv.Local });
-      jest
-        .spyOn(module.get(UserRepository), 'findOne')
-        .mockResolvedValue(TestingFixture.of(UserEntity, { oauths: [TestingFixture.of(OAuthEntity, { platform: OAuthPlatform.Kakao })] }));
 
       expect(service.createTokensWithFindUser(command)).rejects.toBeInstanceOf(NotFoundException);
     });

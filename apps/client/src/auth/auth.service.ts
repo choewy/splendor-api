@@ -20,8 +20,7 @@ export class AuthService {
     }
 
     const user = await this.userRepository.findOne({
-      relations: { oauths: true },
-      where: { id: command.id, oauths: { platform: command.platform } },
+      where: { id: command.id },
     });
 
     if (user === null) {
@@ -30,16 +29,6 @@ export class AuthService {
 
     if (user.oauths.length === 0) {
       throw new NotFoundException('not exists user oauths');
-    }
-
-    let i = 0;
-
-    if (command.platform) {
-      i = user.oauths.findIndex((oauth) => oauth.platform === command.platform);
-
-      if (i === -1) {
-        throw new NotFoundException('not exists user oauths');
-      }
     }
 
     return this.jwtLibsService.createTokens(user.id);
