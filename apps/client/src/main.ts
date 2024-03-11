@@ -1,7 +1,11 @@
 import { createBootstrapOptions } from '@libs/bootstrap';
+import { APP_CONFIG, AppConfigReturnType, NodeEnv, SYSTEM_CONFIG, SystemConfigReturnType } from '@libs/configs';
+import { JwtLibsService } from '@libs/jwt';
 import { WinstonLogger } from '@libs/logger';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerUiOptions } from '@nestjs/swagger/dist/interfaces/swagger-ui-options.interface';
 
 import { AppModule } from './app.module';
 
@@ -9,18 +13,41 @@ async function bootstrap() {
   const logger = WinstonLogger.create('client');
   const app = await NestFactory.create(AppModule, { logger });
 
-  const builder = new DocumentBuilder().setTitle('Ensemble Client APIs').addBearerAuth();
-  const document = SwaggerModule.createDocument(app, builder.build());
+  const config = app.get(ConfigService);
+  const appConfig = config.get<AppConfigReturnType>(APP_CONFIG);
+  const systemConfig = config.get<SystemConfigReturnType>(SYSTEM_CONFIG);
 
-  SwaggerModule.setup('/swagger', app, document);
+  if (systemConfig.env === NodeEnv.Local) {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Ensemble Client APIs')
+      .setVersion(appConfig.version)
+      .addBearerAuth(undefined, 'bearer')
+      .build();
 
-  const options = createBootstrapOptions(app);
+    const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+    const swaggerOptions: SwaggerUiOptions = {};
 
-  app.useGlobalPipes(...options.pipes);
-  app.useGlobalFilters(...options.filters);
-  app.useGlobalInterceptors(...options.interceptors);
+    if (appConfig.swaggerUserId) {
+      const jwtLibsService = app.get(JwtLibsService);
+      const value = jwtLibsService.createTokens(appConfig.swaggerUserId);
 
-  await app.listen(4000);
+      swaggerOptions.authAction = {
+        bearer: { schema: { type: 'http', scheme: 'bearer' }, value },
+      };
+    }
+
+    SwaggerModule.setup('/swagger', app, swaggerDocument, { swaggerOptions });
+  }
+
+  const bootstrapOptions = createBootstrapOptions(app);
+
+  app.enableCors(appConfig.corsOptions);
+  app.useGlobalPipes(...bootstrapOptions.pipes);
+  app.useGlobalFilters(...bootstrapOptions.filters);
+  app.useGlobalInterceptors(...bootstrapOptions.interceptors);
+  app.enableShutdownHooks();
+
+  await app.listen(appConfig.port);
 }
 
 bootstrap();

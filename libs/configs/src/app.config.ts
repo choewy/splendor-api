@@ -4,8 +4,8 @@ import { registerAs } from '@nestjs/config';
 export type AppConfigReturnType = {
   version: string;
   port: number;
-  host: string;
   corsOptions: CorsOptions;
+  swaggerUserId: number;
 };
 
 export const APP_CONFIG = '__app_config__';
@@ -15,7 +15,7 @@ export const AppConfig = registerAs(
   (): AppConfigReturnType => ({
     version: process.env.VERSION,
     port: +process.env.PORT,
-    host: process.env.HOST,
     corsOptions: { origin: process.env.ORIGIN ? new RegExp(process.env.ORIGIN) : undefined },
+    swaggerUserId: +process.env.SWAGGER_USER_ID,
   }),
 );
