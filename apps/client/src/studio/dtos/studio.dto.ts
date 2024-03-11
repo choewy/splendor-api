@@ -1,6 +1,11 @@
 import { StudioEntity } from '@libs/entity';
 import { ApiResponseProperty } from '@nestjs/swagger';
 
+import { StudioDonationSettingDto } from './studio-donation-setting.dto';
+import { StudioPlaySettingDto } from './studio-play-setting.dto';
+import { StudioSettingsDto } from './studio-settings.dto';
+import { StudioStreamSettingsDto } from './studio-stream-settings.dto';
+
 export class StudioDto {
   @ApiResponseProperty({ type: Number })
   id: number;
@@ -11,17 +16,17 @@ export class StudioDto {
   @ApiResponseProperty({ type: String })
   introduction: string;
 
-  @ApiResponseProperty({ type: Number })
-  streamSettingCount: number;
+  @ApiResponseProperty({ type: StudioSettingsDto })
+  settings: StudioSettingsDto;
 
-  @ApiResponseProperty({ type: Number })
-  forbiddenWordsCount: number;
-
-  constructor(studio: StudioEntity, streamSettingCount: number, forbiddenWordsCount: number) {
+  constructor(studio: StudioEntity) {
     this.id = studio.id;
     this.alias = studio.alias;
     this.introduction = studio.introduction;
-    this.streamSettingCount = streamSettingCount;
-    this.forbiddenWordsCount = forbiddenWordsCount;
+    this.settings = new StudioSettingsDto(
+      new StudioPlaySettingDto(studio.studioPlaySetting),
+      new StudioDonationSettingDto(studio.studioDonationSetting),
+      new StudioStreamSettingsDto(studio.studioStreamSettings, studio.studioStreamSettings.length),
+    );
   }
 }
