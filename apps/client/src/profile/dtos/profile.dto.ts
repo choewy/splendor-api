@@ -13,6 +13,12 @@ export class ProfileDto {
   @ApiResponseProperty({ type: String })
   profileImageUrl: string;
 
+  @ApiResponseProperty({ type: Number })
+  followings: number;
+
+  @ApiResponseProperty({ type: Number })
+  followers: number;
+
   @ApiResponseProperty({ type: [ProfileOAuthDto] })
   oauths: ProfileOAuthDto[];
 
@@ -26,6 +32,8 @@ export class ProfileDto {
     this.id = user.id;
     this.nickname = user.nickname;
     this.profileImageUrl = user.profileImageUrl;
+    this.followings = user.count?.followings ?? 0;
+    this.followers = user.count?.followers ?? 0;
     this.oauths = user.oauths ? user.oauths.map((oauth) => new ProfileOAuthDto(oauth)) : [];
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;

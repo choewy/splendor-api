@@ -10,7 +10,7 @@ export class ProfileService {
 
   async getProfile(id: number) {
     const user = await this.userRepository.findOne({
-      relations: { oauths: true },
+      relations: { count: true, oauths: true },
       where: { id },
     });
 
