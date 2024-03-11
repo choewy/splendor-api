@@ -5,7 +5,7 @@ import { UserEntity } from './user.entity';
 
 @Entity({ name: 'user_profile_image' })
 export class UserProfileImageEntity extends AbstractFileBaseEntity {
-  @OneToOne(() => UserEntity, (e) => e.userProfileImage, { onDelete: 'SET NULL', nullable: true })
+  @OneToOne(() => UserEntity, (e) => e.profileImage, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn()
   user: UserEntity | null;
 }

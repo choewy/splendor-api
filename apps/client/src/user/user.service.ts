@@ -15,13 +15,14 @@ export class UserService {
       .skip(query.skip)
       .take(query.take)
       .where('1')
+      .leftJoinAndMapOne('user.count', 'user.count', 'count')
       .innerJoinAndMapOne('user.studio', 'user.studio', 'studio')
       .innerJoinAndMapOne('studio.studioSetting', 'studio.studioSetting', 'studioSetting');
 
     if (userId) {
       queryBuilder
         .andWhere({ userId: Not(userId) })
-        .leftJoinAndMapOne('user.following', 'user.followers', 'following', 'following.fromId = :userId AND following.toId = user.id', {
+        .leftJoinAndMapOne('user.followed', 'user.followers', 'followed', 'followed.fromId = :userId AND followed.toId = user.id', {
           userId,
         });
     }

@@ -23,11 +23,13 @@ import { StudioEntity } from './studio.entity';
 import { TtsVoiceImageEntity } from './tts-voice-image.entity';
 import { TtsVoiceSampleSoundEntity } from './tts-voice-sample-sound.entity';
 import { TtsVoiceEntity } from './tts-voice.entity';
+import { UserCountEntity } from './user-count.entity';
 import { UserProfileImageEntity } from './user-profile-image.entity';
 import { UserEntity } from './user.entity';
 
 export const entities = [
   UserEntity,
+  UserCountEntity,
   UserProfileImageEntity,
   OAuthEntity,
   StudioEntity,

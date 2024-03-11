@@ -192,6 +192,7 @@ export class OAuthService implements OAuthServiceImpl {
     const user = this.userRepository.create({
       nickname: profile.nickname,
       profileImageUrl: profile.profileImageUrl,
+      count: {},
       oauths: [profile],
       studio: { studioSetting: {}, alertWidget: {}, messageWidget: {} },
     });

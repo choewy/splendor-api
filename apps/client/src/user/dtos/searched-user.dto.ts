@@ -14,14 +14,22 @@ export class SearchedUserDto {
   @ApiResponseProperty({ type: String })
   introduction: string;
 
+  @ApiResponseProperty({ type: Number })
+  followings: number;
+
+  @ApiResponseProperty({ type: Number })
+  followers: number;
+
   @ApiResponseProperty({ type: Boolean })
-  following: boolean;
+  followed: boolean;
 
   constructor(user: UserEntity) {
     this.id = user.id;
     this.nickname = user.nickname;
     this.profileImageUrl = user.profileImageUrl;
     this.introduction = user.studio?.studioSetting?.introduction ?? '';
-    this.following = user.following instanceof FollowEntity;
+    this.followings = user.count?.followings ?? 0;
+    this.followers = user.count?.followers ?? 0;
+    this.followed = user.followed instanceof FollowEntity;
   }
 }
