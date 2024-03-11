@@ -1,4 +1,4 @@
-import { FollowRepository, UserRepository } from '@libs/entity';
+import { FollowEntity, FollowRepository, UserCountEntity, UserRepository } from '@libs/entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { GetFollowersResultDto, GetFollowingsResultDto } from './dtos';
@@ -51,7 +51,62 @@ export class FollowService {
   }
 
   async follow(fromId: number, toId: number) {
-    await this.validateUserExist(fromId);
     await this.validateUserExist(toId);
+
+    const existsFollow = await this.followRepository.existsBy({ fromId, toId });
+
+    if (existsFollow === true) {
+      return;
+    }
+
+    await this.followRepository.transaction(async (em) => {
+      const followRepository = em.getRepository(FollowEntity);
+      await followRepository.insert({ fromId, toId });
+
+      const userCountRepository = em.getRepository(UserCountEntity);
+      await userCountRepository
+        .createQueryBuilder()
+        .update()
+        .set({ followings: () => 'followings + 1' })
+        .where({ userId: fromId })
+        .execute();
+
+      await userCountRepository
+        .createQueryBuilder()
+        .update()
+        .set({ followers: () => 'followers + 1' })
+        .where({ userId: toId })
+        .execute();
+    });
+  }
+
+  async unfollow(fromId: number, toId: number) {
+    await this.validateUserExist(toId);
+
+    const existsFollow = await this.followRepository.existsBy({ fromId, toId });
+
+    if (existsFollow === false) {
+      return;
+    }
+
+    await this.followRepository.transaction(async (em) => {
+      const followRepository = em.getRepository(FollowEntity);
+      await followRepository.delete({ fromId, toId });
+
+      const userCountRepository = em.getRepository(UserCountEntity);
+      await userCountRepository
+        .createQueryBuilder()
+        .update()
+        .set({ followings: () => 'IF(followings = 0, 0, followings - 1)' })
+        .where({ userId: fromId })
+        .execute();
+
+      await userCountRepository
+        .createQueryBuilder()
+        .update()
+        .set({ followers: () => 'IF(followers = 0, 0, followers - 1)' })
+        .where({ userId: toId })
+        .execute();
+    });
   }
 }

@@ -1,8 +1,9 @@
 import { IgnoreJwtError, JwtGuard, ReqJwtUser } from '@libs/jwt';
 import { ApiController } from '@libs/swagger';
-import { Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Body, Get, Param, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 
+import { FollowCommand } from './commands';
 import { FollowService } from './follow.service';
 import { GetFollowByUserQuery, GetFollowsQuery } from './queries';
 
@@ -43,5 +44,21 @@ export class FollowController {
   @ApiOkResponse()
   async getOtherFollowers(@ReqJwtUser() userId: number | null, @Param() param: GetFollowByUserQuery, @Query() query: GetFollowsQuery) {
     return this.followService.getFollowers(userId, param.userId, query);
+  }
+
+  @Put('follow')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '다른 회원 팔로우' })
+  @ApiOkResponse()
+  async follow(@ReqJwtUser() userId: number | null, @Body() command: FollowCommand) {
+    return this.followService.follow(userId, command.userId);
+  }
+
+  @Put('unfollow')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '다른 회원 언팔로우' })
+  @ApiOkResponse()
+  async unfollow(@ReqJwtUser() userId: number | null, @Body() command: FollowCommand) {
+    return this.followService.unfollow(userId, command.userId);
   }
 }

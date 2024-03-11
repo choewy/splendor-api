@@ -1,4 +1,5 @@
 export * from './user.entity';
+export * from './user-count.entity';
 export * from './user-profile-image.entity';
 export * from './oauth.entity';
 export * from './studio.entity';
