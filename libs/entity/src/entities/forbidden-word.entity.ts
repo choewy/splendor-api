@@ -10,10 +10,10 @@ export class ForbiddenWordEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 200 })
   word: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   readonly updatedAt: Date;
 
   @ManyToOne(() => StudioEntity, (e) => e.forbiddenWords, { onDelete: 'CASCADE' })

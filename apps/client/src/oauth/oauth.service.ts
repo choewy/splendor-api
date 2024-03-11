@@ -219,7 +219,13 @@ export class OAuthService implements OAuthServiceImpl {
       userWallet: {},
       userFollowCount: {},
       oauths: [profile],
-      studio: { alias: await this.createStudioUniqueAlias(profile.platform, profile.nickname), alertWidget: {}, messageWidget: {} },
+      studio: {
+        alias: await this.createStudioUniqueAlias(profile.platform, profile.nickname),
+        studioPlaySetting: {},
+        studioDonationSetting: {},
+        alertWidget: {},
+        messageWidget: {},
+      },
     });
 
     return user.save();

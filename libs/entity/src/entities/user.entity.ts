@@ -51,10 +51,10 @@ export class UserEntity extends BaseEntity {
   @JoinTable()
   followers: FollowEntity[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   readonly updatedAt: Date;
 
   @JoinTable()

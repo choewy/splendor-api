@@ -41,10 +41,10 @@ export class TtsVoiceEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50 })
   alias: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   readonly updatedAt: Date;
 
   @OneToMany(() => StudioEntity, (e) => e.ttsVoice, { cascade: true })

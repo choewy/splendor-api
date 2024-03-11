@@ -23,6 +23,7 @@ import { AuthModule } from './auth';
 import { FollowModule } from './follow';
 import { OAuthModule } from './oauth';
 import { ProfileModule } from './profile';
+import { StudioModule } from './studio';
 import { UserModule } from './user';
 
 @Module({
@@ -49,6 +50,7 @@ import { UserModule } from './user';
     UserModule,
     ProfileModule,
     FollowModule,
+    StudioModule,
   ],
   controllers: [AppController],
   providers: [AppService],

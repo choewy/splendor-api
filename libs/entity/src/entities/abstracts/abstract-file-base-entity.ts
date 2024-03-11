@@ -1,4 +1,4 @@
-import { BaseEntity, Column, CreateDateColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 export class AbstractFileBaseEntity extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -13,9 +13,9 @@ export class AbstractFileBaseEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50 })
   filename: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
 
-  @CreateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   readonly updatedAt: Date;
 }

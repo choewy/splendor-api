@@ -13,10 +13,10 @@ export class UserFollowCountEntity extends BaseEntity {
   @Column({ type: 'int', unsigned: true, default: 0 })
   followers: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   readonly updatedAt: Date;
 
   @OneToOne(() => UserEntity, (e) => e.userFollowCount, { onDelete: 'CASCADE' })

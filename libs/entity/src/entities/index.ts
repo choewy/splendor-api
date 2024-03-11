@@ -3,6 +3,9 @@ export * from './user-wallet.entity';
 export * from './user-follow-count.entity';
 export * from './oauth.entity';
 export * from './studio.entity';
+export * from './studio-play-setting.entity';
+export * from './studio-donation-setting.entity';
+export * from './studio-stream-setting.entity';
 export * from './follow.entity';
 export * from './forbidden-word.entity';
 export * from './alert-sound.entity';
@@ -18,6 +21,9 @@ import { FollowEntity } from './follow.entity';
 import { ForbiddenWordEntity } from './forbidden-word.entity';
 import { MessageWidgetEntity } from './message-widget.entity';
 import { OAuthEntity } from './oauth.entity';
+import { StudioDonationSettingEntity } from './studio-donation-setting.entity';
+import { StudioPlaySettingEntity } from './studio-play-setting.entity';
+import { StudioStreamSettingEntity } from './studio-stream-setting.entity';
 import { StudioEntity } from './studio.entity';
 import { TtsVoiceImageEntity } from './tts-voice-image.entity';
 import { TtsVoiceSampleSoundEntity } from './tts-voice-sample-sound.entity';
@@ -32,6 +38,9 @@ export const entities = [
   UserFollowCountEntity,
   OAuthEntity,
   StudioEntity,
+  StudioPlaySettingEntity,
+  StudioDonationSettingEntity,
+  StudioStreamSettingEntity,
   FollowEntity,
   ForbiddenWordEntity,
   AlertSoundEntity,

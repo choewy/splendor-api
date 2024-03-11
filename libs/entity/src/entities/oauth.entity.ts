@@ -40,10 +40,10 @@ export class OAuthEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 1024, default: null })
   profileImageUrl: string | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   readonly updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (e) => e.oauths, { onDelete: 'CASCADE' })

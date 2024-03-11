@@ -16,6 +16,9 @@ import { AlertSoundEntity } from './alert-sound.entity';
 import { AlertWidgetEntity } from './alert-widget.entity';
 import { ForbiddenWordEntity } from './forbidden-word.entity';
 import { MessageWidgetEntity } from './message-widget.entity';
+import { StudioDonationSettingEntity } from './studio-donation-setting.entity';
+import { StudioPlaySettingEntity } from './studio-play-setting.entity';
+import { StudioStreamSettingEntity } from './studio-stream-setting.entity';
 import { TtsVoiceEntity } from './tts-voice.entity';
 import { UserEntity } from './user.entity';
 
@@ -30,21 +33,27 @@ export class StudioEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 1000, default: null })
   introduction: string | null;
 
-  @Column({ type: 'tinyint', unsigned: true, default: 5 })
-  alertSoundVolume: number;
-
-  @Column({ type: 'tinyint', unsigned: true, default: 5 })
-  messageSoundVolume: number;
-
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   readonly updatedAt: Date;
 
   @OneToOne(() => UserEntity, (e) => e.studio, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: UserEntity;
+
+  @OneToOne(() => StudioPlaySettingEntity, (e) => e.studio, { cascade: true })
+  @JoinTable()
+  studioPlaySetting: StudioPlaySettingEntity;
+
+  @OneToOne(() => StudioDonationSettingEntity, (e) => e.studio, { cascade: true })
+  @JoinTable()
+  studioDonationSetting: StudioDonationSettingEntity;
+
+  @OneToMany(() => StudioStreamSettingEntity, (e) => e.studio, { cascade: true })
+  @JoinTable()
+  studioStreamSettings: StudioStreamSettingEntity[];
 
   @ManyToOne(() => TtsVoiceEntity, (e) => e.studios, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn()

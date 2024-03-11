@@ -1,6 +1,8 @@
 import { FollowEntity, UserEntity } from '@libs/entity';
 import { ApiResponseProperty } from '@nestjs/swagger';
 
+import { SearchedUserStudioDto } from './searched-user-studio.dto';
+
 export class SearchedUserDto {
   @ApiResponseProperty({ type: Number })
   id: number;
@@ -11,8 +13,8 @@ export class SearchedUserDto {
   @ApiResponseProperty({ type: String })
   profileImageUrl: string;
 
-  @ApiResponseProperty({ type: String })
-  introduction: string;
+  @ApiResponseProperty({ type: SearchedUserStudioDto })
+  studio: SearchedUserStudioDto;
 
   @ApiResponseProperty({ type: Number })
   followingCount: number;
@@ -27,7 +29,6 @@ export class SearchedUserDto {
     this.id = user.id;
     this.nickname = user.nickname;
     this.profileImageUrl = user.profileImageUrl;
-    this.introduction = user.studio?.introduction ?? '';
     this.followingCount = user.userFollowCount?.followings ?? 0;
     this.followerCount = user.userFollowCount?.followers ?? 0;
     this.followed = user.followed instanceof FollowEntity;
