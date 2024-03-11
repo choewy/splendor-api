@@ -10,7 +10,7 @@ export class ProfileService {
 
   async getProfile(id: number) {
     const user = await this.userRepository.findOne({
-      relations: { userFollowCount: true, oauths: true },
+      relations: { oauths: true, userWallet: true, userFollowCount: true },
       where: { id },
     });
 
@@ -23,7 +23,7 @@ export class ProfileService {
 
   async updateProfile(id: number, command: UpdateProfileCommand) {
     const user = await this.userRepository.findOne({
-      relations: { userFollowCount: true, oauths: true },
+      relations: { oauths: true, userWallet: true, userFollowCount: true },
       where: { id },
     });
 

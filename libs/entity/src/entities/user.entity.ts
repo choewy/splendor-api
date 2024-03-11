@@ -15,6 +15,7 @@ import { OAuthEntity } from './oauth.entity';
 import { StudioEntity } from './studio.entity';
 import { UserFollowCountEntity } from './user-follow-count.entity';
 import { UserProfileImageEntity } from './user-profile-image.entity';
+import { UserWalletEntity } from './user-wallet.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
@@ -30,6 +31,10 @@ export class UserEntity extends BaseEntity {
   @OneToMany(() => OAuthEntity, (e) => e.user, { cascade: true })
   @JoinTable()
   oauths: OAuthEntity[];
+
+  @OneToOne(() => UserWalletEntity, (e) => e.user, { cascade: true })
+  @JoinTable()
+  userWallet: UserWalletEntity;
 
   @OneToOne(() => UserFollowCountEntity, (e) => e.user, { cascade: true })
   @JoinTable()

@@ -13,6 +13,12 @@ export class ProfileDto {
   @ApiResponseProperty({ type: String })
   profileImageUrl: string;
 
+  @ApiResponseProperty({ type: String })
+  credit: number;
+
+  @ApiResponseProperty({ type: String })
+  point: number;
+
   @ApiResponseProperty({ type: Number })
   followingCount: number;
 
@@ -32,6 +38,8 @@ export class ProfileDto {
     this.id = user.id;
     this.nickname = user.nickname;
     this.profileImageUrl = user.profileImageUrl;
+    this.credit = user.userWallet?.credit ?? 0;
+    this.point = user.userWallet?.point ?? 0;
     this.followingCount = user.userFollowCount?.followings ?? 0;
     this.followerCount = user.userFollowCount?.followers ?? 0;
     this.oauths = user.oauths ? user.oauths.map((oauth) => new ProfileOAuthDto(oauth)) : [];
