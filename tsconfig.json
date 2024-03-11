@@ -90,6 +90,12 @@
       ],
       "@libs/jwt/*": [
         "libs/jwt/src/*"
+      ],
+      "@libs/redis": [
+        "libs/redis/src"
+      ],
+      "@libs/redis/*": [
+        "libs/redis/src/*"
       ]
     }
   }

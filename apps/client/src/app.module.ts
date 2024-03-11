@@ -6,6 +6,8 @@ import {
   JwtConfigReturnType,
   KakaoOAuthConfig,
   NaverOAuthConfig,
+  REDIS_CONFIG,
+  RedisConfig,
   SystemConfig,
   TYPEORM_MYSQL_CONFIG,
   TypeOrmMySQLConfig,
@@ -13,9 +15,11 @@ import {
 } from '@libs/configs';
 import { entities } from '@libs/entity';
 import { JwtLibsModule } from '@libs/jwt';
+import { RedisLibsModule } from '@libs/redis';
 import { TypeOrmLibsModule } from '@libs/typeorm';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisOptions } from 'ioredis';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -30,7 +34,7 @@ import { UserModule } from './user';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [SystemConfig, AppConfig, TypeOrmMySQLConfig, JwtConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
+      load: [SystemConfig, AppConfig, TypeOrmMySQLConfig, RedisConfig, JwtConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
       envFilePath: ['.envs/.env', '.envs/.env.client'],
     }),
     TypeOrmLibsModule.forRootAsync({
@@ -39,7 +43,13 @@ import { UserModule } from './user';
         return configService.get<TypeOrmMySQLConfigReturnType>(TYPEORM_MYSQL_CONFIG)(entities);
       },
     }),
-    JwtLibsModule.forRoot({
+    RedisLibsModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory(configService: ConfigService) {
+        return configService.get<RedisOptions>(REDIS_CONFIG);
+      },
+    }),
+    JwtLibsModule.forRootAsync({
       inject: [ConfigService],
       useFactory(configService: ConfigService) {
         return configService.get<JwtConfigReturnType>(JWT_CONFIG);

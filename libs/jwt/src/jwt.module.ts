@@ -8,7 +8,7 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({})
 export class JwtLibsModule {
-  static forRoot(moduleAsyncOptions: JwtLibsModuleAsyncOptions): DynamicModule {
+  static forRootAsync(moduleAsyncOptions: JwtLibsModuleAsyncOptions): DynamicModule {
     const jwtModule = JwtModule.registerAsync({
       global: true,
       inject: moduleAsyncOptions.inject,
