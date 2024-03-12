@@ -113,14 +113,16 @@ export class DonationService {
       status: true,
     });
 
-    const regExp = new RegExp(forbiddenWords.map(({ word }) => word).join('|'));
+    if (forbiddenWords.length > 0) {
+      const regExp = new RegExp(forbiddenWords.map(({ word }) => word.trim()).join('|'));
 
-    if (regExp.exec(nickname)) {
-      throw new BadRequestException('the nickname contains prohibited words');
-    }
+      if (regExp.exec(nickname)) {
+        throw new BadRequestException('the nickname contains prohibited words');
+      }
 
-    if (regExp.exec(message)) {
-      throw new BadRequestException('the message contains prohibited words');
+      if (regExp.exec(message)) {
+        throw new BadRequestException('the message contains prohibited words');
+      }
     }
   }
 
