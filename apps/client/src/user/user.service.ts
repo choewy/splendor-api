@@ -21,9 +21,13 @@ export class UserService {
     if (userId) {
       queryBuilder
         .andWhere({ id: Not(userId) })
-        .leftJoinAndMapOne('user.followed', 'user.followers', 'followed', 'followed.fromId = :userId AND followed.toId = user.id', {
-          userId,
-        });
+        .leftJoinAndMapOne(
+          'user.followed',
+          'user.followedHistories',
+          'followed',
+          'followed.userId = :userId AND followed.targetId = user.id',
+          { userId },
+        );
     }
 
     if (query.nickname) {

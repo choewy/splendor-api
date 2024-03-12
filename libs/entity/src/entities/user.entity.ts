@@ -10,9 +10,12 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { BlockEntity } from './block.entity';
+import { DonationEntity } from './donation.entity';
 import { FollowEntity } from './follow.entity';
 import { OAuthEntity } from './oauth.entity';
 import { StudioEntity } from './studio.entity';
+import { UserDonationsEntity } from './user-donation.entity';
 import { UserFollowCountEntity } from './user-follow-count.entity';
 import { UserWalletEntity } from './user-wallet.entity';
 
@@ -27,6 +30,12 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 1024, default: null })
   profileImageUrl: string | null;
 
+  @CreateDateColumn({ type: 'timestamp' })
+  readonly createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  readonly updatedAt: Date;
+
   @OneToMany(() => OAuthEntity, (e) => e.user, { cascade: true })
   @JoinTable()
   oauths: OAuthEntity[];
@@ -39,24 +48,41 @@ export class UserEntity extends BaseEntity {
   @JoinTable()
   userFollowCount: UserFollowCountEntity;
 
+  @OneToOne(() => UserDonationsEntity, (e) => e.user, { cascade: true })
+  @JoinTable()
+  userDonations: UserDonationsEntity;
+
   @OneToOne(() => StudioEntity, (e) => e.user, { cascade: true })
   @JoinTable()
   studio: StudioEntity;
 
-  @OneToMany(() => FollowEntity, (e) => e.from, { cascade: true })
+  @OneToMany(() => FollowEntity, (e) => e.user, { cascade: true })
   @JoinTable()
-  followings: FollowEntity[];
+  followingHistories: FollowEntity[];
 
-  @OneToMany(() => FollowEntity, (e) => e.to, { cascade: true })
+  @OneToMany(() => FollowEntity, (e) => e.target, { cascade: true })
   @JoinTable()
-  followers: FollowEntity[];
-
-  @CreateDateColumn({ type: 'timestamp' })
-  readonly createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  readonly updatedAt: Date;
+  followedHistories: FollowEntity[];
 
   @JoinTable()
   followed: FollowEntity | null;
+
+  @OneToMany(() => BlockEntity, (e) => e.user, { cascade: true })
+  @JoinTable()
+  blockingHistories: BlockEntity[];
+
+  @OneToMany(() => BlockEntity, (e) => e.target, { cascade: true })
+  @JoinTable()
+  blockedHistories: BlockEntity[];
+
+  @JoinTable()
+  blocked: BlockEntity | null;
+
+  @OneToMany(() => DonationEntity, (e) => e.sender, { cascade: true })
+  @JoinTable()
+  sentDonations: DonationEntity[];
+
+  @OneToMany(() => DonationEntity, (e) => e.recipient, { cascade: true })
+  @JoinTable()
+  receivedDonation: DonationEntity[];
 }

@@ -6,3 +6,4 @@ export * from './studio.repository';
 export * from './studio-play-setting.repository';
 export * from './studio-donation-setting.repository';
 export * from './studio-stream-setting.repository';
+export * from './donation.repository';

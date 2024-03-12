@@ -1,5 +1,7 @@
+export * from './donation.entity';
 export * from './user.entity';
 export * from './user-wallet.entity';
+export * from './user-donation.entity';
 export * from './user-follow-count.entity';
 export * from './oauth.entity';
 export * from './studio.entity';
@@ -14,9 +16,12 @@ export * from './tts-voice.entity';
 export * from './tts-voice-image.entity';
 export * from './tts-voice-sample-sound.entity';
 export * from './message-widget.entity';
+export * from './block.entity';
 
 import { AlertSoundEntity } from './alert-sound.entity';
 import { AlertWidgetEntity } from './alert-widget.entity';
+import { BlockEntity } from './block.entity';
+import { DonationEntity } from './donation.entity';
 import { FollowEntity } from './follow.entity';
 import { ForbiddenWordEntity } from './forbidden-word.entity';
 import { MessageWidgetEntity } from './message-widget.entity';
@@ -28,6 +33,7 @@ import { StudioEntity } from './studio.entity';
 import { TtsVoiceImageEntity } from './tts-voice-image.entity';
 import { TtsVoiceSampleSoundEntity } from './tts-voice-sample-sound.entity';
 import { TtsVoiceEntity } from './tts-voice.entity';
+import { UserDonationsEntity } from './user-donation.entity';
 import { UserFollowCountEntity } from './user-follow-count.entity';
 import { UserWalletEntity } from './user-wallet.entity';
 import { UserEntity } from './user.entity';
@@ -36,6 +42,9 @@ export const entities = [
   UserEntity,
   UserWalletEntity,
   UserFollowCountEntity,
+  UserDonationsEntity,
+  DonationEntity,
+  BlockEntity,
   OAuthEntity,
   StudioEntity,
   StudioPlaySettingEntity,
