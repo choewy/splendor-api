@@ -1,4 +1,4 @@
-import { StreamModule } from '@apps/stream/stream.module';
+import { AppModule } from '@apps/stream/app.module';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
@@ -8,7 +8,7 @@ describe('StreamController (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [StreamModule],
+      imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
