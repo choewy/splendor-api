@@ -30,6 +30,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth';
 import { FollowModule } from './follow';
+import { ForbiddenWordsModule } from './forbidden-words';
 import { OAuthModule } from './oauth';
 import { ProfileModule } from './profile';
 import { StudioModule } from './studio';
@@ -83,6 +84,7 @@ import { UserModule } from './user';
     ProfileModule,
     FollowModule,
     StudioModule,
+    ForbiddenWordsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

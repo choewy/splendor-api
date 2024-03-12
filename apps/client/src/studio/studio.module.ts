@@ -1,5 +1,4 @@
 import {
-  ForbiddenWordRepository,
   StudioDonationSettingRepository,
   StudioPlaySettingRepository,
   StudioRepository,
@@ -18,7 +17,6 @@ import { StudioService } from './studio.service';
       StudioPlaySettingRepository,
       StudioDonationSettingRepository,
       StudioStreamSettingRepository,
-      ForbiddenWordRepository,
     ]),
   ],
   controllers: [StudioController],

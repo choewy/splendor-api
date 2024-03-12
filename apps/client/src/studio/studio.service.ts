@@ -1,5 +1,4 @@
 import {
-  ForbiddenWordRepository,
   StudioDonationSettingRepository,
   StudioPlaySettingRepository,
   StudioRepository,
@@ -9,8 +8,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Not } from 'typeorm';
 
 import { UpdateStudioCommand } from './commands';
-import { ForbiddenWordsDto, StudioDto } from './dtos';
-import { GetForbiddenWordsQuery } from './queries';
+import { StudioDto } from './dtos';
 
 @Injectable()
 export class StudioService {
@@ -19,7 +17,6 @@ export class StudioService {
     private readonly studioPlaySettingRepository: StudioPlaySettingRepository,
     private readonly studioDonationSettingRepository: StudioDonationSettingRepository,
     private readonly studioStreamSettingRepository: StudioStreamSettingRepository,
-    private readonly forbiddenWordRepository: ForbiddenWordRepository,
   ) {}
 
   async validateExistsStudio(userId: number) {
@@ -72,24 +69,5 @@ export class StudioService {
     }
 
     await this.studioRepository.update(studio.id, studio);
-  }
-
-  async getForbiddenWords(userId: number, query: GetForbiddenWordsQuery) {
-    const studio = await this.studioRepository.findOne({
-      select: { id: true },
-      where: { user: { id: userId } },
-    });
-
-    if (studio === null) {
-      throw new NotFoundException('not found studio');
-    }
-
-    const [rows, total] = await this.forbiddenWordRepository.findAndCount({
-      where: { studio: { id: studio.id } },
-      skip: query.skip,
-      take: query.take,
-    });
-
-    return new ForbiddenWordsDto(rows, total);
   }
 }
