@@ -1,21 +1,24 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { tap } from 'rxjs';
 
-import { HttpLogDto } from '../dtos';
+import { HttpLog } from '../implements';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler) {
-    context.switchToHttp().getRequest().context = context.getClass()?.name;
-    context.switchToHttp().getRequest().handler = context.getHandler()?.name;
+    const req = context.switchToHttp().getRequest();
+
+    req.context = context.getClass()?.name;
+    req.handler = context.getHandler()?.name;
 
     return next.handle().pipe(
       tap(() => {
         const http = context.switchToHttp();
-        const log = new HttpLogDto(http.getRequest<Request>());
+        const req = http.getRequest();
+        const res = http.getResponse();
+        const log = req.log as HttpLog;
 
-        Logger.verbose(log.toSuccess(http.getResponse<Response>()));
+        Logger.verbose(log.setUser(req.user).toSuccess(res));
       }),
     );
   }

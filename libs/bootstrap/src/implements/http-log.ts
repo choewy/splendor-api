@@ -1,7 +1,9 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-export class HttpLogDto {
+export class HttpLog {
+  private incomingTime = Date.now();
+
   context: string;
   handler: string;
   method: string;
@@ -13,6 +15,7 @@ export class HttpLogDto {
   user?: object;
   message = '';
   status = -1;
+  latency: number;
   error?: object;
   exception?: HttpException;
 
@@ -25,26 +28,36 @@ export class HttpLogDto {
     this.query = req.query;
     this.ip = req.ip;
     this.xforwaredfor = req.header['x-forwared-for'];
-    this.user = req.user;
+  }
+
+  setUser(user?: object) {
+    this.user = user;
+
+    return this;
   }
 
   toSuccess(res: Response) {
     const [message, status] = Object.entries(HttpStatus).find(([, v]) => v === res.statusCode) ?? [-1, ''];
 
-    this.status = Number(status);
     this.message = String(message);
+    this.status = Number(status);
+    this.latency = Date.now() - this.incomingTime;
+    delete this.incomingTime;
 
     return this;
   }
 
   toException(exception: HttpException, error?: Error) {
-    this.status = exception.getStatus();
     this.message = exception.name;
+    this.status = exception.getStatus();
     this.exception = exception;
 
     if (error) {
       this.error = { name: error.name, message: error.message, stack: error.stack };
     }
+
+    this.latency = Date.now() - this.incomingTime;
+    delete this.incomingTime;
 
     return this;
   }

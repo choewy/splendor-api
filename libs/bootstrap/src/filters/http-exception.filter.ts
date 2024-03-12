@@ -1,14 +1,16 @@
 import { ArgumentsHost, Catch, HttpException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { Request, Response } from 'express';
 
-import { HttpExceptionDto, HttpLogDto } from '../dtos';
+import { HttpExceptionDto } from '../dtos';
+import { HttpLog } from '../implements';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {
   catch(e: Error | HttpException, host: ArgumentsHost): void {
     const http = host.switchToHttp();
-    const log = new HttpLogDto(http.getRequest<Request>());
+    const req = http.getRequest();
+    const res = http.getResponse();
+    const log = (req.log as HttpLog).setUser(req.user);
 
     let exception = e as HttpException;
 
@@ -21,6 +23,6 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
       Logger.warn(log.toException(exception));
     }
 
-    host.switchToHttp().getResponse<Response>().status(exception.getStatus()).send(new HttpExceptionDto(exception));
+    res.status(exception.getStatus()).send(new HttpExceptionDto(exception));
   }
 }
