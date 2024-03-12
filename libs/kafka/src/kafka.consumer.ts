@@ -31,7 +31,7 @@ export class KafkaConsumer implements OnModuleInit {
   ) {
     this.kafka = new Kafka({ ...this.kafkaConfig, logCreator: KafkaLoggerCreator });
 
-    if (this.consumerConfig) {
+    if (this.consumerConfig?.groupId && this.consumerConfig?.topics && this.consumerConfig.topics.length > 0) {
       this.consumer = this.kafka.consumer(this.consumerConfig);
     }
   }
@@ -47,7 +47,7 @@ export class KafkaConsumer implements OnModuleInit {
   private async handleMessage(message: EachMessagePayload) {
     const payload = new KafkaMessagePayload(message);
     const event = new KafkaMessageEvent(payload.topic);
-    const contexts = await this.eventEmitter.emitAsync(event.name, payload.message);
+    const contexts = await this.eventEmitter.emitAsync(event.name, payload);
 
     if (contexts.length === 0) {
       return this.logger.warn({ message: 'handleMessage Skipped', payload, contexts });

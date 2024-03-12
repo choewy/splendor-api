@@ -14,7 +14,13 @@ export class KafkaMessagePayload {
 
   constructor(payload: EachMessagePayload) {
     const key = Buffer.from(payload.message.key).toString('utf-8');
-    const value = JSON.parse(Buffer.from(payload.message.value).toString('utf-8'));
+    let value: object;
+
+    try {
+      value = JSON.parse(Buffer.from(payload.message.value).toString('utf-8'));
+    } catch {
+      value = { plainText: payload.message.value };
+    }
 
     this.topic = payload.topic;
     this.partition = payload.partition;
