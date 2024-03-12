@@ -96,6 +96,12 @@
       ],
       "@libs/redis/*": [
         "libs/redis/src/*"
+      ],
+      "@libs/kafka": [
+        "libs/kafka/src"
+      ],
+      "@libs/kafka/*": [
+        "libs/kafka/src/*"
       ]
     }
   }
