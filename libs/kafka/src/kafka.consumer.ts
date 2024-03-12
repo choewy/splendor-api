@@ -29,9 +29,10 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
     private readonly kafkaConfig: KafkaConfig,
     private readonly consumerConfig?: ConsumerConfig & { topics: Array<string | RegExp> },
   ) {
-    this.kafka = new Kafka({ ...this.kafkaConfig, logCreator: KafkaLoggerCreator });
+    this.kafkaConfig.logCreator = KafkaLoggerCreator;
+    this.kafka = new Kafka(this.kafkaConfig);
 
-    if (this.consumerConfig?.groupId && this.consumerConfig?.topics && this.consumerConfig.topics.length > 0) {
+    if (this.consumerConfig?.groupId) {
       this.consumer = this.kafka.consumer(this.consumerConfig);
     }
   }
@@ -39,8 +40,8 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     if (this.consumer) {
       await this.consumer.connect();
-      await this.consumer.subscribe({ topics: this.consumerConfig.topics, fromBeginning: true });
-      await this.consumer.run({ eachMessage: this.handleMessage.bind(this), autoCommit: false });
+      await this.consumer.subscribe({ topics: this.consumerConfig.topics, fromBeginning: false });
+      await this.consumer.run({ eachMessage: this.handleMessage.bind(this), autoCommit: true });
     }
   }
 
@@ -55,10 +56,6 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
     const event = new KafkaMessageEvent(payload.topic);
     const contexts = await this.eventEmitter.emitAsync(event.name, payload);
 
-    if (contexts.length === 0) {
-      return this.logger.warn({ message: 'handleMessage Skipped', payload, contexts });
-    }
-
     let e: { context: string; error: Error } = null;
 
     for (const context of contexts) {
@@ -70,7 +67,6 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
 
     if (e === null) {
       const targets = contexts.map((context) => context.context);
-
       this.logger.debug({ message: 'handleMessage Succeed', payload, targets });
     } else {
       const error = {
@@ -83,7 +79,5 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
 
       this.logger.error({ message: 'handleMessage Failed', payload, error });
     }
-
-    this.consumer.commitOffsets([{ topic: message.topic, partition: message.partition, offset: message.message.offset }]);
   }
 }

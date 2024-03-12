@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Provider } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit, Provider } from '@nestjs/common';
 import { Admin, AdminConfig, Kafka, KafkaConfig } from 'kafkajs';
 
 import { KafkaLibsModuleAsyncOptions } from './interfaces';
@@ -18,13 +18,13 @@ export class KafkaAdmin implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  private readonly logger = new Logger(KafkaAdmin.name);
   private readonly kafka: Kafka;
   private readonly admin: Admin;
 
-  constructor(clientConfig: KafkaConfig, adminConfig?: AdminConfig) {
-    this.kafka = new Kafka({ ...clientConfig, logCreator: KafkaLoggerCreator });
-    this.admin = this.kafka.admin(adminConfig);
+  constructor(readonly kafkaConfig: KafkaConfig, readonly adminConfig?: AdminConfig) {
+    this.kafkaConfig.logCreator = KafkaLoggerCreator;
+    this.kafka = new Kafka(this.kafkaConfig);
+    this.admin = this.kafka.admin(this.adminConfig);
   }
 
   async onModuleInit() {
