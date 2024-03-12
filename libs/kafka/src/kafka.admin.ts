@@ -1,11 +1,11 @@
-import { Injectable, Logger, OnModuleInit, Provider } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Provider } from '@nestjs/common';
 import { Admin, AdminConfig, Kafka, KafkaConfig } from 'kafkajs';
 
 import { KafkaLibsModuleAsyncOptions } from './interfaces';
 import { KafkaLoggerCreator } from './kafka.logger';
 
 @Injectable()
-export class KafkaAdmin implements OnModuleInit {
+export class KafkaAdmin implements OnModuleInit, OnModuleDestroy {
   static createProvider(moduleAsyncOptions: KafkaLibsModuleAsyncOptions): Provider {
     return {
       provide: KafkaAdmin,
@@ -29,6 +29,10 @@ export class KafkaAdmin implements OnModuleInit {
 
   async onModuleInit() {
     await this.admin.connect();
+  }
+
+  async onModuleDestroy() {
+    await this.admin.disconnect();
   }
 
   get topics() {

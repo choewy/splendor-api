@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit, Provider } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Provider } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Kafka, EachMessagePayload, Consumer, KafkaConfig, ConsumerConfig } from 'kafkajs';
 
@@ -7,7 +7,7 @@ import { KafkaLibsModuleAsyncOptions } from './interfaces';
 import { KafkaLoggerCreator } from './kafka.logger';
 
 @Injectable()
-export class KafkaConsumer implements OnModuleInit {
+export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
   static createProvider(moduleAsyncOptions: KafkaLibsModuleAsyncOptions): Provider {
     return {
       provide: KafkaConsumer,
@@ -41,6 +41,12 @@ export class KafkaConsumer implements OnModuleInit {
       await this.consumer.connect();
       await this.consumer.subscribe({ topics: this.consumerConfig.topics, fromBeginning: true });
       await this.consumer.run({ eachMessage: this.handleMessage.bind(this), autoCommit: true });
+    }
+  }
+
+  async onModuleDestroy() {
+    if (this.consumer) {
+      await this.consumer.disconnect();
     }
   }
 

@@ -1,11 +1,11 @@
-import { Injectable, Logger, OnModuleInit, Provider } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit, Provider } from '@nestjs/common';
 import { Kafka, KafkaConfig, Producer, ProducerConfig } from 'kafkajs';
 
 import { KafkaSendMessageCommand } from './implements';
 import { KafkaLibsModuleAsyncOptions } from './interfaces';
 
 @Injectable()
-export class KafkaProducer implements OnModuleInit {
+export class KafkaProducer implements OnModuleInit, OnModuleDestroy {
   static createProvider(moduleAsyncOptions: KafkaLibsModuleAsyncOptions): Provider {
     return {
       provide: KafkaProducer,
@@ -29,6 +29,10 @@ export class KafkaProducer implements OnModuleInit {
 
   async onModuleInit() {
     await this.producer.connect();
+  }
+
+  async onModuleDestroy() {
+    await this.producer.disconnect();
   }
 
   async send(command: KafkaSendMessageCommand) {
