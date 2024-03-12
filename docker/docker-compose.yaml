@@ -11,20 +11,25 @@ x-environment: &environment
   MYSQL_PASSWORD: ensemble
   MYSQL_DATABASE: ensemble
   MYSQL_SYNCHRONIZE: false
+  REDIS_HOST: redis
+  REDIS_PORT: 6380
+  REDIS_DB: 1
 
 services:
   mysql:
     build:
       context: ./mysql
       dockerfile: dockerfile
+    container_name: ensemble-mysql
     ports:
       - 33061:3306
     environment:
       MYSQL_ROOT_PASSWORD: ensemble
     volumes:
-      - ./mysql/log:/var/log/mysql
-      - ./mysql/lib:/var/lib/mysql
       - ./mysql/disk:/disk
+      - ./mysql/lib:/var/lib/mysql
+      - ./mysql/logs:/var/log/mysql
+    restart: unless-stopped
     networks:
       - ensemble
 
@@ -32,11 +37,56 @@ services:
     build:
       context: ./redis
       dockerfile: dockerfile
-    command: redis-server --port 6379
+    container_name: ensemble-redis
     ports:
       - 6380:6379
     volumes:
-      - ./data:/data
+      - ./redis/data:/data
+    restart: unless-stopped
+    networks:
+      - ensemble
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: ensemble-zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+    ports:
+      - 2181:2181
+    volumes:
+      - ./zookeeper/data:/data
+      - ./zookeeper/datalog:/datalog
+      - ./zookeeper/logs:/logs
+    restart: unless-stopped
+    networks:
+      - ensemble
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: ensemble-kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_NAME_OUTSIDE: EXTERNAL
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://127.0.0.1:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - ./kafka/data:/var/lib/kafka/data
+      - ./kafka/secrets:/etc/kafka/secrets
+    ports:
+      - 29092:29092
+    restart: unless-stopped
+    networks:
+      - ensemble
 
   admin:
     build:
