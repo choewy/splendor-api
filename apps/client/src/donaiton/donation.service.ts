@@ -30,6 +30,12 @@ export class DonationService {
   async getSender(senderId: number, amount: number) {
     const user = await this.userRepository.findOne({
       relations: { userWallet: true },
+      select: {
+        id: true,
+        nickname: true,
+        profileImageUrl: true,
+        userWallet: { credit: true },
+      },
       where: { id: senderId },
     });
 
@@ -48,6 +54,11 @@ export class DonationService {
 
   async getRecipient(recipientId: number) {
     const recipient = await this.userRepository.findOne({
+      select: {
+        id: true,
+        nickname: true,
+        profileImageUrl: true,
+      },
       where: { id: recipientId },
     });
 
@@ -129,7 +140,7 @@ export class DonationService {
       await userWalletRepository
         .createQueryBuilder()
         .update()
-        .set({ credit: () => `point + ${command.amount}` })
+        .set({ point: () => `point + ${command.amount}` })
         .where({ userId: command.recipientId })
         .execute();
 

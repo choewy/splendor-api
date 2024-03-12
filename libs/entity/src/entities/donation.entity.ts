@@ -1,4 +1,4 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { UserEntity } from './user.entity';
 
@@ -19,8 +19,14 @@ export class DonationEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 1024, default: null })
   imageUrl: string | null;
 
+  @Column({ type: 'boolean', default: false })
+  played: boolean;
+
   @CreateDateColumn({ type: 'timestamp' })
   readonly createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  readonly updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (e) => e.sentDonations, { onDelete: 'CASCADE' })
   @JoinColumn()
