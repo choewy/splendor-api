@@ -32,11 +32,11 @@ async function bootstrap() {
 
   const bootstrapOptions = createBootstrapOptions(app);
 
+  app.enableShutdownHooks();
   app.enableCors(appConfig.corsOptions);
   app.useGlobalPipes(...bootstrapOptions.pipes);
   app.useGlobalFilters(...bootstrapOptions.filters);
   app.useGlobalInterceptors(...bootstrapOptions.interceptors);
-  app.enableShutdownHooks();
 
   await app.listen(appConfig.port);
 }

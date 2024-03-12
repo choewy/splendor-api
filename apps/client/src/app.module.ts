@@ -4,6 +4,9 @@ import {
   JWT_CONFIG,
   JwtConfig,
   JwtConfigReturnType,
+  KAFKA_CONFIG,
+  KafkaConfig,
+  KafkaConfigReturnType,
   KakaoOAuthConfig,
   NaverOAuthConfig,
   REDIS_CONFIG,
@@ -16,6 +19,7 @@ import {
 import { entities } from '@libs/entity';
 import { HealthLibsModule } from '@libs/health';
 import { JwtLibsModule } from '@libs/jwt';
+import { KafkaLibsModule } from '@libs/kafka';
 import { RedisLibsModule } from '@libs/redis';
 import { TypeOrmLibsModule } from '@libs/typeorm';
 import { Module } from '@nestjs/common';
@@ -35,7 +39,17 @@ import { UserModule } from './user';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [SystemConfig, AppConfig, TypeOrmMySQLConfig, RedisConfig, JwtConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
+      load: [
+        SystemConfig,
+        AppConfig,
+        TypeOrmMySQLConfig,
+        RedisConfig,
+        KafkaConfig,
+        JwtConfig,
+        GoogleOAuthConfig,
+        KakaoOAuthConfig,
+        NaverOAuthConfig,
+      ],
       envFilePath: ['.envs/.env', '.envs/.env.client', '.envs/.env.mysql', '.envs/.env.redis'],
     }),
     TypeOrmLibsModule.forRootAsync({
@@ -54,6 +68,12 @@ import { UserModule } from './user';
       inject: [ConfigService],
       useFactory(configService: ConfigService) {
         return configService.get<JwtConfigReturnType>(JWT_CONFIG);
+      },
+    }),
+    KafkaLibsModule.registerAsync({
+      inject: [ConfigService],
+      useFactory(configService: ConfigService) {
+        return configService.get<KafkaConfigReturnType>(KAFKA_CONFIG)();
       },
     }),
     HealthLibsModule.register(),
