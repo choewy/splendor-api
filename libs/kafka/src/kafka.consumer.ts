@@ -40,7 +40,7 @@ export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
     if (this.consumer) {
       await this.consumer.connect();
       await this.consumer.subscribe({ topics: this.consumerConfig.topics, fromBeginning: true });
-      await this.consumer.run({ eachMessage: this.handleMessage.bind(this), autoCommit: true });
+      await this.consumer.run({ eachMessage: this.handleMessage.bind(this), autoCommit: false });
     }
   }
 
