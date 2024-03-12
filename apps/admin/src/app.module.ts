@@ -1,14 +1,11 @@
 import {
   AppConfig,
-  GoogleOAuthConfig,
   JWT_CONFIG,
   JwtConfig,
   JwtConfigReturnType,
   KAFKA_CONFIG,
   KafkaConfig,
   KafkaConfigReturnType,
-  KakaoOAuthConfig,
-  NaverOAuthConfig,
   REDIS_CONFIG,
   RedisConfig,
   SystemConfig,
@@ -17,7 +14,6 @@ import {
   TypeOrmMySQLConfigReturnType,
 } from '@libs/configs';
 import { entities } from '@libs/entity';
-import { HealthLibsModule } from '@libs/health';
 import { JwtLibsModule } from '@libs/jwt';
 import { KafkaLibsModule } from '@libs/kafka';
 import { RedisLibsModule } from '@libs/redis';
@@ -28,31 +24,13 @@ import { RedisOptions } from 'ioredis';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth';
-import { DonationModule } from './donaiton';
-import { FollowModule } from './follow';
-import { ForbiddenWordsModule } from './forbidden-words';
-import { OAuthModule } from './oauth';
-import { ProfileModule } from './profile';
-import { StudioModule } from './studio';
-import { UserModule } from './user';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [
-        SystemConfig,
-        AppConfig,
-        TypeOrmMySQLConfig,
-        RedisConfig,
-        KafkaConfig,
-        JwtConfig,
-        GoogleOAuthConfig,
-        KakaoOAuthConfig,
-        NaverOAuthConfig,
-      ],
-      envFilePath: ['.envs/.env', '.envs/.env.client', '.envs/.env.mysql', '.envs/.env.redis'],
+      load: [SystemConfig, AppConfig, TypeOrmMySQLConfig, RedisConfig, KafkaConfig, JwtConfig],
+      envFilePath: ['./.envs/.env', './.envs/.env.admin'],
     }),
     TypeOrmLibsModule.forRootAsync({
       inject: [ConfigService],
@@ -78,15 +56,6 @@ import { UserModule } from './user';
         return configService.get<JwtConfigReturnType>(JWT_CONFIG);
       },
     }),
-    HealthLibsModule.register(),
-    AuthModule,
-    OAuthModule,
-    UserModule,
-    ProfileModule,
-    FollowModule,
-    StudioModule,
-    ForbiddenWordsModule,
-    DonationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
