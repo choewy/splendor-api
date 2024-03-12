@@ -36,7 +36,7 @@ import { UserModule } from './user';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [SystemConfig, AppConfig, TypeOrmMySQLConfig, RedisConfig, JwtConfig, GoogleOAuthConfig, KakaoOAuthConfig, NaverOAuthConfig],
-      envFilePath: ['.envs/.env', '.envs/.env.client'],
+      envFilePath: ['.envs/.env', '.envs/.env.client', '.envs/.env.mysql', '.envs/.env.redis'],
     }),
     TypeOrmLibsModule.forRootAsync({
       inject: [ConfigService],

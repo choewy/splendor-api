@@ -2,12 +2,13 @@
 /dist
 /node_modules
 /build
-/temp
-/docker/mysql/lib
-/docker/mysql/log
-/docker/mysql/disk
 /docker/**/build.tar.gz
+/docker/**/lib
+/docker/**/disk
+/docker/**/data
+/docker/**/datalog
 /docker/**/logs
+/docker/**/secrets
 
 # Logs
 logs
@@ -42,17 +43,8 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
 .envs/.env*
-!.envs/.env*.public
-
-
-
+!.envs/.env*.local
 
 
 # temp directory
