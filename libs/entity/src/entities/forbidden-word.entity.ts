@@ -7,7 +7,7 @@ export class ForbiddenWordEntity extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   readonly id: number;
 
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ type: 'varchar', length: 20 })
   word: string;
 
   @Column({ type: 'boolean', default: true })
