@@ -218,6 +218,7 @@ export class OAuthService implements OAuthServiceImpl {
       profileImageUrl: profile.profileImageUrl,
       userWallet: {},
       userFollowCount: {},
+      userDonations: {},
       oauths: [profile],
       studio: {
         alias: await this.createStudioUniqueAlias(profile.platform, profile.nickname),

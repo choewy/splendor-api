@@ -37,4 +37,9 @@ export class AppModule {
   onStream(message: KafkaMessagePayload) {
     console.log(message);
   }
+
+  @OnKafkaMessage(KafkaStreamTopics.Play)
+  onPlay(message: KafkaMessagePayload) {
+    console.log(message);
+  }
 }

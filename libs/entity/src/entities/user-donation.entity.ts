@@ -8,10 +8,10 @@ export class UserDonationsEntity {
   readonly userId: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  sendCount: number;
+  sentCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  sendAmount: number;
+  sentAmount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   receivedCount: number;
