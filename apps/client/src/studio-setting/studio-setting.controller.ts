@@ -6,7 +6,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { UpdateStudioDonationSettingCommand, UpdateStudioPlaySettingCommand } from './commands';
 import { StudioSettingService } from './studio-setting.service';
 
-@ApiController('studio-settings')
+@ApiController('studio-settings', '스튜디오 설정')
 @UseGuards(JwtGuard)
 export class StudioSettingController {
   constructor(private readonly studioSettingService: StudioSettingService) {}
