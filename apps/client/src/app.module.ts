@@ -35,6 +35,7 @@ import { ForbiddenWordsModule } from './forbidden-words';
 import { OAuthModule } from './oauth';
 import { ProfileModule } from './profile';
 import { StudioModule } from './studio';
+import { StudioSettingModuie } from './studio-setting';
 import { UserModule } from './user';
 
 @Module({
@@ -85,6 +86,7 @@ import { UserModule } from './user';
     ProfileModule,
     FollowModule,
     StudioModule,
+    StudioSettingModuie,
     ForbiddenWordsModule,
     DonationModule,
   ],

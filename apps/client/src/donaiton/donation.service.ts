@@ -1,4 +1,4 @@
-import { KafkaStreamMessageKey, KafkaStreamTopics } from '@libs/common';
+import { KafkaDonationMessage, KafkaTopics } from '@libs/common';
 import {
   BlockRepository,
   DonationEntity,
@@ -11,7 +11,7 @@ import {
   UserRepository,
   UserWalletEntity,
 } from '@libs/entity';
-import { KafkaMessage, KafkaProducer, KafkaSendMessageCommand } from '@libs/kafka';
+import { KafkaProducer, KafkaSendMessageCommand } from '@libs/kafka';
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateDonationCommand } from './commands';
@@ -30,12 +30,6 @@ export class DonationService {
   async getSender(senderId: number, amount: number) {
     const user = await this.userRepository.findOne({
       relations: { userWallet: true },
-      select: {
-        id: true,
-        nickname: true,
-        profileImageUrl: true,
-        userWallet: { credit: true },
-      },
       where: { id: senderId },
     });
 
@@ -54,11 +48,6 @@ export class DonationService {
 
   async getRecipient(recipientId: number) {
     const recipient = await this.userRepository.findOne({
-      select: {
-        id: true,
-        nickname: true,
-        profileImageUrl: true,
-      },
       where: { id: recipientId },
     });
 
@@ -77,6 +66,10 @@ export class DonationService {
 
     if (studio === null) {
       throw new NotFoundException('not found studio');
+    }
+
+    if (studio.studioDonationSetting.status === false) {
+      throw new ConflictException('donating is diabled');
     }
 
     return studio;
@@ -160,7 +153,7 @@ export class DonationService {
         .where({ userId: command.recipientId })
         .execute();
 
-      const donation = donationRepository.create({
+      return donationRepository.save({
         recipient,
         sender,
         amount: command.amount,
@@ -168,9 +161,6 @@ export class DonationService {
         message: command.message ?? null,
         imageUrl: command.imageUrl ?? null,
       });
-
-      await donation.save();
-      return donation;
     });
   }
 
@@ -184,7 +174,8 @@ export class DonationService {
     await this.validateForbiddenWords(studio.id, command.nickname, command.message);
 
     const donation = await this.createDonationTransaction(sender, recipient, command);
-    const message = new KafkaMessage(KafkaStreamMessageKey.Donate, donation);
-    await this.kafkaProducer.send(new KafkaSendMessageCommand(KafkaStreamTopics.Play, [message]));
+    const kafkaMessages = [new KafkaDonationMessage(donation, sender, recipient, studio)];
+    const kafkaSendMessageCommand = new KafkaSendMessageCommand(KafkaTopics.Donation, kafkaMessages);
+    await this.kafkaProducer.send(kafkaSendMessageCommand);
   }
 }
