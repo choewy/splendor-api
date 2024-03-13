@@ -1,4 +1,4 @@
-import { KafkaTopics, KafkaStudioPlaySettingMessage, KafkaStudioDonationSettingMessage } from '@libs/common';
+import { KafkaTopics, KafkaStudioPlaySettingMessage, KafkaStudioDonationSettingMessage, toDecimal } from '@libs/common';
 import { StudioDonationSettingRepository, StudioPlaySettingRepository, StudioRepository } from '@libs/entity';
 import { KafkaProducer, KafkaSendMessageCommand } from '@libs/kafka';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -43,9 +43,9 @@ export class StudioSettingService {
       studioPlaySetting.messageVolume = command.messageVolume;
     }
 
-    if (Decimal.isDecimal(command.delay)) {
-      const delay = new Decimal(command.delay);
+    const delay = toDecimal(command.delay);
 
+    if (Decimal.isDecimal(delay)) {
       if (delay.lessThanOrEqualTo(new Decimal(0))) {
         throw new BadRequestException('');
       }
@@ -57,9 +57,9 @@ export class StudioSettingService {
       studioPlaySetting.delay = delay.toFixed(1);
     }
 
-    if (Decimal.isDecimal(command.maxSeconds)) {
-      const maxSeconds = new Decimal(command.maxSeconds);
+    const maxSeconds = toDecimal(command.maxSeconds);
 
+    if (Decimal.isDecimal(maxSeconds)) {
       if (maxSeconds.lessThanOrEqualTo(new Decimal(0))) {
         throw new BadRequestException('');
       }
