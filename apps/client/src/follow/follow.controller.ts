@@ -46,19 +46,15 @@ export class FollowController {
     return this.followService.getFollowers(userId, param.userId, query);
   }
 
-  @Put('follow')
+  @Put()
   @ApiBearerAuth()
-  @ApiOperation({ summary: '다른 회원 팔로우' })
+  @ApiOperation({ summary: '다른 회원 팔로우/언팔로우' })
   @ApiOkResponse()
-  async follow(@ReqJwtUser() userId: number | null, @Body() command: FollowCommand) {
-    return this.followService.follow(userId, command.userId);
-  }
-
-  @Put('unfollow')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '다른 회원 언팔로우' })
-  @ApiOkResponse()
-  async unfollow(@ReqJwtUser() userId: number | null, @Body() command: FollowCommand) {
-    return this.followService.unfollow(userId, command.userId);
+  async followOrUnfollow(@ReqJwtUser() userId: number | null, @Body() command: FollowCommand) {
+    if (command.follow) {
+      return this.followService.follow(userId, command.userId);
+    } else {
+      return this.followService.unfollow(userId, command.userId);
+    }
   }
 }
