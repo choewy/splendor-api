@@ -1,7 +1,9 @@
 import { StudioPlaySettingEntity } from '@libs/entity';
 import { KafkaMessage } from '@libs/kafka';
 
-export class KafkaStudioPlaySettingMessage extends KafkaMessage {
+export class KafkaStudioPlaySettingMessage extends KafkaMessage<
+  Pick<StudioPlaySettingEntity, 'studioId' | 'autoPlay' | 'alertVolume' | 'messageVolume' | 'delay' | 'maxSeconds'>
+> {
   constructor(studioPlaySetting: StudioPlaySettingEntity) {
     super({
       studioId: studioPlaySetting.studioId,
