@@ -1,10 +1,11 @@
-import { StudioPlaySettingEntity } from '@libs/entity';
+import { DonationEntity, StudioPlaySettingEntity, UserEntity } from '@libs/entity';
 import { Injectable, Type } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Redis } from 'ioredis';
 import { v4 } from 'uuid';
 
-import { AlertWidgetGatewaySession, StudioWidgetSession, StudioPlaySession, StudioSettingSession } from './implements';
+import { DonationStatus } from './constants';
+import { SocketSession, WidgetSession, PlaySettingSession, DonationSession } from './implements';
 
 @Injectable()
 export class SessionService {
@@ -16,21 +17,7 @@ export class SessionService {
     return JSON.stringify(session, null, 2);
   }
 
-  async parseHash<Session>(session: Type<Session>, record: Promise<Record<string, string> | null>) {
-    const result = await record;
-
-    if (result === null) {
-      return null;
-    }
-
-    try {
-      return plainToInstance(session, result);
-    } catch {
-      return null;
-    }
-  }
-
-  async parseStr<Session>(session: Type<Session>, value: Promise<string | null>) {
+  async parse<Session>(session: Type<Session>, value: Promise<string | null>) {
     const result = await value;
 
     if (result === null) {
@@ -38,97 +25,158 @@ export class SessionService {
     }
 
     try {
-      return plainToInstance(session, JSON.parse(result));
+      return plainToInstance(session, JSON.parse(result), {
+        enableCircularCheck: true,
+        enableImplicitConversion: true,
+      });
     } catch {
       return null;
     }
   }
 
-  async createStudioPlaySession(studioId: number): Promise<void> {
-    const key = StudioPlaySession.createKey(studioId);
-
-    if (await this.redis.exists(key)) {
-      return;
-    }
-
-    await this.redis.hset(key, new StudioPlaySession());
+  async getPlaySettingSession(studioId: number) {
+    return this.parse(PlaySettingSession, this.redis.get(PlaySettingSession.createKey(studioId)));
   }
 
-  async deleteStudioPlaySession(studioId: number) {
-    await this.redis.del(StudioPlaySession.createKey(studioId));
-  }
-
-  async createStudioSettingSession(studioPlaySetting: StudioPlaySettingEntity) {
+  async createPlaySettingSession(studioPlaySetting: Partial<StudioPlaySettingEntity>) {
     const studioId = studioPlaySetting.studioId;
-    const key = StudioSettingSession.createKey(studioId);
 
-    if (await this.redis.exists(key)) {
-      return;
+    let session = await this.getPlaySettingSession(studioId);
+
+    if (session === null) {
+      session = new PlaySettingSession(studioPlaySetting);
+      await this.redis.set(PlaySettingSession.createKey(studioId), this.stringify(session));
     }
 
-    await this.redis.hset(key, new StudioSettingSession(studioPlaySetting));
+    return session;
   }
 
-  async deleteStudioSettingSession(studioId: number) {
-    await this.redis.del(StudioSettingSession.createKey(studioId));
-  }
+  async updatePlaySettingSession(studioPlaySetting: Partial<StudioPlaySettingEntity>) {
+    const studioId = studioPlaySetting.studioId;
+    const playSettingSessionKey = PlaySettingSession.createKey(studioId);
+    const playSettingSession = new PlaySettingSession(studioPlaySetting);
 
-  async getAlertWidgetGatewaySession(socketId: string) {
-    const key = AlertWidgetGatewaySession.createKey();
-    return this.parseStr(AlertWidgetGatewaySession, this.redis.hget(key, socketId));
-  }
-
-  async createAlertWidgetGatewaySession(studioId: number, socketId: string) {
-    const alertWidgetGatewaySessionKey = AlertWidgetGatewaySession.createKey();
-    const alertWidgetGatewaySession = new AlertWidgetGatewaySession(this.serverId, studioId);
-
-    await this.redis.hset(alertWidgetGatewaySessionKey, { [socketId]: this.stringify(alertWidgetGatewaySession) });
-  }
-
-  async deleteAlertWidgetGatewaySession(socketId: string): Promise<AlertWidgetGatewaySession | null> {
-    const key = AlertWidgetGatewaySession.createKey();
-    const session = await this.getAlertWidgetGatewaySession(socketId);
-
-    if (session?.serverId === this.serverId) {
-      await this.redis.hdel(key, socketId);
-      return session;
+    if (await this.redis.exists(playSettingSessionKey)) {
+      await this.redis.set(playSettingSessionKey, this.stringify(playSettingSession));
+      return playSettingSession;
     }
 
     return null;
   }
 
-  async getStudioWidgetSession(studioId: number, socketId: string) {
-    const key = StudioWidgetSession.createKey(studioId);
-    return this.parseStr(StudioWidgetSession, this.redis.hget(key, socketId));
+  async deletePlaySettingSession(studioId: number) {
+    await this.redis.del(PlaySettingSession.createKey(studioId));
   }
 
-  async getStudioWidgetSessionCount(studioId: number) {
-    const key = StudioWidgetSession.createKey(studioId);
-    return this.redis.hlen(key);
+  async getSocketSession(socketId: string) {
+    const key = SocketSession.createKey();
+    return this.parse(SocketSession, this.redis.hget(key, socketId));
   }
 
-  async createStudioWidgetSession(studioId: number, socketId: string, name: string) {
-    const key = StudioWidgetSession.createKey(studioId);
-    const session = new StudioWidgetSession(name);
+  async createSocketSession(studioId: number, socketId: string) {
+    const socketSessionKey = SocketSession.createKey();
+    const socketSession = new SocketSession(this.serverId, studioId);
 
-    await this.redis.hset(key, { [socketId]: this.stringify(session) });
+    await this.redis.hset(socketSessionKey, { [socketId]: this.stringify(socketSession) });
   }
 
-  async deleteStudioWidgetSession(studioId: number, socketId: string): Promise<void> {
-    const key = StudioWidgetSession.createKey(studioId);
-    const session = await this.getStudioWidgetSession(studioId, socketId);
+  async deleteSocketSession(socketId: string) {
+    const socketSessionKey = SocketSession.createKey();
+    const socketSession = await this.getSocketSession(socketId);
 
-    if (session) {
-      await this.redis.hdel(key, socketId);
+    if (socketSession?.serverId === this.serverId) {
+      await this.redis.hdel(socketSessionKey, socketId);
     }
 
-    const count = await this.getStudioWidgetSessionCount(studioId);
+    return socketSession;
+  }
+
+  async getWidgetSession(studioId: number, socketId: string) {
+    return this.parse(WidgetSession, this.redis.hget(WidgetSession.createKey(studioId), socketId));
+  }
+
+  async getWidgetSessionCount(studioId: number) {
+    return this.redis.hlen(WidgetSession.createKey(studioId));
+  }
+
+  async createWidgetSession(studioId: number, socketId: string, name: string) {
+    const socketSessionKey = SocketSession.createKey();
+    const socketSession = new SocketSession(this.serverId, studioId);
+    await this.redis.hset(socketSessionKey, { [socketId]: this.stringify(socketSession) });
+
+    const widgetSessionKey = WidgetSession.createKey(studioId);
+    const widgetSession = new WidgetSession(name);
+    await this.redis.hset(widgetSessionKey, { [socketId]: this.stringify(widgetSession) });
+  }
+
+  async updateWidgetSession(studioId: number, socketId: string, session: WidgetSession) {
+    await this.redis.hset(WidgetSession.createKey(studioId), { [socketId]: this.stringify(session) });
+  }
+
+  async deleteWidgetSession(socketId: string): Promise<void> {
+    const socketSession = await this.deleteSocketSession(socketId);
+
+    if (socketSession === null) {
+      return;
+    }
+
+    const serverId = socketSession.serverId;
+    const studioId = socketSession.studioId;
+
+    if (serverId !== this.serverId) {
+      return;
+    }
+
+    const widgetSession = await this.getWidgetSession(studioId, socketId);
+
+    if (widgetSession) {
+      await this.redis.hdel(WidgetSession.createKey(studioId), socketId);
+    }
+
+    const count = await this.getWidgetSessionCount(studioId);
 
     if (count > 0) {
       return;
     }
 
-    await this.deleteStudioPlaySession(studioId);
-    await this.deleteStudioSettingSession(studioId);
+    await this.deletePlaySettingSession(studioId);
+  }
+
+  async getDonationIndex(studioId: number, id: number) {
+    return this.redis.hget(DonationSession.createHashKey(studioId), String(id));
+  }
+
+  async getDonationSession(studioId: number, id: number) {
+    const index = await this.getDonationIndex(studioId, id);
+
+    if (index === null) {
+      return null;
+    }
+
+    return this.parse(DonationSession, this.redis.lindex(DonationSession.createListKey(studioId), index));
+  }
+
+  async createDonationSession(studioId: number, donation: Partial<DonationEntity>, sender: Partial<UserEntity>, status?: DonationStatus) {
+    const listKey = DonationSession.createListKey(studioId);
+    const hashKey = DonationSession.createHashKey(studioId);
+
+    const session = new DonationSession(donation, sender, status);
+    const index = await this.redis.rpush(listKey, this.stringify(session));
+
+    await this.redis.hset(hashKey, { [session.id]: index - 1 });
+    await this.redis.expire(listKey, DonationSession.TTL);
+    await this.redis.expire(hashKey, DonationSession.TTL);
+
+    return session;
+  }
+
+  async updateDonationSession(studioId: number, donation: DonationSession) {
+    const index = await this.getDonationIndex(studioId, donation.id);
+
+    if (index === null) {
+      return null;
+    }
+
+    await this.redis.lset(DonationSession.createListKey(studioId), index, this.stringify(donation));
   }
 }

@@ -1,4 +1,4 @@
-export class AlertWidgetGatewaySession {
+export class SocketSession {
   readonly serverId: string;
   readonly studioId: number;
   readonly connectedAt: Date;
@@ -10,6 +10,6 @@ export class AlertWidgetGatewaySession {
   }
 
   static createKey() {
-    return ['gateway', 'alert-widget'].join(':');
+    return 'socket:widgets';
   }
 }

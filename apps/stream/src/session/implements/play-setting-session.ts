@@ -1,13 +1,23 @@
-import { KafkaStudioPlaySettingDto } from '@libs/common';
+import { StudioPlaySettingEntity } from '@libs/entity';
+import { ApiResponseProperty } from '@nestjs/swagger';
 
-export class StudioSettingSession {
+export class PlaySettingSession {
+  @ApiResponseProperty({ type: Boolean })
   autoPlay: boolean;
+
+  @ApiResponseProperty({ type: Number })
   alertVolume: number;
+
+  @ApiResponseProperty({ type: Number })
   messageVolume: number;
+
+  @ApiResponseProperty({ type: String, format: 'float' })
   delay: string;
+
+  @ApiResponseProperty({ type: String, format: 'float' })
   maxSeconds: string;
 
-  constructor(studioPlaySetting: KafkaStudioPlaySettingDto) {
+  constructor(studioPlaySetting: Partial<StudioPlaySettingEntity>) {
     this.autoPlay = studioPlaySetting.autoPlay;
     this.alertVolume = studioPlaySetting.alertVolume;
     this.messageVolume = studioPlaySetting.messageVolume;
