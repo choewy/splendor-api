@@ -28,8 +28,6 @@ async function bootstrap() {
 
     const asyncApiDocument = AsyncApiModule.createDocument(app, asyncApiConfig);
     await AsyncApiModule.setup('api/async', app, asyncApiDocument);
-
-    console.log('todo - create async api docs');
   }
 
   const bootstrapOptions = createBootstrapOptions(app);
