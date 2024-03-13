@@ -1,4 +1,4 @@
-import { KafkaStreamTopics } from '@libs/common';
+import { KafkaTopics } from '@libs/common';
 import { AppConfig, KAFKA_CONFIG, KafkaConfig, KafkaConfigReturnType, REDIS_CONFIG, RedisConfig, SystemConfig } from '@libs/configs';
 import { KafkaLibsModule, KafkaMessagePayload, OnKafkaMessage } from '@libs/kafka';
 import { RedisLibsModule } from '@libs/redis';
@@ -25,7 +25,7 @@ import { AppService } from './app.service';
     KafkaLibsModule.registerAsync({
       inject: [ConfigService],
       useFactory(configService: ConfigService) {
-        return configService.get<KafkaConfigReturnType>(KAFKA_CONFIG)(Object.values(KafkaStreamTopics));
+        return configService.get<KafkaConfigReturnType>(KAFKA_CONFIG)([KafkaTopics.Studio, KafkaTopics.Donation]);
       },
     }),
   ],
@@ -33,13 +33,13 @@ import { AppService } from './app.service';
   providers: [AppService],
 })
 export class AppModule {
-  @OnKafkaMessage(KafkaStreamTopics.Stream)
-  onStream(message: KafkaMessagePayload) {
+  @OnKafkaMessage(KafkaTopics.Studio)
+  onStudio(message: KafkaMessagePayload) {
     console.log(message);
   }
 
-  @OnKafkaMessage(KafkaStreamTopics.Play)
-  onPlay(message: KafkaMessagePayload) {
+  @OnKafkaMessage(KafkaTopics.Donation)
+  onDonation(message: KafkaMessagePayload) {
     console.log(message);
   }
 }
