@@ -1,4 +1,4 @@
-import { KafkaStudioDonationSettingMessage, KafkaTopics } from '@libs/common';
+import { KafkaTopics } from '@libs/common';
 import {
   AppConfig,
   EnsembleConfig,
@@ -13,7 +13,7 @@ import {
   TypeOrmMySQLConfigReturnType,
 } from '@libs/configs';
 import { entities } from '@libs/entity';
-import { KafkaLibsModule, KafkaMessagePayload, OnKafkaTopic } from '@libs/kafka';
+import { KafkaLibsModule } from '@libs/kafka';
 import { RedisLibsModule } from '@libs/redis';
 import { TypeOrmLibsModule } from '@libs/typeorm';
 import { Module } from '@nestjs/common';
@@ -24,8 +24,8 @@ import { AlertWidgetModule } from './alert-widget';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DonationModule } from './donation';
+import { PlaySettingModule } from './play-setting';
 import { SessionModule } from './session';
-import { StudioPlaySettingModule } from './studio-play-setting';
 
 @Module({
   imports: [
@@ -59,20 +59,10 @@ import { StudioPlaySettingModule } from './studio-play-setting';
     }),
     SessionModule.forRoot(),
     AlertWidgetModule,
-    StudioPlaySettingModule,
+    PlaySettingModule,
     DonationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  @OnKafkaTopic(KafkaTopics.Studio)
-  onStudio(payload: KafkaMessagePayload) {
-    console.log(payload);
-  }
-
-  @OnKafkaTopic(KafkaTopics.StudioDonationSetting)
-  onStudioDonationSetting(payload: KafkaMessagePayload<KafkaStudioDonationSettingMessage>) {
-    console.log(payload);
-  }
-}
+export class AppModule {}
