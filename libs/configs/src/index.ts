@@ -1,5 +1,6 @@
 export * from './system.config';
 export * from './app.config';
+export * from './ensemble.config';
 export * from './typeorm-mysql.config';
 export * from './jwt.config';
 export * from './google-oauth.config';
