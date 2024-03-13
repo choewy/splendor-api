@@ -1,6 +1,6 @@
-import { KafkaTopics } from '@libs/common';
+import { KafkaDonationMessage, KafkaStudioDonationSettingMessage, KafkaStudioPlaySettingMessage, KafkaTopics } from '@libs/common';
 import { AppConfig, KAFKA_CONFIG, KafkaConfig, KafkaConfigReturnType, REDIS_CONFIG, RedisConfig, SystemConfig } from '@libs/configs';
-import { KafkaLibsModule, KafkaMessagePayload, OnKafkaMessage } from '@libs/kafka';
+import { KafkaLibsModule, KafkaMessagePayload, OnKafkaTopic } from '@libs/kafka';
 import { RedisLibsModule } from '@libs/redis';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -25,7 +25,12 @@ import { AppService } from './app.service';
     KafkaLibsModule.registerAsync({
       inject: [ConfigService],
       useFactory(configService: ConfigService) {
-        return configService.get<KafkaConfigReturnType>(KAFKA_CONFIG)([KafkaTopics.Studio, KafkaTopics.Donation]);
+        return configService.get<KafkaConfigReturnType>(KAFKA_CONFIG)([
+          KafkaTopics.Studio,
+          KafkaTopics.StudioPlaySetting,
+          KafkaTopics.StudioDonationSetting,
+          KafkaTopics.Donation,
+        ]);
       },
     }),
   ],
@@ -33,13 +38,23 @@ import { AppService } from './app.service';
   providers: [AppService],
 })
 export class AppModule {
-  @OnKafkaMessage(KafkaTopics.Studio)
-  onStudio(message: KafkaMessagePayload) {
-    console.log(message);
+  @OnKafkaTopic(KafkaTopics.Studio)
+  onStudio(payload: KafkaMessagePayload) {
+    console.log(payload);
   }
 
-  @OnKafkaMessage(KafkaTopics.Donation)
-  onDonation(message: KafkaMessagePayload) {
-    console.log(message);
+  @OnKafkaTopic(KafkaTopics.StudioPlaySetting)
+  onStudioPlaySetting(payload: KafkaMessagePayload<KafkaStudioPlaySettingMessage>) {
+    console.log(payload);
+  }
+
+  @OnKafkaTopic(KafkaTopics.StudioDonationSetting)
+  onStudioDonationSetting(payload: KafkaMessagePayload<KafkaStudioDonationSettingMessage>) {
+    console.log(payload);
+  }
+
+  @OnKafkaTopic(KafkaTopics.Donation)
+  onDonation(payload: KafkaMessagePayload<KafkaDonationMessage>) {
+    console.log(payload);
   }
 }

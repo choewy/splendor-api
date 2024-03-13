@@ -1,1 +1,1 @@
-export * from './on-kafka-message';
+export * from './on-kafka-topic';

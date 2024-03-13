@@ -74,7 +74,7 @@ export class StudioSettingService {
     await this.sutdioPlaySettingRepository.update({ studio }, studioPlaySetting);
 
     const kafkaMessages = [new KafkaStudioPlaySettingMessage(studioPlaySetting)];
-    const kafkaSendMessageCommand = new KafkaSendMessageCommand(KafkaTopics.Studio, kafkaMessages);
+    const kafkaSendMessageCommand = new KafkaSendMessageCommand(KafkaTopics.StudioPlaySetting, kafkaMessages);
     await this.kafkaProducer.send(kafkaSendMessageCommand);
   }
 
@@ -101,7 +101,7 @@ export class StudioSettingService {
     await this.studioDonationSettingRepository.update({ studio }, studioDonationSetting);
 
     const kafkaMessages = [new KafkaStudioDonationSettingMessage(studioDonationSetting)];
-    const kafkaSendMessageCommand = new KafkaSendMessageCommand(KafkaTopics.Studio, kafkaMessages);
+    const kafkaSendMessageCommand = new KafkaSendMessageCommand(KafkaTopics.StudioDonationSetting, kafkaMessages);
     await this.kafkaProducer.send(kafkaSendMessageCommand);
   }
 }

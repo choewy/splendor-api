@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 
 import { KafkaMessageEvent } from '../implements';
 
-export const OnKafkaMessage = (topic: string) => {
+export const OnKafkaTopic = (topic: string) => {
   const event = new KafkaMessageEvent(topic);
 
   return applyDecorators(OnEvent(event.name), (_target: any, _key: string, descriptor: PropertyDescriptor) => {

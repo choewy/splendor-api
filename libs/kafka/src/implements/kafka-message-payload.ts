@@ -2,10 +2,10 @@ import { EachMessagePayload, IHeaders } from 'kafkajs';
 
 import { KafkaMessage } from './kafka-message';
 
-export class KafkaMessagePayload {
+export class KafkaMessagePayload<Message = KafkaMessage> {
   readonly topic: string;
   readonly partition: number;
-  readonly message: KafkaMessage;
+  readonly message: Message;
   readonly timestamp: Date;
   readonly attributes: number;
   readonly offset: number;
@@ -13,7 +13,6 @@ export class KafkaMessagePayload {
   readonly headers?: IHeaders;
 
   constructor(payload: EachMessagePayload) {
-    const key = Buffer.from(payload.message.key).toString('utf-8');
     let value: object;
 
     try {
@@ -22,9 +21,15 @@ export class KafkaMessagePayload {
       value = { plainText: payload.message.value };
     }
 
+    let key: string | undefined;
+
+    if (payload.message.key) {
+      key = Buffer.from(payload.message.key).toString('utf-8');
+    }
+
     this.topic = payload.topic;
     this.partition = payload.partition;
-    this.message = new KafkaMessage(key, value);
+    this.message = new KafkaMessage(value, key) as Message;
     this.timestamp = new Date(+payload.message.timestamp);
     this.attributes = payload.message.attributes;
     this.offset = +payload.message.offset;
