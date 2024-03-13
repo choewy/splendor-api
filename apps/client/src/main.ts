@@ -27,7 +27,7 @@ async function bootstrap() {
       swaggerOptions.authAction = { bearer: { schema: { type: 'http' }, value: accessToken } };
     }
 
-    SwaggerModule.setup('swagger', app, swaggerDocument, { swaggerOptions });
+    SwaggerModule.setup('api/swagger', app, swaggerDocument, { swaggerOptions });
   }
 
   const bootstrapOptions = createBootstrapOptions(app);

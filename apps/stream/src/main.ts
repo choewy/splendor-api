@@ -3,6 +3,7 @@ import { APP_CONFIG, AppConfigReturnType, NodeEnv, SYSTEM_CONFIG, SystemConfigRe
 import { WinstonLogger } from '@libs/logger';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { AsyncApiDocumentBuilder, AsyncApiModule } from 'nestjs-asyncapi';
 
 import { AppModule } from './app.module';
 
@@ -15,6 +16,19 @@ async function bootstrap() {
   const systemConfig = config.get<SystemConfigReturnType>(SYSTEM_CONFIG);
 
   if (systemConfig.env === NodeEnv.Local) {
+    const asyncApiConfig = new AsyncApiDocumentBuilder()
+      .setTitle('Ensemble Stream APIs')
+      .setVersion(appConfig.version)
+      .setDefaultContentType('application/json')
+      .addServer('alert', {
+        url: `ws://localhost:${appConfig.port}/alert`,
+        protocol: 'socket.io',
+      })
+      .build();
+
+    const asyncApiDocument = AsyncApiModule.createDocument(app, asyncApiConfig);
+    await AsyncApiModule.setup('api/async', app, asyncApiDocument);
+
     console.log('todo - create async api docs');
   }
 
