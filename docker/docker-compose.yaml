@@ -6,9 +6,9 @@ x-environment: &environment
   TZ: UTC
   NODE_ENV: local
   KAFKAJS_NO_PARTITIONER_WARNING: 1
-  ENSEMBLE_CLIENT_URL: http://client:4000
-  ENSEMBLE_STREAM_URL: http://stream:4001
-  ENSEMBLE_ADMIN_URL: http://admin:4002
+  ENSEMBLE_CLIENT_SERVER_URL: http://client:4000
+  ENSEMBLE_STREAM_SERVER_URL: http://stream:4001
+  ENSEMBLE_ADMIN_SERVER_URL: http://admin:4002
   MYSQL_HOST: mysql
   MYSQL_PORT: 3306
   MYSQL_USERNAME: root
