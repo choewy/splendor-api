@@ -225,7 +225,6 @@ export class OAuthService implements OAuthServiceImpl {
         studioPlaySetting: {},
         studioDonationSetting: {},
         alertWidget: {},
-        messageWidget: {},
       },
     });
 

@@ -1,5 +1,6 @@
 import {
   AppConfig,
+  EnsembleConfig,
   GoogleOAuthConfig,
   JWT_CONFIG,
   JwtConfig,
@@ -37,6 +38,7 @@ import { ProfileModule } from './profile';
 import { StudioModule } from './studio';
 import { StudioSettingModuie } from './studio-setting';
 import { UserModule } from './user';
+import { WidgetModule } from './widget';
 
 @Module({
   imports: [
@@ -44,6 +46,7 @@ import { UserModule } from './user';
       isGlobal: true,
       load: [
         SystemConfig,
+        EnsembleConfig,
         AppConfig,
         TypeOrmMySQLConfig,
         RedisConfig,
@@ -88,6 +91,7 @@ import { UserModule } from './user';
     StudioModule,
     StudioSettingModuie,
     ForbiddenWordsModule,
+    WidgetModule,
     DonationModule,
   ],
   controllers: [AppController],

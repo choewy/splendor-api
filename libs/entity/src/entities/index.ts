@@ -1,3 +1,5 @@
+export * from './abstracts';
+
 export * from './donation.entity';
 export * from './user.entity';
 export * from './user-wallet.entity';
@@ -15,7 +17,6 @@ export * from './alert-widget.entity';
 export * from './tts-voice.entity';
 export * from './tts-voice-image.entity';
 export * from './tts-voice-sample-sound.entity';
-export * from './message-widget.entity';
 export * from './block.entity';
 
 import { AlertSoundEntity } from './alert-sound.entity';
@@ -24,7 +25,6 @@ import { BlockEntity } from './block.entity';
 import { DonationEntity } from './donation.entity';
 import { FollowEntity } from './follow.entity';
 import { ForbiddenWordEntity } from './forbidden-word.entity';
-import { MessageWidgetEntity } from './message-widget.entity';
 import { OAuthEntity } from './oauth.entity';
 import { StudioDonationSettingEntity } from './studio-donation-setting.entity';
 import { StudioPlaySettingEntity } from './studio-play-setting.entity';
@@ -57,5 +57,4 @@ export const entities = [
   TtsVoiceEntity,
   TtsVoiceImageEntity,
   TtsVoiceSampleSoundEntity,
-  MessageWidgetEntity,
 ];

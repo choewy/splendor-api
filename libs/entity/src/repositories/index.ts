@@ -9,3 +9,4 @@ export * from './studio-donation-setting.repository';
 export * from './studio-stream-setting.repository';
 export * from './donation.repository';
 export * from './block.repository';
+export * from './alert-widget.repository';

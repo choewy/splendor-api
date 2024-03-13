@@ -15,7 +15,6 @@ import {
 import { AlertSoundEntity } from './alert-sound.entity';
 import { AlertWidgetEntity } from './alert-widget.entity';
 import { ForbiddenWordEntity } from './forbidden-word.entity';
-import { MessageWidgetEntity } from './message-widget.entity';
 import { StudioDonationSettingEntity } from './studio-donation-setting.entity';
 import { StudioPlaySettingEntity } from './studio-play-setting.entity';
 import { StudioStreamSettingEntity } from './studio-stream-setting.entity';
@@ -70,8 +69,4 @@ export class StudioEntity extends BaseEntity {
   @OneToOne(() => AlertWidgetEntity, (e) => e.studio, { cascade: true })
   @JoinTable()
   alertWidget: AlertWidgetEntity;
-
-  @OneToOne(() => MessageWidgetEntity, (e) => e.studio, { cascade: true })
-  @JoinTable()
-  messageWidget: MessageWidgetEntity;
 }
