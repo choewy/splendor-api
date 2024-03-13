@@ -14,7 +14,7 @@ export class StudioSettingController {
   @Patch('play')
   @ApiBearerAuth()
   @ApiOperation({ summary: '스튜디오 재생 설정 변경' })
-  @ApiOkResponse()
+  @ApiOkResponse({ type: null })
   async updateStudioPlaySetting(@ReqJwtUser() userId: number, @Body() command: UpdateStudioPlaySettingCommand) {
     return this.studioSettingService.updateStudioPlaySetting(userId, command);
   }
@@ -22,7 +22,7 @@ export class StudioSettingController {
   @Patch('donation')
   @ApiBearerAuth()
   @ApiOperation({ summary: '스튜디오 후원 설정 변경' })
-  @ApiOkResponse()
+  @ApiOkResponse({ type: null })
   async updateStudioDonationSetting(@ReqJwtUser() userId: number, @Body() command: UpdateStudioDonationSettingCommand) {
     return this.studioSettingService.updateStudioDonationSetting(userId, command);
   }

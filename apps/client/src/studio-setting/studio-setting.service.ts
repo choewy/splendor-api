@@ -1,4 +1,4 @@
-import { KafkaTopics, KafkaStudioPlaySettingMessage } from '@libs/common';
+import { KafkaTopics, KafkaStudioPlaySettingMessage, KafkaStudioDonationSettingMessage } from '@libs/common';
 import { StudioDonationSettingRepository, StudioPlaySettingRepository, StudioRepository } from '@libs/entity';
 import { KafkaProducer, KafkaSendMessageCommand } from '@libs/kafka';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -80,7 +80,28 @@ export class StudioSettingService {
 
   async updateStudioDonationSetting(userId: number, command: UpdateStudioDonationSettingCommand) {
     const studio = await this.getStudio(userId);
+    const studioDonationSetting = await this.studioDonationSettingRepository.findOneBy({ studio: { id: studio.id } });
 
-    await this.studioDonationSettingRepository.update({ studio }, {});
+    if (typeof command.status === 'boolean') {
+      studioDonationSetting.status = command.status;
+    }
+
+    if (typeof command.min === 'number') {
+      studioDonationSetting.min = command.min;
+    }
+
+    if (typeof command.max === 'number') {
+      studioDonationSetting.max = command.max;
+    }
+
+    if (studioDonationSetting.max < studioDonationSetting.min) {
+      throw new BadRequestException();
+    }
+
+    await this.studioDonationSettingRepository.update({ studio }, studioDonationSetting);
+
+    const kafkaMessages = [new KafkaStudioDonationSettingMessage(studioDonationSetting)];
+    const kafkaSendMessageCommand = new KafkaSendMessageCommand(KafkaTopics.Studio, kafkaMessages);
+    await this.kafkaProducer.send(kafkaSendMessageCommand);
   }
 }
