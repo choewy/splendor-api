@@ -1,17 +1,28 @@
 import { StudioPlaySettingEntity } from '@libs/entity';
 import { KafkaMessage } from '@libs/kafka';
 
-export class KafkaStudioPlaySettingMessage extends KafkaMessage<
-  Pick<StudioPlaySettingEntity, 'studioId' | 'autoPlay' | 'alertVolume' | 'messageVolume' | 'delay' | 'maxSeconds'>
-> {
+export class KafkaStudioPlaySettingDto
+  implements Pick<StudioPlaySettingEntity, 'studioId' | 'autoPlay' | 'alertVolume' | 'messageVolume' | 'delay' | 'maxSeconds'>
+{
+  studioId: number;
+  autoPlay: boolean;
+  alertVolume: number;
+  messageVolume: number;
+  delay: string;
+  maxSeconds: string;
+
   constructor(studioPlaySetting: StudioPlaySettingEntity) {
-    super({
-      studioId: studioPlaySetting.studioId,
-      autoPlay: studioPlaySetting.autoPlay,
-      alertVolume: studioPlaySetting.alertVolume,
-      messageVolume: studioPlaySetting.messageVolume,
-      delay: studioPlaySetting.delay,
-      maxSeconds: studioPlaySetting.maxSeconds,
-    });
+    this.studioId = studioPlaySetting.studioId;
+    this.autoPlay = studioPlaySetting.autoPlay;
+    this.alertVolume = studioPlaySetting.alertVolume;
+    this.messageVolume = studioPlaySetting.messageVolume;
+    this.delay = studioPlaySetting.delay;
+    this.maxSeconds = studioPlaySetting.maxSeconds;
+  }
+}
+
+export class KafkaStudioPlaySettingMessage extends KafkaMessage<KafkaStudioPlaySettingDto> {
+  constructor(studioPlaySetting: StudioPlaySettingEntity) {
+    super(new KafkaStudioPlaySettingDto(studioPlaySetting));
   }
 }

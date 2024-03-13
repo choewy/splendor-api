@@ -1,15 +1,22 @@
 import { StudioDonationSettingEntity } from '@libs/entity';
 import { KafkaMessage } from '@libs/kafka';
 
-export class KafkaStudioDonationSettingMessage extends KafkaMessage<
-  Pick<StudioDonationSettingEntity, 'studioId' | 'min' | 'max' | 'status'>
-> {
+export class KafkaStudioDonationSettingDto implements Pick<StudioDonationSettingEntity, 'studioId' | 'min' | 'max' | 'status'> {
+  studioId: number;
+  min: number;
+  max: number;
+  status: boolean;
+
   constructor(studioDonationSetting: StudioDonationSettingEntity) {
-    super({
-      studioId: studioDonationSetting.studioId,
-      min: studioDonationSetting.min,
-      max: studioDonationSetting.max,
-      status: studioDonationSetting.status,
-    });
+    this.studioId = studioDonationSetting.studioId;
+    this.min = studioDonationSetting.min;
+    this.max = studioDonationSetting.max;
+    this.status = studioDonationSetting.status;
+  }
+}
+
+export class KafkaStudioDonationSettingMessage extends KafkaMessage<KafkaStudioDonationSettingDto> {
+  constructor(studioDonationSetting: StudioDonationSettingEntity) {
+    super(new KafkaStudioDonationSettingDto(studioDonationSetting));
   }
 }
