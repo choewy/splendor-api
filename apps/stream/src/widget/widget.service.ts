@@ -63,9 +63,11 @@ export class WidgetService {
 
   async createSession(client: Socket) {
     const auth = this.getSocketAuth(client);
-
     const widget = await this.getWidget(auth.id, auth.type);
+
     const studioId = widget.studio.id;
+
+    await this.socketSessionManager.create(client.id, studioId);
     const studioPlaySession = await this.studioPlaySessionManager.get(studioId);
 
     if (studioPlaySession === null) {
@@ -77,7 +79,7 @@ export class WidgetService {
   }
 
   async deleteSession(client: Socket) {
-    const socketSession = await this.socketSessionManager.get(client.id);
+    const socketSession = await this.socketSessionManager.delete(client.id);
 
     if (socketSession === null) {
       return;
