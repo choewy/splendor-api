@@ -1,11 +1,10 @@
-import { JwtGuard, ReqJwtUser, SkipJwtGuard } from '@libs/jwt';
+import { JwtGuard, ReqJwtUser } from '@libs/jwt';
 import { ApiController } from '@libs/swagger';
-import { Body, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { Body, Get, Patch, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 
 import { UpdateStudioCommand } from './commands';
 import { StudioDto } from './dtos';
-import { GetStudioQuery } from './queries';
 import { StudioService } from './studio.service';
 
 @ApiController('studio', '스튜디오')
@@ -19,14 +18,6 @@ export class StudioController {
   @ApiOkResponse({ type: StudioDto })
   async getStudio(@ReqJwtUser() userId: number) {
     return this.studioService.getStudio(userId);
-  }
-
-  @Get(':userId(\\d+)')
-  @SkipJwtGuard()
-  @ApiOperation({ summary: '스튜디오 조회' })
-  @ApiOkResponse({ type: StudioDto })
-  async getOtherStudio(@Param() query: GetStudioQuery) {
-    return this.studioService.getStudio(query.userId);
   }
 
   @Patch()

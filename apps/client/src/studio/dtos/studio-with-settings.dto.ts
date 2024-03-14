@@ -4,7 +4,6 @@ import { ApiResponseProperty } from '@nestjs/swagger';
 import { StudioDonationSettingDto } from './studio-donation-setting.dto';
 import { StudioPlaySettingDto } from './studio-play-setting.dto';
 import { StudioSettingsDto } from './studio-settings.dto';
-import { StudioStreamSettingsDto } from './studio-stream-settings.dto';
 
 export class StudioWithSettingsDto {
   @ApiResponseProperty({ type: Number })
@@ -26,7 +25,6 @@ export class StudioWithSettingsDto {
     this.settings = new StudioSettingsDto(
       new StudioPlaySettingDto(studio.studioPlaySetting),
       new StudioDonationSettingDto(studio.studioDonationSetting),
-      new StudioStreamSettingsDto(studio.studioStreamSettings, studio.studioStreamSettings.length),
     );
   }
 }

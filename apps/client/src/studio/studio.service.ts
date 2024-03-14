@@ -1,9 +1,4 @@
-import {
-  StudioDonationSettingRepository,
-  StudioPlaySettingRepository,
-  StudioRepository,
-  StudioStreamSettingRepository,
-} from '@libs/entity';
+import { StudioRepository } from '@libs/entity';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Not } from 'typeorm';
 
@@ -12,12 +7,7 @@ import { StudioDto } from './dtos';
 
 @Injectable()
 export class StudioService {
-  constructor(
-    private readonly studioRepository: StudioRepository,
-    private readonly studioPlaySettingRepository: StudioPlaySettingRepository,
-    private readonly studioDonationSettingRepository: StudioDonationSettingRepository,
-    private readonly studioStreamSettingRepository: StudioStreamSettingRepository,
-  ) {}
+  constructor(private readonly studioRepository: StudioRepository) {}
 
   async validateExistsStudio(userId: number) {
     const studio = await this.studioRepository.findOne({
@@ -36,7 +26,6 @@ export class StudioService {
       relations: {
         studioDonationSetting: true,
         studioPlaySetting: true,
-        studioStreamSettings: true,
       },
       where: { user: { id: userId } },
     });
