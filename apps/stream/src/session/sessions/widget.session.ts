@@ -11,13 +11,16 @@ export enum WidgetSessionStatus {
 }
 
 export class WidgetSession {
+  readonly id: string;
+  readonly studioId: number;
   readonly type: WidgetType;
-
   donationId: number | null = null;
   status = WidgetSessionStatus.Wating;
   updatedAt = new Date();
 
-  constructor(type: WidgetType) {
+  constructor(id: string, studioId: number, type: WidgetType) {
+    this.id = id;
+    this.studioId = studioId;
     this.type = type;
   }
 

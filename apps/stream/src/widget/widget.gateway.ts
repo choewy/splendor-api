@@ -1,12 +1,11 @@
-import { OnEvent } from '@nestjs/event-emitter';
-import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { AsyncApiSub } from 'nestjs-asyncapi';
+import { WsExceptionDto } from '@libs/bootstrap';
+import { AsyncApiEvent, AsyncApiException } from '@libs/docs';
+import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
 
-import { WidgetGatewaySubEvent } from './constants';
+import { WidgetSubChannel } from './constants';
 import { WidgetService } from './widget.service';
 import { StudioSettingSession } from '../session';
-import { SettingEvent } from '../setting';
 
 @WebSocketGateway({ namespace: 'widget' })
 export class WidgetGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -15,21 +14,51 @@ export class WidgetGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(private readonly widgetService: WidgetService) {}
 
+  protected roomName(studioId: number) {
+    return ['studio', studioId].join('_');
+  }
+
   async handleConnection(client: Socket) {
-    await this.widgetService.handleConnection(client);
+    try {
+      const session = await this.widgetService.createSession(client);
+      await client.join(this.roomName(session.studioId));
+    } catch (e) {
+      this.asendException(client, e, true);
+    }
   }
 
   async handleDisconnect(client: Socket) {
-    await this.widgetService.handleDisconnection(client);
+    await this.widgetService.deleteSession(client);
   }
 
-  @AsyncApiSub({
-    summary: '설정 변경 동기화',
-    channel: WidgetGatewaySubEvent.Setting,
-    message: { payload: StudioSettingSession },
+  @AsyncApiException({
+    summary: '예외 발생',
+    channel: WidgetSubChannel.Exception,
   })
-  @OnEvent(SettingEvent.Change)
-  onPlaySetting(studioId: number, settingSession: StudioSettingSession) {
-    this.nsp.in([this.widgetService.createStudioRoom(studioId)]).emit(WidgetGatewaySubEvent.Setting, settingSession);
+  asendException(client: Socket, exception: WsException, disconnect?: boolean) {
+    client.emit(WidgetSubChannel.Exception, new WsExceptionDto(exception));
+
+    if (disconnect) {
+      client.disconnect(true);
+    }
+  }
+
+  @AsyncApiEvent({
+    type: 'sub',
+    summary: '설정 변경 동기화',
+    channel: WidgetSubChannel.Setting,
+    payload: StudioSettingSession,
+  })
+  sendSetting(studioId: number, session: StudioSettingSession) {
+    this.nsp.in([this.roomName(studioId)]).emit(WidgetSubChannel.Setting, session);
+  }
+
+  @AsyncApiEvent({
+    type: 'pub',
+    summary: '재생 완료',
+    channel: 'complete',
+  })
+  async onPlayComplate() {
+    return null;
   }
 }

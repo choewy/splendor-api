@@ -13,6 +13,7 @@ import {
   TypeOrmMySQLConfigReturnType,
 } from '@libs/configs';
 import { entities } from '@libs/entity';
+import { EventModule } from '@libs/event';
 import { KafkaLibsModule } from '@libs/kafka';
 import { RedisLibsModule } from '@libs/redis';
 import { TypeOrmLibsModule } from '@libs/typeorm';
@@ -25,6 +26,7 @@ import { AppService } from './app.service';
 import { DonationModule } from './donation';
 import { SessionModule } from './session';
 import { SettingModule } from './setting';
+import { WidgetModule } from './widget';
 
 @Module({
   imports: [
@@ -56,9 +58,11 @@ import { SettingModule } from './setting';
         ]);
       },
     }),
+    EventModule.forRoot(),
     SessionModule.forRoot(),
     SettingModule,
     DonationModule,
+    WidgetModule,
   ],
   controllers: [AppController],
   providers: [AppService],

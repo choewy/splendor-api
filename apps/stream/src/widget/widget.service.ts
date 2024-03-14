@@ -1,7 +1,9 @@
 import { AlertWidgetEntity, AlertWidgetRepository } from '@libs/entity';
 import { Injectable } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
+import { WidgetSocketAuth } from './interfaces';
 import {
   DonationSessionManager,
   SocketSessionManager,
@@ -23,26 +25,27 @@ export class WidgetService {
     private readonly widgetSessionManager: WidgetSessionManager,
   ) {}
 
-  createStudioRoom(studioId: number) {
-    return `widgets_in_${studioId}`;
-  }
-
-  async handleConnection(client: Socket) {
+  protected getSocketAuth(client: Socket): WidgetSocketAuth {
     const auth = client.handshake.auth;
 
     const id = auth.id ?? null;
     const type = auth.type ?? null;
 
     if (id === null || type === null) {
-      return client.disconnect(true);
+      throw new WsException('invalid socket auth');
     }
 
+    return { id, type };
+  }
+
+  protected async getWidget(id: string, type: WidgetType) {
     let widget: AlertWidgetEntity;
 
     switch (type) {
       case WidgetType.Alert:
         widget = await this.alertWidgetRepository.findOne({
           relations: { studio: true },
+          select: { id: true, studio: { id: true } },
           where: { id },
         });
         break;
@@ -52,9 +55,16 @@ export class WidgetService {
     }
 
     if (widget === null) {
-      return client.disconnect(true);
+      throw new WsException('not found widget');
     }
 
+    return widget;
+  }
+
+  async createSession(client: Socket) {
+    const auth = this.getSocketAuth(client);
+
+    const widget = await this.getWidget(auth.id, auth.type);
     const studioId = widget.studio.id;
     const studioPlaySession = await this.studioPlaySessionManager.get(studioId);
 
@@ -62,11 +72,11 @@ export class WidgetService {
       await this.studioPlaySessionManager.create(studioId);
     }
 
-    await this.widgetSessionManager.set(studioId, client.id, new WidgetSession(type));
-    await client.join(this.createStudioRoom(studioId));
+    const session = new WidgetSession(widget.id, studioId, auth.type);
+    return this.widgetSessionManager.set(studioId, client.id, session);
   }
 
-  async handleDisconnection(client: Socket) {
+  async deleteSession(client: Socket) {
     const socketSession = await this.socketSessionManager.get(client.id);
 
     if (socketSession === null) {

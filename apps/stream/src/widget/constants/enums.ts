@@ -1,8 +1,9 @@
-export enum WidgetGatewaySubEvent {
+export enum WidgetSubChannel {
+  Exception = 'exception',
   Setting = 'setting',
   Play = 'play',
 }
 
-export enum WidgetGatewayPubEvent {
+export enum WidgetPubChannel {
   PlayComplete = 'play',
 }

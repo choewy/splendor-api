@@ -25,6 +25,7 @@ export class WidgetSessionManager {
 
   async set(studioId: number, socketId: string, session: WidgetSession) {
     await this.redis.hset(this.createKey(studioId), session.toHash(socketId));
+    return session;
   }
 
   async delete(studioId: number, socketId: string) {
