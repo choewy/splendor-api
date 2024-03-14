@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { DonationMessageController } from './donation-message.controller';
+import { DonationEventController } from './donation-event.controller';
 import { DonationService } from './donation.service';
 
-@Module({
-  providers: [DonationService, DonationMessageController],
-})
+@Module({ providers: [DonationService, DonationEventController] })
 export class DonationModule {}

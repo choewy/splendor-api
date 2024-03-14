@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { DonationService } from './donation.service';
 
 @Injectable()
-export class DonationMessageController {
+export class DonationEventController {
   constructor(private readonly donationService: DonationService) {}
 
   @OnKafkaTopic(KafkaTopics.Donation)
