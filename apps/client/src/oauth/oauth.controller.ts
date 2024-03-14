@@ -1,6 +1,6 @@
+import { ApiController, ApiPipeException } from '@libs/docs';
 import { OAuthPlatform } from '@libs/entity';
 import { JwtGuard, ReqJwtUser } from '@libs/jwt';
-import { ApiController, ApiPipeException } from '@libs/swagger';
 import { Body, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { Response } from 'express';

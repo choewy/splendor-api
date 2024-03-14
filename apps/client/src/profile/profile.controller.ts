@@ -1,6 +1,6 @@
 import { FileFilter } from '@libs/bootstrap';
+import { ApiController, ApiFile } from '@libs/docs';
 import { JwtGuard, ReqJwtUser } from '@libs/jwt';
-import { ApiController, ApiFile } from '@libs/swagger';
 import { Body, Get, Patch, UploadedFile, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 

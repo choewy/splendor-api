@@ -1,6 +1,6 @@
 import { XRefererGuard } from '@libs/common';
+import { ApiController } from '@libs/docs';
 import { JwtGuard, ReqJwtUser } from '@libs/jwt';
-import { ApiController } from '@libs/swagger';
 import { Body, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 

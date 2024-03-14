@@ -1,5 +1,5 @@
+import { ApiController, ApiExtendsException, ApiPipeException } from '@libs/docs';
 import { JwtLibsService } from '@libs/jwt';
-import { ApiController, ApiExtendsException, ApiPipeException } from '@libs/swagger';
 import { Body, NotFoundException, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
 import { Request } from 'express';

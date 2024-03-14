@@ -1,5 +1,5 @@
+import { ApiController } from '@libs/docs';
 import { JwtGuard, ReqJwtUser } from '@libs/jwt';
-import { ApiController } from '@libs/swagger';
 import { Body, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 

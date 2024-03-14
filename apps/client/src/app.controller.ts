@@ -1,5 +1,5 @@
 import { VersionDto } from '@libs/common';
-import { ApiController } from '@libs/swagger';
+import { ApiController } from '@libs/docs';
 import { Get } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 

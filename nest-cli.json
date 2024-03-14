@@ -88,13 +88,13 @@
         "tsConfigPath": "libs/testing/tsconfig.lib.json"
       }
     },
-    "swagger": {
+    "docs": {
       "type": "library",
-      "root": "libs/swagger",
+      "root": "libs/docs",
       "entryFile": "index",
-      "sourceRoot": "libs/swagger/src",
+      "sourceRoot": "libs/docs/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/swagger/tsconfig.lib.json"
+        "tsConfigPath": "libs/docs/tsconfig.lib.json"
       }
     },
     "configs": {
@@ -140,6 +140,15 @@
       "sourceRoot": "libs/common/src",
       "compilerOptions": {
         "tsConfigPath": "libs/common/tsconfig.lib.json"
+      }
+    },
+    "event": {
+      "type": "library",
+      "root": "libs/event",
+      "entryFile": "index",
+      "sourceRoot": "libs/event/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/event/tsconfig.lib.json"
       }
     }
   }

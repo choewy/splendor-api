@@ -138,12 +138,13 @@
       "^@libs/entity(|/.*)$": "<rootDir>/libs/entity/src/$1",
       "^@libs/bootstrap(|/.*)$": "<rootDir>/libs/bootstrap/src/$1",
       "^@libs/testing(|/.*)$": "<rootDir>/libs/testing/src/$1",
-      "^@libs/swagger(|/.*)$": "<rootDir>/libs/swagger/src/$1",
+      "^@libs/docs(|/.*)$": "<rootDir>/libs/docs/src/$1",
       "^@libs/configs(|/.*)$": "<rootDir>/libs/configs/src/$1",
       "^@libs/jwt(|/.*)$": "<rootDir>/libs/jwt/src/$1",
       "^@libs/redis(|/.*)$": "<rootDir>/libs/redis/src/$1",
       "^@libs/kafka(|/.*)$": "<rootDir>/libs/kafka/src/$1",
-      "^@libs/common(|/.*)$": "<rootDir>/libs/common/src/$1"
+      "^@libs/common(|/.*)$": "<rootDir>/libs/common/src/$1",
+      "^@libs/event(|/.*)$": "<rootDir>/libs/event/src/$1"
     }
   }
 }
