@@ -21,7 +21,7 @@ async function bootstrap() {
       .setVersion(appConfig.version)
       .setDefaultContentType('application/json')
       .addServer('alert', {
-        url: `ws://localhost:${appConfig.port}/alert`,
+        url: `ws://localhost:${appConfig.port}/widget`,
         protocol: 'socket.io',
       })
       .build();
