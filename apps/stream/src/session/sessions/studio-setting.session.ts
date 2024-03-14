@@ -1,21 +1,22 @@
 import { StudioPlaySettingEntity } from '@libs/entity';
 import { ApiResponseProperty } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 
-export class PlaySettingSession {
+export class StudioSettingSession {
   @ApiResponseProperty({ type: Boolean })
-  autoPlay: boolean;
+  autoPlay = false;
 
   @ApiResponseProperty({ type: Number })
-  alertVolume: number;
+  alertVolume = 0;
 
   @ApiResponseProperty({ type: Number })
-  messageVolume: number;
+  messageVolume = 0;
 
   @ApiResponseProperty({ type: String, format: 'float' })
-  delay: string;
+  delay = '0.0';
 
   @ApiResponseProperty({ type: String, format: 'float' })
-  maxSeconds: string;
+  maxSeconds = '0.0';
 
   constructor(studioPlaySetting: Partial<StudioPlaySettingEntity>) {
     this.autoPlay = studioPlaySetting.autoPlay;
@@ -23,9 +24,26 @@ export class PlaySettingSession {
     this.messageVolume = studioPlaySetting.messageVolume;
     this.delay = studioPlaySetting.delay;
     this.maxSeconds = studioPlaySetting.maxSeconds;
+
+    return this;
   }
 
-  static createKey(studioId: number) {
-    return ['studio', studioId, 'setting'].join(':');
+  stringify() {
+    return JSON.stringify(this, null, 2);
+  }
+
+  static toInstance(plainText: string) {
+    if (plainText === null) {
+      return null;
+    }
+
+    try {
+      return plainToInstance(this, JSON.parse(plainText), {
+        enableCircularCheck: true,
+        enableImplicitConversion: true,
+      });
+    } catch {
+      return null;
+    }
   }
 }
