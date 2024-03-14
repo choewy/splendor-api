@@ -20,12 +20,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisOptions } from 'ioredis';
 
-import { AlertWidgetModule } from './alert-widget';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DonationModule } from './donation';
-import { PlaySettingModule } from './play-setting';
 import { SessionModule } from './session';
+import { SettingModule } from './setting';
 
 @Module({
   imports: [
@@ -58,8 +57,7 @@ import { SessionModule } from './session';
       },
     }),
     SessionModule.forRoot(),
-    AlertWidgetModule,
-    PlaySettingModule,
+    SettingModule,
     DonationModule,
   ],
   controllers: [AppController],
