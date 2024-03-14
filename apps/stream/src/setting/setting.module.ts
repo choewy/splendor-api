@@ -1,12 +1,7 @@
-import { StudioPlaySettingRepository } from '@libs/entity';
-import { TypeOrmLibsModule } from '@libs/typeorm';
 import { Module } from '@nestjs/common';
 
-import { SettingMessageController } from './setting-message.controller';
+import { SettingEventController } from './setting-event.controller';
 import { SettingService } from './setting.service';
 
-@Module({
-  imports: [TypeOrmLibsModule.forFeature([StudioPlaySettingRepository])],
-  providers: [SettingMessageController, SettingService],
-})
+@Module({ providers: [SettingEventController, SettingService] })
 export class SettingModule {}

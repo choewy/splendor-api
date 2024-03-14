@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { SettingService } from './setting.service';
 
 @Injectable()
-export class SettingMessageController {
+export class SettingEventController {
   constructor(private readonly settingService: SettingService) {}
 
   @OnKafkaTopic(KafkaTopics.StudioPlaySetting)
