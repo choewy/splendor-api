@@ -9,7 +9,7 @@ export class EventModule {
     return {
       global: true,
       module: EventModule,
-      imports: [EventEmitterModule.forRoot()],
+      imports: [EventEmitterModule],
       providers: [EventService],
       exports: [EventService],
     };

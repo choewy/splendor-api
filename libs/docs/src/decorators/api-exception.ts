@@ -1,18 +1,14 @@
-import { HttpExceptionDto } from '@libs/bootstrap';
 import { ValidationFailException } from '@libs/bootstrap/exceptions';
 import { HttpException, Type, UnauthorizedException, applyDecorators } from '@nestjs/common';
 import { ApiResponse, ApiResponseProperty } from '@nestjs/swagger';
 
-class ApiExceptionType implements HttpExceptionDto {
+class ApiExceptionType {
   @ApiResponseProperty({ type: String })
   name: string;
-
   @ApiResponseProperty({ type: String })
   message: string;
-
   @ApiResponseProperty({ type: Number })
   statusCode: number;
-
   @ApiResponseProperty({ type: Object, example: undefined })
   error?: object;
 }
