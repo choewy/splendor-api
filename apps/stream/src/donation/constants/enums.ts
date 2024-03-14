@@ -1,3 +1,3 @@
 export enum DonationEvent {
-  Insert = 'donation.insert',
+  Regist = 'donation.regist',
 }

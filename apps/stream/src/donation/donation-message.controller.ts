@@ -10,6 +10,6 @@ export class DonationMessageController {
 
   @OnKafkaTopic(KafkaTopics.Donation)
   async onDonation(payload: KafkaMessagePayload<KafkaDonationMessage>) {
-    await this.donationService.insertDonation(payload.message);
+    await this.donationService.registDonation(payload.message);
   }
 }

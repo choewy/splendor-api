@@ -3,16 +3,18 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { DonationEvent } from './constants';
-import { DonationStatus, SessionService } from '../session';
+import { DonationSession, DonationSessionManager } from '../session';
 
 @Injectable()
 export class DonationService {
-  constructor(private readonly sessionService: SessionService, private readonly eventEmitter: EventEmitter2) {}
+  constructor(private readonly eventEmitter: EventEmitter2, private readonly donationSessionManager: DonationSessionManager) {}
 
-  async insertDonation(message: KafkaDonationMessage) {
-    const { studio, donation, sender } = message.value;
-    const donationSession = await this.sessionService.createDonationSession(studio.id, donation, sender, DonationStatus.New);
+  async registDonation(message: KafkaDonationMessage) {
+    const studioId = message.value.studio.id;
+    const donation = message.value.donation;
+    const sender = message.value.sender;
+    const session = await this.donationSessionManager.push(studioId, new DonationSession(donation, sender));
 
-    this.eventEmitter.emit(DonationEvent.Insert, studio.id, donationSession);
+    this.eventEmitter.emit(DonationEvent.Regist, studioId, session);
   }
 }
