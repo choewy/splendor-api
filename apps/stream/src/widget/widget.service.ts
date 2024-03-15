@@ -1,4 +1,4 @@
-import { AlertWidgetEntity, AlertWidgetRepository } from '@libs/entity';
+import { AlertWidgetEntity, AlertWidgetRepository, StudioPlaySettingRepository } from '@libs/entity';
 import { Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
@@ -19,6 +19,7 @@ export class WidgetService {
   constructor(
     private readonly socketSessionManager: SocketSessionManager,
     private readonly alertWidgetRepository: AlertWidgetRepository,
+    private readonly studioPlaySettingRepository: StudioPlaySettingRepository,
     private readonly studioPlaySessionManager: StudioPlaySessionManager,
     private readonly studioSettingSessionManager: StudioSettingSessionManager,
     private readonly donationSessionManager: DonationSessionManager,
@@ -66,7 +67,6 @@ export class WidgetService {
     const widget = await this.getWidget(auth.id, auth.type);
 
     const studioId = widget.studio.id;
-
     await this.socketSessionManager.create(client.id, studioId);
     const studioPlaySession = await this.studioPlaySessionManager.get(studioId);
 
@@ -75,7 +75,9 @@ export class WidgetService {
     }
 
     const session = new WidgetSession(widget.id, studioId, auth.type);
-    return this.widgetSessionManager.set(studioId, client.id, session);
+    await this.widgetSessionManager.set(studioId, client.id, session);
+
+    return session;
   }
 
   async deleteSession(client: Socket) {
@@ -96,5 +98,28 @@ export class WidgetService {
     await this.studioPlaySessionManager.delete(studioId);
     await this.studioSettingSessionManager.delete(studioId);
     await this.donationSessionManager.delete(studioId);
+  }
+
+  async getSetting(client: Socket) {
+    const socketSession = await this.socketSessionManager.get(client.id);
+    const studioId = socketSession.studioId;
+
+    if (socketSession === null) {
+      throw new WsException(`not exists client(${client.id}) session`);
+    }
+
+    let settingSession = await this.studioSettingSessionManager.get(studioId);
+
+    if (settingSession === null) {
+      const studioPlaySetting = await this.studioPlaySettingRepository.findOneBy({ studioId: studioId });
+
+      if (studioPlaySetting === null) {
+        throw new WsException('not found studio setting');
+      }
+
+      settingSession = await this.studioSettingSessionManager.create(studioId, studioPlaySetting);
+    }
+
+    return settingSession;
   }
 }

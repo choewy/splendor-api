@@ -5,5 +5,6 @@ export enum WidgetSubChannel {
 }
 
 export enum WidgetPubChannel {
+  Setting = 'setting',
   PlayComplete = 'play',
 }

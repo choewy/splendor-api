@@ -1,13 +1,24 @@
-import { WsExceptionDto } from '@libs/bootstrap';
+import { WsExceptionDto, WsExceptionFilter, WsLoggingInterceptor } from '@libs/bootstrap';
 import { AsyncApiEvent, AsyncApiException } from '@libs/docs';
-import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
+import { UseFilters, UseInterceptors } from '@nestjs/common';
+import {
+  ConnectedSocket,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+  WsException,
+} from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
 
-import { WidgetSubChannel } from './constants';
+import { WidgetPubChannel, WidgetSubChannel } from './constants';
 import { WidgetService } from './widget.service';
 import { StudioSettingSession } from '../session';
 
 @WebSocketGateway({ namespace: 'widget' })
+@UseFilters(WsExceptionFilter)
+@UseInterceptors(WsLoggingInterceptor)
 export class WidgetGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private readonly nsp: Namespace;
@@ -22,6 +33,8 @@ export class WidgetGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const session = await this.widgetService.createSession(client);
       await client.join(this.roomName(session.studioId));
+
+      client.emit('connect:ack');
     } catch (e) {
       this.asendException(client, e, true);
     }
@@ -41,6 +54,16 @@ export class WidgetGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (disconnect) {
       client.disconnect(true);
     }
+  }
+
+  @AsyncApiEvent({
+    type: 'pub',
+    summary: '설정 조회',
+    channel: WidgetPubChannel.Setting,
+  })
+  @SubscribeMessage(WidgetPubChannel.Setting)
+  async onSetting(@ConnectedSocket() client: Socket) {
+    return this.widgetService.getSetting(client);
   }
 
   @AsyncApiEvent({

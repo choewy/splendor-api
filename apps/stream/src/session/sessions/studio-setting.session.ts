@@ -19,13 +19,13 @@ export class StudioSettingSession {
   maxSeconds = '0.0';
 
   constructor(studioPlaySetting: Partial<StudioPlaySettingEntity>) {
-    this.autoPlay = studioPlaySetting.autoPlay;
-    this.alertVolume = studioPlaySetting.alertVolume;
-    this.messageVolume = studioPlaySetting.messageVolume;
-    this.delay = studioPlaySetting.delay;
-    this.maxSeconds = studioPlaySetting.maxSeconds;
-
-    return this;
+    if (studioPlaySetting) {
+      this.autoPlay = studioPlaySetting.autoPlay;
+      this.alertVolume = studioPlaySetting.alertVolume;
+      this.messageVolume = studioPlaySetting.messageVolume;
+      this.delay = studioPlaySetting.delay;
+      this.maxSeconds = studioPlaySetting.maxSeconds;
+    }
   }
 
   stringify() {
@@ -37,12 +37,15 @@ export class StudioSettingSession {
       return null;
     }
 
+    console.log(plainText);
+
     try {
       return plainToInstance(this, JSON.parse(plainText), {
         enableCircularCheck: true,
         enableImplicitConversion: true,
       });
-    } catch {
+    } catch (e) {
+      console.log(e);
       return null;
     }
   }
