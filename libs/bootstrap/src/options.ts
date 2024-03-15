@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ValidationFailException } from './exceptions';
 import { HttpExceptionFilter } from './filters';
 import { HttpLog } from './implements';
-import { LoggingInterceptor } from './interceptors';
+import { HttpLoggingInterceptor } from './interceptors';
 
 export const createBootstrapOptions = (app: INestApplication) => {
   app.use((req: Request, _: Response, next: NextFunction) => {
@@ -33,7 +33,7 @@ export const createBootstrapOptions = (app: INestApplication) => {
         enableImplicitConversion: true,
         enableCircularCheck: true,
       }),
-      new LoggingInterceptor(),
+      new HttpLoggingInterceptor(),
     ] as NestInterceptor[],
     filters: [new HttpExceptionFilter()] as ExceptionFilter[],
   };

@@ -4,7 +4,7 @@ import { tap } from 'rxjs';
 import { HttpLog } from '../implements';
 
 @Injectable()
-export class LoggingInterceptor implements NestInterceptor {
+export class HttpLoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler) {
     const req = context.switchToHttp().getRequest();
 

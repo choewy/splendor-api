@@ -30,6 +30,12 @@ export class HttpLog {
     this.xforwaredfor = req.header['x-forwared-for'];
   }
 
+  private end() {
+    this.latency = Date.now() - this.incomingTime;
+    delete this.incomingTime;
+    return this;
+  }
+
   setUser(user?: object) {
     this.user = user;
 
@@ -41,10 +47,8 @@ export class HttpLog {
 
     this.message = String(message);
     this.status = Number(status);
-    this.latency = Date.now() - this.incomingTime;
-    delete this.incomingTime;
 
-    return this;
+    return this.end();
   }
 
   toException(exception: HttpException, error?: Error) {
@@ -56,9 +60,6 @@ export class HttpLog {
       this.error = { name: error.name, message: error.message, stack: error.stack };
     }
 
-    this.latency = Date.now() - this.incomingTime;
-    delete this.incomingTime;
-
-    return this;
+    return this.end();
   }
 }
