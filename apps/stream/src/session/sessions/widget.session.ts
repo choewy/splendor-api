@@ -4,18 +4,10 @@ export enum WidgetType {
   Alert = 'alert',
 }
 
-export enum WidgetSessionStatus {
-  Wating = 0,
-  Playing = 1,
-  PlayComplete = 2,
-}
-
 export class WidgetSession {
   readonly id: string;
   readonly studioId: number;
   readonly type: WidgetType;
-  pointer = -1;
-  status = WidgetSessionStatus.Wating;
   updatedAt = new Date();
 
   constructor(id?: string, studioId?: number, type?: WidgetType) {
@@ -30,20 +22,6 @@ export class WidgetSession {
     if (type) {
       this.type = type;
     }
-  }
-
-  setPointer(pointer: number) {
-    this.pointer = pointer;
-    this.updatedAt = new Date();
-
-    return this;
-  }
-
-  setStatus(status: WidgetSessionStatus) {
-    this.status = status;
-    this.updatedAt = new Date();
-
-    return this;
   }
 
   stringify() {
