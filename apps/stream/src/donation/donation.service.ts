@@ -13,8 +13,10 @@ export class DonationService {
     const studioId = message.value.studio.id;
     const donation = message.value.donation;
     const sender = message.value.sender;
-    const session = await this.donationSessionManager.push(studioId, new DonationSession(donation, sender));
+    const studio = message.value.studio;
 
-    this.eventService.send(new DonationRegisteredEvent(studioId, session));
+    await this.donationSessionManager.push(studioId, new DonationSession(donation, sender, studio));
+
+    this.eventService.send(new DonationRegisteredEvent(studioId));
   }
 }
