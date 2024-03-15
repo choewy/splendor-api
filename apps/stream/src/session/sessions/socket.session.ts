@@ -4,9 +4,11 @@ export class SocketSession {
   readonly studioId: number;
   readonly connectedAt: Date;
 
-  constructor(studioId: number) {
-    this.studioId = studioId;
-    this.connectedAt = new Date();
+  constructor(studioId?: number) {
+    if (studioId) {
+      this.studioId = studioId;
+      this.connectedAt = new Date();
+    }
   }
 
   stringify() {

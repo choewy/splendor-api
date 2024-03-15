@@ -18,10 +18,18 @@ export class WidgetSession {
   status = WidgetSessionStatus.Wating;
   updatedAt = new Date();
 
-  constructor(id: string, studioId: number, type: WidgetType) {
-    this.id = id;
-    this.studioId = studioId;
-    this.type = type;
+  constructor(id?: string, studioId?: number, type?: WidgetType) {
+    if (id) {
+      this.id = id;
+    }
+
+    if (studioId) {
+      this.studioId = studioId;
+    }
+
+    if (type) {
+      this.type = type;
+    }
   }
 
   setDonationId(donationId: number | null) {

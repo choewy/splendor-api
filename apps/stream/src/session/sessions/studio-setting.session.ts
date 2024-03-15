@@ -18,7 +18,7 @@ export class StudioSettingSession {
   @ApiResponseProperty({ type: String, format: 'float' })
   maxSeconds = '0.0';
 
-  constructor(studioPlaySetting: Partial<StudioPlaySettingEntity>) {
+  constructor(studioPlaySetting?: Partial<StudioPlaySettingEntity>) {
     if (studioPlaySetting) {
       this.autoPlay = studioPlaySetting.autoPlay;
       this.alertVolume = studioPlaySetting.alertVolume;
@@ -37,15 +37,12 @@ export class StudioSettingSession {
       return null;
     }
 
-    console.log(plainText);
-
     try {
       return plainToInstance(this, JSON.parse(plainText), {
         enableCircularCheck: true,
         enableImplicitConversion: true,
       });
-    } catch (e) {
-      console.log(e);
+    } catch {
       return null;
     }
   }

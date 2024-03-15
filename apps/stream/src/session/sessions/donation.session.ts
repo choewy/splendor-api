@@ -43,22 +43,30 @@ export class DonationSession {
   status: DonationSessionStatus;
 
   constructor(
-    donation: Partial<DonationEntity>,
-    sender: Partial<UserEntity>,
+    donation?: Partial<DonationEntity>,
+    sender?: Partial<UserEntity>,
     values?: {
       hasPlayed?: boolean;
       status?: DonationSessionStatus;
     },
   ) {
-    this.id = donation.id;
-    this.nickname = donation.nickname;
-    this.message = donation.message;
-    this.imageUrl = donation.imageUrl;
-    this.createdAt = new Date(donation.createdAt);
-    this.senderId = sender?.id;
-    this.senderNickname = sender?.nickname;
-    this.status = values?.status ?? DonationSessionStatus.Wating;
-    this.hasPlayed = values?.hasPlayed ?? false;
+    if (donation) {
+      this.id = donation.id;
+      this.nickname = donation.nickname;
+      this.message = donation.message;
+      this.imageUrl = donation.imageUrl;
+      this.createdAt = new Date(donation.createdAt);
+    }
+
+    if (sender) {
+      this.senderId = sender.id;
+      this.senderNickname = sender.nickname;
+    }
+
+    if (values) {
+      this.status = values.status ?? DonationSessionStatus.Wating;
+      this.hasPlayed = values.hasPlayed ?? false;
+    }
   }
 
   setPlayed() {
