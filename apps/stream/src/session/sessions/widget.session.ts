@@ -14,7 +14,7 @@ export class WidgetSession {
   readonly id: string;
   readonly studioId: number;
   readonly type: WidgetType;
-  donationId: number | null = null;
+  pointer = -1;
   status = WidgetSessionStatus.Wating;
   updatedAt = new Date();
 
@@ -32,8 +32,8 @@ export class WidgetSession {
     }
   }
 
-  setDonationId(donationId: number | null) {
-    this.donationId = donationId;
+  setPointer(pointer: number) {
+    this.pointer = pointer;
     this.updatedAt = new Date();
 
     return this;

@@ -1,4 +1,4 @@
-import { DonationEntity, UserEntity } from '@libs/entity';
+import { DonationEntity, StudioEntity, UserEntity } from '@libs/entity';
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
@@ -36,6 +36,9 @@ export class DonationSession {
   @ApiResponseProperty({ type: String })
   readonly senderProfileImageUrl: string;
 
+  @ApiResponseProperty({ type: Number })
+  readonly studioId: number;
+
   @ApiResponseProperty({ type: Boolean })
   hasPlayed: boolean;
 
@@ -45,6 +48,7 @@ export class DonationSession {
   constructor(
     donation?: Partial<DonationEntity>,
     sender?: Partial<UserEntity>,
+    studio?: Partial<StudioEntity>,
     values?: {
       hasPlayed?: boolean;
       status?: DonationSessionStatus;
@@ -53,6 +57,7 @@ export class DonationSession {
     if (donation) {
       this.id = donation.id;
       this.nickname = donation.nickname;
+      this.amount = donation.amount;
       this.message = donation.message;
       this.imageUrl = donation.imageUrl;
       this.createdAt = new Date(donation.createdAt);
@@ -63,10 +68,12 @@ export class DonationSession {
       this.senderNickname = sender.nickname;
     }
 
-    if (values) {
-      this.status = values.status ?? DonationSessionStatus.Wating;
-      this.hasPlayed = values.hasPlayed ?? false;
+    if (studio) {
+      this.studioId = studio.id;
     }
+
+    this.status = values?.status ?? DonationSessionStatus.Wating;
+    this.hasPlayed = values?.hasPlayed ?? false;
   }
 
   setPlayed() {
@@ -97,7 +104,7 @@ export class DonationSession {
         enableCircularCheck: true,
         enableImplicitConversion: true,
       });
-    } catch {
+    } catch (e) {
       return null;
     }
   }

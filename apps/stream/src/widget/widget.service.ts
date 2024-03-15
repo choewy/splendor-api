@@ -3,11 +3,16 @@ import { Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
+import { WidgetPlayCompleteCommand } from './commands';
+import { WidgetSubChannel } from './constants';
 import { WidgetSocketAuth } from './interfaces';
 import {
   DonationSessionManager,
+  DonationSessionStatus,
+  SocketSession,
   SocketSessionManager,
   StudioPlaySessionManager,
+  StudioPlayStatus,
   StudioSettingSessionManager,
   WidgetSession,
   WidgetSessionManager,
@@ -20,11 +25,15 @@ export class WidgetService {
     private readonly socketSessionManager: SocketSessionManager,
     private readonly alertWidgetRepository: AlertWidgetRepository,
     private readonly studioPlaySettingRepository: StudioPlaySettingRepository,
-    private readonly studioPlaySessionManager: StudioPlaySessionManager,
-    private readonly studioSettingSessionManager: StudioSettingSessionManager,
+    private readonly playSessionManager: StudioPlaySessionManager,
+    private readonly settingSessionManager: StudioSettingSessionManager,
     private readonly donationSessionManager: DonationSessionManager,
     private readonly widgetSessionManager: WidgetSessionManager,
   ) {}
+
+  roomName(studioId: number) {
+    return ['studio', studioId].join('_');
+  }
 
   protected getSocketAuth(client: Socket): WidgetSocketAuth {
     const auth = client.handshake.auth;
@@ -62,22 +71,73 @@ export class WidgetService {
     return widget;
   }
 
+  async getSocketSession(socketId: string) {
+    const session = await this.socketSessionManager.get(socketId);
+
+    if (session === null) {
+      throw new WsException('not found socket session');
+    }
+
+    return session;
+  }
+
+  protected async getWidgetSession(studioId: number, socketId: string) {
+    const session = await this.widgetSessionManager.get(studioId, socketId);
+
+    if (session) {
+      throw new WsException('not found widget session');
+    }
+
+    return session;
+  }
+
+  protected async getPlaySession(studioId: number) {
+    let studioPlaySession = await this.playSessionManager.get(studioId);
+
+    if (studioPlaySession === null) {
+      studioPlaySession = await this.playSessionManager.create(studioId);
+    }
+
+    return studioPlaySession;
+  }
+
+  protected async getSettingSession(studioId: number) {
+    let settingSession = await this.settingSessionManager.get(studioId);
+
+    if (settingSession === null) {
+      const studioPlaySetting = await this.studioPlaySettingRepository.findOneBy({ studioId: studioId });
+
+      if (studioPlaySetting === null) {
+        throw new WsException('not found studio setting');
+      }
+
+      settingSession = await this.settingSessionManager.create(studioId, studioPlaySetting);
+    }
+
+    return settingSession;
+  }
+
   async createSession(client: Socket) {
     const auth = this.getSocketAuth(client);
     const widget = await this.getWidget(auth.id, auth.type);
 
     const studioId = widget.studio.id;
+
+    await client.join(this.roomName(studioId));
+
     await this.socketSessionManager.create(client.id, studioId);
-    const studioPlaySession = await this.studioPlaySessionManager.get(studioId);
+    const settingSession = await this.getSettingSession(studioId);
 
-    if (studioPlaySession === null) {
-      await this.studioPlaySessionManager.create(studioId);
+    client.emit(WidgetSubChannel.Setting, settingSession);
+
+    const widgetSession = new WidgetSession(widget.id, studioId, auth.type);
+    await this.widgetSessionManager.set(studioId, client.id, widgetSession);
+
+    const donationSession = await this.getNextDonationSession(studioId);
+
+    if (donationSession) {
+      client.emit(WidgetSubChannel.Play, donationSession);
     }
-
-    const session = new WidgetSession(widget.id, studioId, auth.type);
-    await this.widgetSessionManager.set(studioId, client.id, session);
-
-    return session;
   }
 
   async deleteSession(client: Socket) {
@@ -95,31 +155,52 @@ export class WidgetService {
       return;
     }
 
-    await this.studioPlaySessionManager.delete(studioId);
-    await this.studioSettingSessionManager.delete(studioId);
+    await this.playSessionManager.delete(studioId);
+    await this.settingSessionManager.delete(studioId);
     await this.donationSessionManager.delete(studioId);
   }
 
-  async getSetting(client: Socket) {
-    const socketSession = await this.socketSessionManager.get(client.id);
+  async getNextDonationSession(studioId: number) {
+    const playSession = await this.getPlaySession(studioId);
+
+    if (playSession.status === StudioPlayStatus.Playing) {
+      return;
+    }
+
+    const settingSession = await this.getSettingSession(studioId);
+
+    if (settingSession.autoPlay === false) {
+      return;
+    }
+
+    const { pointer, session } = await this.donationSessionManager.getByNotPlayed(studioId, playSession.pointer);
+
+    if (session) {
+      const playSession = await this.getPlaySession(studioId);
+      await this.playSessionManager.set(studioId, playSession.setPointer(pointer).setStatus(StudioPlayStatus.Playing));
+      await this.donationSessionManager.set(studioId, session.setPlayed().setStatus(DonationSessionStatus.Playing));
+    }
+
+    return session;
+  }
+
+  async playComplete(socketSession: SocketSession, command: WidgetPlayCompleteCommand) {
     const studioId = socketSession.studioId;
 
-    if (socketSession === null) {
-      throw new WsException(`not exists client(${client.id}) session`);
+    const donationSession = await this.donationSessionManager.getByDonationId(studioId, command.id);
+    if (donationSession === null) {
+      throw new WsException('not found donation session');
     }
 
-    let settingSession = await this.studioSettingSessionManager.get(studioId);
+    const playSession = await this.getPlaySession(studioId);
 
-    if (settingSession === null) {
-      const studioPlaySetting = await this.studioPlaySettingRepository.findOneBy({ studioId: studioId });
-
-      if (studioPlaySetting === null) {
-        throw new WsException('not found studio setting');
-      }
-
-      settingSession = await this.studioSettingSessionManager.create(studioId, studioPlaySetting);
+    if (playSession === null) {
+      throw new WsException('not found play session');
     }
 
-    return settingSession;
+    await this.playSessionManager.set(studioId, playSession.setStatus(StudioPlayStatus.Wating));
+    await this.donationSessionManager.set(studioId, donationSession.setPlayed().setStatus(DonationSessionStatus.PlayComplete));
+
+    return this.getNextDonationSession(studioId);
   }
 }

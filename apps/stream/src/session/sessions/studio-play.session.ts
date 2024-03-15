@@ -1,7 +1,7 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 
-export enum StudioSessionPlayStatus {
+export enum StudioPlayStatus {
   Wating = 0,
   Playing = 1,
 }
@@ -10,15 +10,15 @@ export class StudioPlaySession {
   @ApiResponseProperty({ type: Number })
   pointer = -1;
 
-  @ApiResponseProperty({ type: Number, enum: StudioSessionPlayStatus })
-  status = StudioSessionPlayStatus.Wating;
+  @ApiResponseProperty({ type: Number, enum: StudioPlayStatus })
+  status = StudioPlayStatus.Wating;
 
   setPointer(pointer: number) {
     this.pointer = pointer;
     return this;
   }
 
-  setStatus(status: StudioSessionPlayStatus) {
+  setStatus(status: StudioPlayStatus) {
     this.status = status;
     return this;
   }

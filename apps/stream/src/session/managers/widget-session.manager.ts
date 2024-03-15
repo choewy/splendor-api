@@ -15,6 +15,21 @@ export class WidgetSessionManager {
     return WidgetSession.toInstance(await this.redis.hget(this.createKey(studioId), socketId));
   }
 
+  async getAll(studioId: number) {
+    const sessions: WidgetSession[] = [];
+    const socketIds = await this.redis.hkeys(this.createKey(studioId));
+
+    for (const socketId of socketIds) {
+      const session = await this.get(studioId, socketId);
+
+      if (session) {
+        sessions.push(session);
+      }
+    }
+
+    return sessions;
+  }
+
   async getCount(studioId: number) {
     return (await this.getSocketIds(studioId)).length;
   }

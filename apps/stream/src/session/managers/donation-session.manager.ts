@@ -40,6 +40,26 @@ export class DonationSessionManager {
     return this.getByIndex(studioId, index);
   }
 
+  async getByNotPlayed(studioId: number, currentPointer = -1) {
+    let pointer = currentPointer;
+    let session: DonationSession = null;
+
+    while (true) {
+      pointer++;
+      session = await this.getByIndex(studioId, pointer);
+
+      if (session === null) {
+        break;
+      }
+
+      if (session.hasPlayed === false) {
+        break;
+      }
+    }
+
+    return { pointer, session };
+  }
+
   async push(studioId: number, session: DonationSession) {
     const index = await this.redis.rpush(this.createKey(studioId), session.stringify());
     await this.redis.hset(this.createHashKey(studioId), session.toHash(index));
