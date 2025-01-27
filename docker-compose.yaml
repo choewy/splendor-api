@@ -1,0 +1,24 @@
+name: splendor
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: splendor-mysql
+    environment:
+      TZ: Asia/Seoul
+      MYSQL_USER: splendor
+      MYSQL_PASSWORD: splendor
+      MYSQL_DATABASE: splendor
+      MYSQL_ROOT_PASSWORD: splendor
+    volumes:
+      - ../docker-splendor/mysql/data:/var/lib/mysql
+      - ../docker-splendor/mysql/log:/var/log
+    ports:
+      - 33062:3306
+    restart: unless-stopped
+    networks:
+      - splendor
+
+networks:
+  splendor:
+    driver: bridge
