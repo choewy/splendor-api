@@ -2,13 +2,6 @@
 /dist
 /node_modules
 /build
-/docker/**/build.tar.gz
-/docker/**/lib
-/docker/**/disk
-/docker/**/data
-/docker/**/datalog
-/docker/**/logs
-/docker/**/secrets
 
 # Logs
 logs
@@ -43,9 +36,11 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # dotenv environment variable files
-.envs/.env*
-!.envs/.env*.local
-
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
 
 # temp directory
 .temp
@@ -59,4 +54,3 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-node_modules
