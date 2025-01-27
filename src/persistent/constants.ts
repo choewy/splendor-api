@@ -1,16 +1,16 @@
 import { CardToken, DevelopmentCard, NobleCard } from './classes';
 
 export const NOBLE_CARDS: NobleCard[] = [
-  new NobleCard(1, '메리 여왕', 3, new CardToken({ red: 4, green: 4 })),
-  new NobleCard(2, '카를 5세', 3, new CardToken({ red: 3, white: 3, black: 3 })),
-  new NobleCard(3, '마키아벨리', 3, new CardToken({ blue: 4, white: 4 })),
-  new NobleCard(4, '이사벨 1세', 3, new CardToken({ white: 4, black: 4 })),
-  new NobleCard(5, '쉴레이만 1세', 3, new CardToken({ green: 4, blue: 4 })),
-  new NobleCard(6, '카트린 드 메디시스', 3, new CardToken({ red: 3, green: 3, blue: 3 })),
-  new NobleCard(7, '브르타뉴의 앤', 3, new CardToken({ green: 3, blue: 3, white: 3 })),
-  new NobleCard(8, '헨리 8세', 3, new CardToken({ red: 4, black: 4 })),
-  new NobleCard(9, '오스트리아의 엘리자베트', 3, new CardToken({ blue: 3, white: 3, black: 3 })),
-  new NobleCard(10, '프랑수아 1세', 3, new CardToken({ red: 3, green: 3, black: 3 })),
+  new NobleCard(1, 'Mary, Queen of Scots', 3, new CardToken({ red: 4, green: 4 })),
+  new NobleCard(2, 'Charles V', 3, new CardToken({ red: 3, white: 3, black: 3 })),
+  new NobleCard(3, 'Machiavelli', 3, new CardToken({ blue: 4, white: 4 })),
+  new NobleCard(4, 'Isabella I', 3, new CardToken({ white: 4, black: 4 })),
+  new NobleCard(5, 'Suleiman the Magnificent', 3, new CardToken({ green: 4, blue: 4 })),
+  new NobleCard(6, 'Catherine de Medici', 3, new CardToken({ red: 3, green: 3, blue: 3 })),
+  new NobleCard(7, 'Anne of Brittany', 3, new CardToken({ green: 3, blue: 3, white: 3 })),
+  new NobleCard(8, 'Henry VIII', 3, new CardToken({ red: 4, black: 4 })),
+  new NobleCard(9, 'Elisabeth of Austria', 3, new CardToken({ blue: 3, white: 3, black: 3 })),
+  new NobleCard(10, 'Francis I', 3, new CardToken({ red: 3, green: 3, black: 3 })),
 ];
 
 export const DEVELOPMENT_CARDS_OF_LEVEL_1: DevelopmentCard[] = [
@@ -88,6 +88,7 @@ export const DEVELOPMENT_CARDS_OF_LEVEL_2: DevelopmentCard[] = [
   new DevelopmentCard(69, 'CARD_OD_LEVEL_2_29', 2, 3, new CardToken({ black: 7 }), new CardToken({ blue: 1 })),
   new DevelopmentCard(70, 'CARD_OD_LEVEL_2_30', 2, 2, new CardToken({ blue: 6, red: 3 }), new CardToken({ blue: 1 })),
 ];
+
 export const DEVELOPMENT_CARDS_OF_LEVEL_3: DevelopmentCard[] = [
   new DevelopmentCard(71, 'CARD_OF_LEVEL_3_1', 3, 4, new CardToken({ black: 7, red: 3, green: 3 }), new CardToken({ blue: 1 })),
   new DevelopmentCard(72, 'CARD_OF_LEVEL_3_2', 3, 4, new CardToken({ white: 7, blue: 3, red: 3 }), new CardToken({ green: 1 })),
