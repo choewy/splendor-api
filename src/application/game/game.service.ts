@@ -21,7 +21,6 @@ export class GameService {
     private readonly dataSource: DataSource,
   ) {}
 
-  // TODO 방 목록 조회
   async list(queryParam: GetGameListQueryParamDTO) {
     const [rows, total] = await this.dataSource.getRepository(Game).findAndCount({
       relations: { players: true },
