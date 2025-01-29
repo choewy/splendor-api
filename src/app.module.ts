@@ -6,6 +6,8 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './application/auth/auth.module';
+import { KakaoApiModule } from './application/kakao-api/kakao-api.module';
+import { OAuthModule } from './application/oauth/oauth.module';
 import { PlayModule } from './application/play/play.module';
 import { PlayerModule } from './application/player/player.module';
 import { ProfileModule } from './application/profile/profile.module';
@@ -20,11 +22,11 @@ import { ContextModule } from './core/context/context.module';
       useFactory(configService: ConfigService) {
         return {
           type: 'mysql',
-          host: configService.get('DB_HOST'),
-          port: configService.get('DB_PORT'),
-          username: configService.get('DB_USERNAME'),
-          password: configService.get('DB_PASSWORD'),
-          database: configService.get('DB_DATABASE'),
+          host: configService.getOrThrow('DB_HOST'),
+          port: configService.getOrThrow('DB_PORT'),
+          username: configService.getOrThrow('DB_USERNAME'),
+          password: configService.getOrThrow('DB_PASSWORD'),
+          database: configService.getOrThrow('DB_DATABASE'),
           synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           namingStrategy: new SnakeNamingStrategy(),
           entities: [`${process.cwd()}/dist/domain/entities/**/*.entity.{ts,js}`],
@@ -32,6 +34,8 @@ import { ContextModule } from './core/context/context.module';
       },
     }),
     ContextModule.forRoot(),
+    KakaoApiModule,
+    OAuthModule,
     AuthModule,
     ProfileModule,
     PlayerModule,

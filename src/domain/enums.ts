@@ -14,3 +14,7 @@ export enum PlayerDevelopmentCardStatus {
   Purchased = 'purchased',
   Dibed = 'dibed',
 }
+
+export enum OAuthPlatform {
+  Kakao = 'kakao',
+}
