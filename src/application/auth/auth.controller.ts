@@ -12,6 +12,6 @@ export class AuthController {
   @Post('token')
   @ApiOperation({ summary: 'JWT 발급', description: '자동 갱신' })
   async issueToken(@Body() body: IssueTokenDTO) {
-    return this.authService.issueToken(body);
+    return this.authService.issueToken(body.id);
   }
 }

@@ -3,6 +3,7 @@ import { ClsModule } from 'nestjs-cls';
 import { ContextPropertyKey, RequestHeader, ResponseHeader } from 'src/persistent/enums';
 import { v4 } from 'uuid';
 
+import { ContextInterceptor } from './context.interceptor';
 import { ContextService } from './context.service';
 
 @Module({})
@@ -22,8 +23,8 @@ export class ContextModule {
           },
         }),
       ],
-      providers: [ContextService],
-      exports: [ContextService],
+      providers: [ContextService, ContextInterceptor],
+      exports: [ContextService, ContextInterceptor],
       module: ContextModule,
       global: true,
     };

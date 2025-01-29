@@ -13,6 +13,7 @@ import { PlayerModule } from './application/player/player.module';
 import { ProfileModule } from './application/profile/profile.module';
 import { RoomModule } from './application/room/room.module';
 import { ContextModule } from './core/context/context.module';
+import { LoggingModule } from './core/logging/logging.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ContextModule } from './core/context/context.module';
       },
     }),
     ContextModule.forRoot(),
+    LoggingModule,
     KakaoApiModule,
     OAuthModule,
     AuthModule,
