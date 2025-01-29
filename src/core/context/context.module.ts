@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { ClsModule } from 'nestjs-cls';
-import { ContextPropertyKey } from 'src/persistent/enums';
+import { ContextPropertyKey, RequestHeader, ResponseHeader } from 'src/persistent/enums';
 import { v4 } from 'uuid';
 
 import { ContextService } from './context.service';
@@ -14,8 +14,8 @@ export class ContextModule {
           middleware: {
             mount: true,
             setup(clsService, req, res) {
-              req.id = req.get(ContextPropertyKey.RequestId) ?? v4();
-              res.set(ContextPropertyKey.RequestId, req.id);
+              req.id = req.get(RequestHeader.XRequestId) ?? v4();
+              res.set(ResponseHeader.XRequestId, req.id);
               clsService.set(ContextPropertyKey.RequestId, req.id);
               clsService.set(ContextPropertyKey.RequestTimestamp, Date.now());
             },
