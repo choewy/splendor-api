@@ -5,6 +5,11 @@ export enum GameStatus {
   Dropped = 'dropped',
 }
 
+export enum PlayerStatus {
+  Activated = 'activated',
+  Deprecated = 'deprecated',
+}
+
 export enum GameDevelopmentCardPosition {
   Deck = 'deck',
   Field = 'field',

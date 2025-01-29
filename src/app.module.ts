@@ -6,12 +6,12 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './application/auth/auth.module';
+import { GameModule } from './application/game/game.module';
 import { KakaoApiModule } from './application/kakao-api/kakao-api.module';
 import { OAuthModule } from './application/oauth/oauth.module';
 import { PlayModule } from './application/play/play.module';
 import { PlayerModule } from './application/player/player.module';
 import { ProfileModule } from './application/profile/profile.module';
-import { RoomModule } from './application/room/room.module';
 import { ContextModule } from './core/context/context.module';
 import { LoggingModule } from './core/logging/logging.module';
 
@@ -31,6 +31,7 @@ import { LoggingModule } from './core/logging/logging.module';
           synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           namingStrategy: new SnakeNamingStrategy(),
           entities: [`${process.cwd()}/dist/domain/entities/**/*.entity.{ts,js}`],
+          logging: true,
         };
       },
     }),
@@ -41,7 +42,7 @@ import { LoggingModule } from './core/logging/logging.module';
     AuthModule,
     ProfileModule,
     PlayerModule,
-    RoomModule,
+    GameModule,
     PlayModule,
   ],
   controllers: [AppController],

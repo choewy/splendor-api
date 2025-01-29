@@ -15,17 +15,23 @@ async function bootstrap() {
   const swaggerDocument = new DocumentBuilder()
     .setTitle('Splendor API')
     .setVersion(process.env.npm_package_version ?? '')
-    .addBearerAuth({
-      name: RequestHeader.Authorization,
-      type: 'http',
-      in: 'header',
-      bearerFormat: 'bearer',
-    })
-    .addApiKey({
-      name: RequestHeader.XRefreshToken,
-      type: 'apiKey',
-      in: 'header',
-    })
+    .addBearerAuth(
+      {
+        name: RequestHeader.Authorization,
+        type: 'http',
+        in: 'header',
+        bearerFormat: 'bearer',
+      },
+      RequestHeader.Authorization,
+    )
+    .addApiKey(
+      {
+        name: RequestHeader.XRefreshToken,
+        type: 'apiKey',
+        in: 'header',
+      },
+      RequestHeader.XRefreshToken,
+    )
     .build();
 
   SwaggerModule.setup('api-docs', app, SwaggerModule.createDocument(app, swaggerDocument));

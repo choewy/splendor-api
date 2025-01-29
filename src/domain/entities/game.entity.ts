@@ -4,7 +4,7 @@ import { GameDevelopmentCard } from './game-development-card.entity';
 import { GameNobleCard } from './game-noble-card.entity';
 import { GameToken } from './game-token.entity';
 import { GameStatus } from '../enums';
-import { GamePlayers } from './game-players.entity';
+import { Player } from './player.entity';
 
 @Entity({ name: 'game', comment: '게임' })
 export class Game {
@@ -14,10 +14,19 @@ export class Game {
   @Column({ type: 'varchar', length: 100, comment: '방제' })
   title: string;
 
-  @Column({ type: 'mediumint', unsigned: true, comment: '턴 제한시간' })
-  waitSeconds: number;
+  @Column({ type: 'varchar', length: 255, default: null, comment: '방 비밀번호' })
+  password: string | null;
 
-  @Column({ type: 'varchar', length: 10, comment: '상태' })
+  @Column({ type: 'mediumint', unsigned: true, default: 60, comment: '턴 제한시간(초)' })
+  waitTime: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 4, comment: '인원 제한 수' })
+  maxPlayerCount: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 1, comment: '참여 인원 수' })
+  playerCount: number;
+
+  @Column({ type: 'varchar', length: 10, default: GameStatus.Wating, comment: '상태' })
   status: GameStatus;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1, comment: '라운드 수' })
@@ -35,9 +44,9 @@ export class Game {
   @DeleteDateColumn({ comment: '삭제일시' })
   readonly deletedAt: Date | null;
 
-  @OneToMany(() => GamePlayers, (e) => e.game, { cascade: true })
+  @OneToMany(() => Player, (e) => e.game, { cascade: true })
   @JoinTable()
-  players: GamePlayers[];
+  players: Player[];
 
   @OneToOne(() => GameToken, (e) => e.game, { cascade: true })
   @JoinTable()

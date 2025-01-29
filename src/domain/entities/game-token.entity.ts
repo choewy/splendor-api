@@ -4,7 +4,7 @@ import { Game } from './game.entity';
 
 @Entity({ name: 'game_token', comment: '게임 토큰' })
 export class GameToken {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true, comment: '게임 토큰 PK' })
   readonly id: string;
 
   @Column({ type: 'tinyint', unsigned: true, comment: '루비' })
@@ -31,4 +31,18 @@ export class GameToken {
   @OneToOne(() => Game, (e) => e.token, { onDelete: 'CASCADE' })
   @JoinColumn()
   game: Game;
+
+  public static of(game: Game, tokenCount: number) {
+    const gameToken = new GameToken();
+
+    gameToken.game = game;
+    gameToken.ruby = tokenCount;
+    gameToken.sapphire = tokenCount;
+    gameToken.emerald = tokenCount;
+    gameToken.onyx = tokenCount;
+    gameToken.diamond = tokenCount;
+    gameToken.topaz = 5;
+
+    return gameToken;
+  }
 }
