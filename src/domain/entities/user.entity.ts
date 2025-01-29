@@ -8,6 +8,9 @@ export class User {
   @Column({ type: 'varchar', length: 50, comment: '닉네임' })
   nickname: string;
 
+  @Column({ type: 'varchar', length: 255, comment: '비밀번호' })
+  password: string;
+
   @CreateDateColumn({ comment: '생성일시' })
   readonly createdAt: Date;
 

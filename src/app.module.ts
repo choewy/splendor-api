@@ -10,6 +10,7 @@ import { PlayModule } from './application/play/play.module';
 import { PlayerModule } from './application/player/player.module';
 import { ProfileModule } from './application/profile/profile.module';
 import { RoomModule } from './application/room/room.module';
+import { ContextModule } from './core/context/context.module';
 
 @Module({
   imports: [
@@ -24,12 +25,13 @@ import { RoomModule } from './application/room/room.module';
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_DATABASE'),
-          synchronize: configService.get('NODE_ENV') === 'local',
+          synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
           namingStrategy: new SnakeNamingStrategy(),
           entities: [`${process.cwd()}/dist/domain/entities/**/*.entity.{ts,js}`],
         };
       },
     }),
+    ContextModule.forRoot(),
     AuthModule,
     ProfileModule,
     PlayerModule,
