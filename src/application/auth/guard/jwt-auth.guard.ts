@@ -40,6 +40,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     this.contextService.requestUser = oauth;
+    this.contextService.requestPlayer = await this.authService.getPlayer(oauth);
 
     if (accessTokenVerifyResult.error instanceof TokenExpiredError) {
       const refreshToken = (request.headers[RequestHeader.XRefreshToken] ?? '').toString();

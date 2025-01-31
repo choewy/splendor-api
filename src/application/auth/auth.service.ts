@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { OAuth } from 'src/domain/entities/oauth.entity';
+import { Player } from 'src/domain/entities/player.entity';
+import { PlayerStatus } from 'src/domain/enums';
 import { DataSource } from 'typeorm';
 
 import { JwtAccessPayload, JwtRefreshPayload, JwtVerifyResult } from './dto/interfaces';
@@ -81,6 +83,16 @@ export class AuthService {
     });
 
     return oauth;
+  }
+
+  async getPlayer(oauth: OAuth) {
+    const playerRepository = this.dataSource.getRepository(Player);
+    const player = await playerRepository.findOne({
+      relations: { game: true },
+      where: { userId: oauth.userId, status: PlayerStatus.Activated },
+    });
+
+    return player;
   }
 
   async issueToken(id: string) {
