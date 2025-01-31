@@ -1,9 +1,10 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Game } from './game.entity';
+import { TokenProperty } from '../types';
 
 @Entity({ name: 'game_token', comment: '게임 토큰' })
-export class GameToken {
+export class GameToken implements TokenProperty {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true, comment: '게임 토큰 PK' })
   readonly id: string;
 

@@ -5,6 +5,8 @@ import { GameDevelopmentCard } from 'src/domain/entities/game-development-card.e
 import { GameNobleCard } from 'src/domain/entities/game-noble-card.entity';
 import { GameToken } from 'src/domain/entities/game-token.entity';
 import { Game } from 'src/domain/entities/game.entity';
+import { PlayerBonus } from 'src/domain/entities/player-bonus.entity';
+import { PlayerToken } from 'src/domain/entities/player-token.entity';
 import { Player } from 'src/domain/entities/player.entity';
 import { GameDevelopmentCardPosition, GameStatus } from 'src/domain/enums';
 import { DEVELOPMENT_CARDS_OF_LEVEL_1, DEVELOPMENT_CARDS_OF_LEVEL_2, DEVELOPMENT_CARDS_OF_LEVEL_3, NOBLE_CARDS } from 'src/persistent/constants';
@@ -43,6 +45,8 @@ export class GameService {
     }
 
     const playerRepository = this.dataSource.getRepository(Player);
+    const hostPlayer = playerRepository.create({ userId: oauth.userId, isHost: true });
+
     const gameRepository = this.dataSource.getRepository(Game);
     const game = gameRepository.create({
       title: body.title,
@@ -50,12 +54,7 @@ export class GameService {
       waitTime: body.waitTime,
       maxPlayerCount: body.maxPlayerCount,
       playerCount: 1,
-      players: [
-        playerRepository.create({
-          userId: oauth.userId,
-          isHost: true,
-        }),
-      ],
+      players: [hostPlayer],
     });
 
     await gameRepository.save(game);
@@ -113,17 +112,24 @@ export class GameService {
         .map((card, i) => GameDevelopmentCard.of(game, i < 4 ? GameDevelopmentCardPosition.Field : GameDevelopmentCardPosition.Deck, card)),
     );
 
+    const playerTokens = game.players.map((player) => PlayerToken.of(player));
+    const playerBonuses = game.players.map((player) => PlayerBonus.of(player));
+
     await this.dataSource.transaction(async (em) => {
       const gameRepository = em.getRepository(Game);
       const gameTokenRepository = em.getRepository(GameToken);
       const gameNobleCardRepository = em.getRepository(GameNobleCard);
       const gameDevelopmentCardRepository = em.getRepository(GameDevelopmentCard);
+      const playerTokenRepository = em.getRepository(PlayerToken);
+      const playerBonusRepository = em.getRepository(PlayerBonus);
 
       await Promise.all([
         gameRepository.update(game.id, { status: GameStatus.Playing }),
         gameTokenRepository.insert(gameToken),
         gameNobleCardRepository.insert(gameNobleCards),
         gameDevelopmentCardRepository.insert(gameDevelopmentCards),
+        playerTokenRepository.insert(playerTokens),
+        playerBonusRepository.insert(playerBonuses),
       ]);
     });
   }
