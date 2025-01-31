@@ -1,5 +1,5 @@
 import { NobleCard } from 'src/persistent/classes';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Game } from './game.entity';
 
@@ -35,6 +35,9 @@ export class GameNobleCard {
   @ManyToOne(() => Game, (e) => e.nobleCards, { onDelete: 'CASCADE' })
   @JoinColumn()
   game: Game;
+
+  @DeleteDateColumn({ comment: '삭제일시' })
+  readonly deletedAt: Date | null;
 
   public static of(game: Game, card: NobleCard) {
     const gameNobleCard = new GameNobleCard();

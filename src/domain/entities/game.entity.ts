@@ -32,8 +32,11 @@ export class Game {
   @Column({ type: 'tinyint', unsigned: true, default: 1, comment: '라운드 수' })
   round: number;
 
-  @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '플레이어 커서' })
-  cursor: number;
+  @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '현재 플레이어 커서' })
+  currentPlayerIndex: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '최대 플레이어 커서' })
+  maxPlayerIndex: number;
 
   @CreateDateColumn({ comment: '생성일시' })
   readonly createdAt: Date;

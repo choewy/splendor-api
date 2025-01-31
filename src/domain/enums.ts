@@ -10,14 +10,20 @@ export enum PlayerStatus {
   Deprecated = 'deprecated',
 }
 
-export enum GameDevelopmentCardPosition {
+export enum CardLevel {
+  One = 1,
+  Two = 2,
+  Three = 3,
+}
+
+export enum CardPosition {
   Deck = 'deck',
   Field = 'field',
 }
 
-export enum PlayerDevelopmentCardStatus {
+export enum CardStatus {
   Purchased = 'purchased',
-  Dibed = 'dibed',
+  Keep = 'keep',
 }
 
 export enum OAuthPlatform {

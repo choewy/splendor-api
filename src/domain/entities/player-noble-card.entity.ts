@@ -1,11 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 import { Player } from './player.entity';
 
 @Entity({ name: 'player_noble_card', comment: '플레이어 귀족 카드' })
 export class PlayerNobleCard {
-  @PrimaryGeneratedColumn('uuid')
-  readonly id: string;
+  @PrimaryColumn({ type: 'varchar', length: 32, comment: '게임 귀족 카드 PK' })
+  id: string;
 
   @Column({ type: 'tinyint', unsigned: true, comment: '카드번호' })
   cardId: number;
@@ -28,10 +28,13 @@ export class PlayerNobleCard {
   @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '다이아몬드(비용)' })
   costOfDiamond: number;
 
-  @Column({ type: 'varchar', comment: '플레이어 PK' })
+  @Column({ type: 'varchar', length: 32, comment: '플레이어 PK' })
   playerId: string;
 
   @ManyToOne(() => Player, (e) => e.nobleCards, { onDelete: 'CASCADE' })
   @JoinColumn()
   player: Player;
+
+  @DeleteDateColumn({ comment: '삭제일시' })
+  readonly deletedAt: Date | null;
 }

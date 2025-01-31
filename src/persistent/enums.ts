@@ -30,3 +30,9 @@ export enum MetadataKey {
   RequiredPlayerAuthGuard = 'required-player-auth-guard',
   RequiredEmptyPlayerAuthGuard = 'required-empty-player-auth-guard',
 }
+
+export enum TakeTokenCount {
+  Zero = 0,
+  One = 1,
+  Two = 2,
+}

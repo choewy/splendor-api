@@ -1,12 +1,12 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 
 import { Player } from './player.entity';
 import { TokenProperty } from '../types';
 
 @Entity({ name: 'player_token', comment: '플레이어 토큰' })
 export class PlayerToken implements TokenProperty {
-  @PrimaryGeneratedColumn('uuid')
-  readonly id: string;
+  @PrimaryColumn({ type: 'varchar', length: 36, comment: '플레이어 PK' })
+  playerId: string;
 
   @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '루비' })
   ruby: number;
@@ -26,12 +26,12 @@ export class PlayerToken implements TokenProperty {
   @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '토파즈' })
   topaz: number;
 
-  @Column({ type: 'varchar' })
-  playerId: string;
-
   @OneToOne(() => Player, (e) => e.token, { onDelete: 'CASCADE' })
   @JoinColumn()
   player: Player;
+
+  @DeleteDateColumn({ comment: '삭제일시' })
+  readonly deletedAt: Date | null;
 
   public static of(player: Player) {
     const playerToken = new PlayerToken();

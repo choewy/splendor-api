@@ -1,11 +1,12 @@
 import { DevelopmentCard } from 'src/persistent/classes';
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Game } from './game.entity';
-import { GameDevelopmentCardPosition } from '../enums';
+import { CardLevel, CardPosition } from '../enums';
 
 @Entity({ name: 'game_development_card', comment: '게임 발전 카드' })
-@Index('game_development_card_idx', ['gameId', 'cardId', 'level', 'position'])
+@Index('game_development_card_card_idx', ['gameId', 'cardId', 'position'])
+@Index('game_development_card_level_idx', ['gameId', 'level', 'position'])
 export class GameDevelopmentCard {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true, comment: '게임 발전 카드 PK' })
   readonly id: string;
@@ -14,10 +15,10 @@ export class GameDevelopmentCard {
   cardId: number;
 
   @Column({ type: 'varchar', length: 10, comment: '카드 위치' })
-  position: GameDevelopmentCardPosition;
+  position: CardPosition;
 
   @Column({ type: 'tinyint', unsigned: true, comment: '카드 레벨' })
-  level: number;
+  level: CardLevel;
 
   @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '카드 점수' })
   point: number;
@@ -59,7 +60,10 @@ export class GameDevelopmentCard {
   @JoinColumn()
   game: Game;
 
-  public static of(game: Game, position: GameDevelopmentCardPosition, card: DevelopmentCard) {
+  @DeleteDateColumn({ comment: '삭제일시' })
+  readonly deletedAt: Date | null;
+
+  public static of(game: Game, position: CardPosition, card: DevelopmentCard) {
     const gameDevelopmentCard = new GameDevelopmentCard();
 
     gameDevelopmentCard.game = game;

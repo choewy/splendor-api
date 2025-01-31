@@ -13,11 +13,14 @@ export class Player {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
+  @Column({ type: 'boolean', default: false, comment: '방장 여부' })
+  isHost: boolean;
+
   @Column({ type: 'boolean', default: false, comment: '준비 여부' })
   isReady: boolean;
 
-  @Column({ type: 'boolean', default: false, comment: '방장 여부' })
-  isHost: boolean;
+  @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '턴 순서(Zero Based)' })
+  index: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 0, comment: '점수' })
   point: number;

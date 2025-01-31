@@ -8,7 +8,7 @@ import { Game } from 'src/domain/entities/game.entity';
 import { PlayerBonus } from 'src/domain/entities/player-bonus.entity';
 import { PlayerToken } from 'src/domain/entities/player-token.entity';
 import { Player } from 'src/domain/entities/player.entity';
-import { GameDevelopmentCardPosition, GameStatus } from 'src/domain/enums';
+import { CardPosition, GameStatus } from 'src/domain/enums';
 import { DEVELOPMENT_CARDS_OF_LEVEL_1, DEVELOPMENT_CARDS_OF_LEVEL_2, DEVELOPMENT_CARDS_OF_LEVEL_3, NOBLE_CARDS } from 'src/persistent/constants';
 import { DataSource } from 'typeorm';
 
@@ -101,36 +101,34 @@ export class GameService {
       .map((card) => GameNobleCard.of(game, card));
 
     const gameDevelopmentCards: GameDevelopmentCard[] = ([] as GameDevelopmentCard[]).concat(
-      [...DEVELOPMENT_CARDS_OF_LEVEL_1]
-        .sort(() => Math.random() - 0.5)
-        .map((card, i) => GameDevelopmentCard.of(game, i < 4 ? GameDevelopmentCardPosition.Field : GameDevelopmentCardPosition.Deck, card)),
-      [...DEVELOPMENT_CARDS_OF_LEVEL_2]
-        .sort(() => Math.random() - 0.5)
-        .map((card, i) => GameDevelopmentCard.of(game, i < 4 ? GameDevelopmentCardPosition.Field : GameDevelopmentCardPosition.Deck, card)),
-      [...DEVELOPMENT_CARDS_OF_LEVEL_3]
-        .sort(() => Math.random() - 0.5)
-        .map((card, i) => GameDevelopmentCard.of(game, i < 4 ? GameDevelopmentCardPosition.Field : GameDevelopmentCardPosition.Deck, card)),
+      [...DEVELOPMENT_CARDS_OF_LEVEL_1].sort(() => Math.random() - 0.5).map((card, i) => GameDevelopmentCard.of(game, i < 4 ? CardPosition.Field : CardPosition.Deck, card)),
+      [...DEVELOPMENT_CARDS_OF_LEVEL_2].sort(() => Math.random() - 0.5).map((card, i) => GameDevelopmentCard.of(game, i < 4 ? CardPosition.Field : CardPosition.Deck, card)),
+      [...DEVELOPMENT_CARDS_OF_LEVEL_3].sort(() => Math.random() - 0.5).map((card, i) => GameDevelopmentCard.of(game, i < 4 ? CardPosition.Field : CardPosition.Deck, card)),
     );
 
     const playerTokens = game.players.map((player) => PlayerToken.of(player));
     const playerBonuses = game.players.map((player) => PlayerBonus.of(player));
+    const players = [...game.players]
+      .sort(() => Math.random() - 0.5)
+      .map((player, i) => {
+        player.index = i;
+
+        return player;
+      });
 
     await this.dataSource.transaction(async (em) => {
-      const gameRepository = em.getRepository(Game);
-      const gameTokenRepository = em.getRepository(GameToken);
-      const gameNobleCardRepository = em.getRepository(GameNobleCard);
-      const gameDevelopmentCardRepository = em.getRepository(GameDevelopmentCard);
-      const playerTokenRepository = em.getRepository(PlayerToken);
-      const playerBonusRepository = em.getRepository(PlayerBonus);
+      const playerRepositpry = em.getRepository(Player);
 
-      await Promise.all([
-        gameRepository.update(game.id, { status: GameStatus.Playing }),
-        gameTokenRepository.insert(gameToken),
-        gameNobleCardRepository.insert(gameNobleCards),
-        gameDevelopmentCardRepository.insert(gameDevelopmentCards),
-        playerTokenRepository.insert(playerTokens),
-        playerBonusRepository.insert(playerBonuses),
-      ]);
+      for (const player of players) {
+        await playerRepositpry.update(player.id, player);
+      }
+
+      await em.getRepository(PlayerToken).insert(playerTokens);
+      await em.getRepository(PlayerBonus).insert(playerBonuses);
+      await em.getRepository(GameToken).insert(gameToken);
+      await em.getRepository(GameNobleCard).insert(gameNobleCards);
+      await em.getRepository(GameDevelopmentCard).insert(gameDevelopmentCards);
+      await em.getRepository(Game).update(game.id, { status: GameStatus.Playing, maxPlayerIndex: players.length - 1 });
     });
   }
 
@@ -158,13 +156,8 @@ export class GameService {
     }
 
     await this.dataSource.transaction(async (em) => {
-      const gameRepository = em.getRepository(Game);
-      const playerRepository = em.getRepository(Player);
-
-      await Promise.all([
-        playerRepository.insert(playerRepository.create({ game, userId: oauth.userId, isHost: false })),
-        gameRepository.update(game.id, { playerCount: game.playerCount + 1 }),
-      ]);
+      await em.getRepository(Player).insert({ game, userId: oauth.userId, isHost: false });
+      await em.getRepository(Game).update(game.id, { playerCount: game.playerCount + 1 });
     });
   }
 
