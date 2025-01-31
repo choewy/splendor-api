@@ -35,7 +35,7 @@ export class PlayService {
       throw new ForbiddenException();
     }
 
-    if (game.maxPlayerIndex !== player.index) {
+    if (game.currentPlayerIndex !== player.index) {
       throw new BadRequestException('당신 차례 아님');
     }
 
@@ -121,7 +121,7 @@ export class PlayService {
     }
 
     const playerTokenRepository = this.dataSource.getRepository(PlayerToken);
-    const playerToken = await playerTokenRepository.findOneBy({ playerId: player?.id });
+    const playerToken = await playerTokenRepository.findOneBy({ playerId: player.id });
 
     if (!playerToken) {
       throw new BadRequestException('플레이어 토큰 정보 없음');
@@ -277,14 +277,14 @@ export class PlayService {
     const { player, game } = await this.checkTurn();
 
     const playerTokenRepository = this.dataSource.getRepository(PlayerToken);
-    const playerToken = await playerTokenRepository.findOneBy({ player });
+    const playerToken = await playerTokenRepository.findOneBy({ playerId: player.id });
 
     if (!playerToken) {
       throw new BadRequestException('플레이어 토큰 정보 없음');
     }
 
     const playerBonusRepository = this.dataSource.getRepository(PlayerBonus);
-    const playerBonus = await playerBonusRepository.findOneBy({ player });
+    const playerBonus = await playerBonusRepository.findOneBy({ playerId: player.id });
 
     if (!playerBonus) {
       throw new BadRequestException('플레이어 보너스 정보 없음');
