@@ -1,10 +1,14 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { ContextService } from 'src/core/context/context.service';
 import { GameDevelopmentCard } from 'src/domain/entities/game-development-card.entity';
+import { GameNobleCard } from 'src/domain/entities/game-noble-card.entity';
 import { GameToken } from 'src/domain/entities/game-token.entity';
 import { Game } from 'src/domain/entities/game.entity';
+import { PlayerBonus } from 'src/domain/entities/player-bonus.entity';
 import { PlayerDevelopmentCard } from 'src/domain/entities/player-development-card.entity';
+import { PlayerNobleCard } from 'src/domain/entities/player-noble-card.entity';
 import { PlayerToken } from 'src/domain/entities/player-token.entity';
+import { Player } from 'src/domain/entities/player.entity';
 import { CardPosition, CardStatus } from 'src/domain/enums';
 import { TokenProperty } from 'src/domain/types';
 import { TakeTokenCount } from 'src/persistent/enums';
@@ -12,6 +16,7 @@ import { DataSource, EntityManager } from 'typeorm';
 
 import { KeepCardDTO } from './dto/keep-card.dto';
 import { PlayDetailDTO } from './dto/play-detail.dto';
+import { PurchaseCardDTO } from './dto/purchase-card.dto';
 import { TakeTokenDTO } from './dto/take-token.dto';
 
 @Injectable()
@@ -21,6 +26,22 @@ export class PlayService {
     private readonly contextService: ContextService,
   ) {}
 
+  private async checkTurn() {
+    const player = this.contextService.requestPlayer;
+    const game = player?.game;
+
+    if (!game) {
+      throw new ForbiddenException();
+    }
+
+    if (game.maxPlayerIndex !== player.index) {
+      throw new BadRequestException('당신 차례 아님');
+    }
+
+    return { player, game };
+  }
+
+  // TODO 게임 종료 체크 결과 반환
   private async nextTurn(em: EntityManager, game: Game) {
     const isNextRound = game.currentPlayerIndex === game.maxPlayerIndex;
 
@@ -61,16 +82,7 @@ export class PlayService {
   }
 
   async takeToken(body: TakeTokenDTO) {
-    const player = this.contextService.requestPlayer;
-    const game = player?.game;
-
-    if (!game) {
-      throw new ForbiddenException();
-    }
-
-    if (game.currentPlayerIndex !== player.index) {
-      throw new BadRequestException('당신 차례 아님');
-    }
+    const { player, game } = await this.checkTurn();
 
     const countOfZeroTokens: Array<keyof Omit<TokenProperty, 'topaz'>> = [];
     const countOfOneTokens: Array<keyof Omit<TokenProperty, 'topaz'>> = [];
@@ -167,25 +179,16 @@ export class PlayService {
       gameToken[countOfTwoToken] -= 2;
     }
 
-    return this.dataSource.transaction(async (em) => {
+    await this.dataSource.transaction(async (em) => {
       await em.getRepository(PlayerToken).update(player.id, playerToken);
       await em.getRepository(GameToken).update(game.id, gameToken);
 
-      await this.nextTurn(em, game);
+      return this.nextTurn(em, game);
     });
   }
 
   async keepCard(body: KeepCardDTO) {
-    const player = this.contextService.requestPlayer;
-    const game = player?.game;
-
-    if (!game) {
-      throw new ForbiddenException();
-    }
-
-    if (game.maxPlayerIndex !== player.index) {
-      throw new BadRequestException('당신 차례 아님');
-    }
+    const { player, game } = await this.checkTurn();
 
     const playerDevelopmentCardRepository = this.dataSource.getRepository(PlayerDevelopmentCard);
     const playerDibedDevelopmentCardCount = await playerDevelopmentCardRepository.countBy({
@@ -252,7 +255,7 @@ export class PlayService {
       throw new BadRequestException('게임 토큰 정보 없음');
     }
 
-    return this.dataSource.transaction(async (em) => {
+    await this.dataSource.transaction(async (em) => {
       if (openTarget) {
         await em.getRepository(GameDevelopmentCard).update(openTarget.id, { position: CardPosition.Field });
       }
@@ -265,20 +268,32 @@ export class PlayService {
         await em.getRepository(GameToken).update(game.id, { topaz: () => `topaz - 1` });
       }
 
-      await this.nextTurn(em, game);
+      return this.nextTurn(em, game);
     });
   }
 
-  async purchaseCard() {
-    const player = this.contextService.requestPlayer;
-    const game = player?.game;
+  async purchaseDevelopmentCard(body: PurchaseCardDTO) {
+    const { player, game } = await this.checkTurn();
 
-    if (!game) {
-      throw new ForbiddenException();
+    const gameDevelopmentCardRepository = this.dataSource.getRepository(GameDevelopmentCard);
+    const gameDevelopmentCard = await gameDevelopmentCardRepository.findOneBy({ game, cardId: body.cardId });
+
+    if (!gameDevelopmentCard) {
+      throw new BadRequestException('게임 발전 카드 없음');
     }
 
-    if (game.maxPlayerIndex !== player.index) {
-      throw new BadRequestException('당신 차례 아님');
+    const playerTokenRepository = this.dataSource.getRepository(PlayerToken);
+    const playerToken = await playerTokenRepository.findOneBy({ player });
+
+    if (!playerToken) {
+      throw new BadRequestException('플레이어 토큰 정보 없음');
+    }
+
+    const playerBonusRepository = this.dataSource.getRepository(PlayerBonus);
+    const playerBonus = await playerBonusRepository.findOneBy({ player });
+
+    if (!playerBonus) {
+      throw new BadRequestException('플레이어 보너스 정보 없음');
     }
 
     // TODO 플레이어의 보너스 및 토큰 수량 파악(플레이어가 소지한 노란색 토큰 수량 고려)
@@ -287,8 +302,45 @@ export class PlayService {
     // TODO 플레이어의 점수 증가
     // TODO 덱에서 새로운 카드 뽑아서 필드에 추가
 
-    return this.dataSource.transaction(async (em) => {
-      await this.nextTurn(em, game);
+    await this.dataSource.transaction(async (em) => {
+      return this.nextTurn(em, game);
+    });
+  }
+
+  async purchaseNobleCard(body: PurchaseCardDTO) {
+    const { player, game } = await this.checkTurn();
+
+    const gameNobleCardRepository = this.dataSource.getRepository(GameNobleCard);
+    const gameNobleCard = await gameNobleCardRepository.findOneBy({ game, cardId: body.cardId });
+
+    if (!gameNobleCard) {
+      throw new BadRequestException('게임 귀족 카드 없음');
+    }
+
+    const playerBonusRepository = this.dataSource.getRepository(PlayerBonus);
+    const playerBonus = await playerBonusRepository.findOneBy({ player });
+
+    if (!playerBonus) {
+      throw new BadRequestException('플레이어 보너스 정보 없음');
+    }
+
+    const validationTarget = [
+      gameNobleCard.costOfRuby > playerBonus.ruby,
+      gameNobleCard.costOfEmerald > playerBonus.emerald,
+      gameNobleCard.costOfSapphire > playerBonus.sapphire,
+      gameNobleCard.costOfOnyx > playerBonus.onyx,
+      gameNobleCard.costOfDiamond > playerBonus.diamond,
+    ].some((value) => value === true);
+
+    if (validationTarget) {
+      throw new BadRequestException('플레이어 보너스 부족');
+    }
+
+    await this.dataSource.transaction(async (em) => {
+      await em.getRepository(PlayerNobleCard).insert(PlayerNobleCard.ofPurchase(player, gameNobleCard));
+      await em.getRepository(Player).update(player.id, { point: () => `point + ${gameNobleCard.point}` });
+
+      return this.nextTurn(em, game);
     });
   }
 }

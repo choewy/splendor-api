@@ -1,5 +1,6 @@
 import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
+import { GameNobleCard } from './game-noble-card.entity';
 import { Player } from './player.entity';
 
 @Entity({ name: 'player_noble_card', comment: '플레이어 귀족 카드' })
@@ -37,4 +38,19 @@ export class PlayerNobleCard {
 
   @DeleteDateColumn({ comment: '삭제일시' })
   readonly deletedAt: Date | null;
+
+  public static ofPurchase(player: Player, gameNobleCard: GameNobleCard) {
+    const playerNobleCard = new PlayerNobleCard();
+
+    playerNobleCard.playerId = player.id;
+    playerNobleCard.cardId = gameNobleCard.cardId;
+    playerNobleCard.point = gameNobleCard.point;
+    playerNobleCard.costOfRuby = gameNobleCard.costOfRuby;
+    playerNobleCard.costOfEmerald = gameNobleCard.costOfEmerald;
+    playerNobleCard.costOfSapphire = gameNobleCard.costOfSapphire;
+    playerNobleCard.costOfOnyx = gameNobleCard.costOfOnyx;
+    playerNobleCard.costOfDiamond = gameNobleCard.costOfDiamond;
+
+    return playerNobleCard;
+  }
 }

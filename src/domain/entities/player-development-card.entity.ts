@@ -85,7 +85,7 @@ export class PlayerDevelopmentCard {
     return playerDevelopmentCard;
   }
 
-  public static ofPurchased(player: Player, gameDevelopmentCard: GameDevelopmentCard) {
+  public static ofPurchase(player: Player, gameDevelopmentCard: GameDevelopmentCard) {
     const playerDevelopmentCard = new PlayerDevelopmentCard();
 
     playerDevelopmentCard.playerId = player.id;
