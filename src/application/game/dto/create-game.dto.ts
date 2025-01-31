@@ -12,6 +12,13 @@ export class CreateGameDTO {
   @IsOptional()
   password: string;
 
+  @ApiProperty({ type: Number, description: '종료 점수(15점 ~ 30점)' })
+  @Max(30)
+  @Min(15)
+  @IsInt()
+  @IsNotEmpty()
+  finishPoint: number;
+
   @ApiProperty({ type: Number, description: '턴 제한시간(30초 ~ 300초)' })
   @Max(300)
   @Min(30)

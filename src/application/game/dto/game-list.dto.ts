@@ -13,6 +13,9 @@ export class GameDTO {
   isPrivate: boolean;
 
   @ApiResponseProperty({ type: Number })
+  finishPoint: number;
+
+  @ApiResponseProperty({ type: Number })
   waitTime: number;
 
   @ApiResponseProperty({ type: Number })
@@ -31,6 +34,7 @@ export class GameDTO {
     this.id = game.id;
     this.title = game.title;
     this.isPrivate = !!game.password;
+    this.finishPoint = game.finishPoint;
     this.waitTime = game.waitTime;
     this.maxPlayerCount = game.maxPlayerCount;
     this.playerCount = game.playerCount;

@@ -22,6 +22,9 @@ export class PlayDetailDTO {
   nextPlayerIndex: number;
 
   @ApiResponseProperty({ type: Number })
+  finishPoint: number;
+
+  @ApiResponseProperty({ type: Number })
   waitTime: number;
 
   @ApiResponseProperty({ type: Date })
@@ -48,6 +51,7 @@ export class PlayDetailDTO {
     this.round = game.round;
     this.currentPlayerIndex = game.currentPlayerIndex;
     this.nextPlayerIndex = game.currentPlayerIndex === game.maxPlayerIndex ? 0 : game.currentPlayerIndex + 1;
+    this.finishPoint = game.finishPoint;
     this.waitTime = game.waitTime;
     this.createdAt = game.createdAt;
     this.token = new PlayDetailGameTokenDTO(game.token);

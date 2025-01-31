@@ -9,7 +9,7 @@ import { PlayerDevelopmentCard } from 'src/domain/entities/player-development-ca
 import { PlayerNobleCard } from 'src/domain/entities/player-noble-card.entity';
 import { PlayerToken } from 'src/domain/entities/player-token.entity';
 import { Player } from 'src/domain/entities/player.entity';
-import { CardPosition, CardStatus } from 'src/domain/enums';
+import { CardPosition, CardStatus, GameStatus } from 'src/domain/enums';
 import { TokenProperty } from 'src/domain/types';
 import { TakeTokenCount } from 'src/persistent/enums';
 import { DataSource, EntityManager } from 'typeorm';
@@ -42,14 +42,34 @@ export class PlayService {
     return { player, game };
   }
 
-  // TODO 게임 종료 체크 결과 반환
-  private async nextTurn(em: EntityManager, game: Game) {
+  // TODO 로직 구체화하기
+  private async checkNextTurn(em: EntityManager, game: Game) {
     const isNextRound = game.currentPlayerIndex === game.maxPlayerIndex;
 
     await em.getRepository(Game).update(game.id, {
       currentPlayerIndex: isNextRound ? 0 : () => 'currentPlayerIndex + 1',
       round: isNextRound ? () => 'round + 1' : undefined,
     });
+
+    if (!isNextRound) {
+      return true;
+    }
+
+    const playerRepository = em.getRepository(Player);
+    const players = await playerRepository.find({
+      relations: { developmentCards: true, nobleCards: true, token: true },
+      where: { gameId: game.id },
+    });
+
+    const winners = players.filter((player) => player.point >= game.finishPoint);
+
+    if (winners.length === 0) {
+      return true;
+    }
+
+    await em.getRepository(Game).update(game.id, { status: GameStatus.Finished });
+
+    return false;
   }
 
   async getDetail() {
@@ -184,7 +204,7 @@ export class PlayService {
       await em.getRepository(PlayerToken).update(player.id, playerToken);
       await em.getRepository(GameToken).update(game.id, gameToken);
 
-      return this.nextTurn(em, game);
+      return this.checkNextTurn(em, game);
     });
   }
 
@@ -269,7 +289,7 @@ export class PlayService {
         await em.getRepository(GameToken).update(game.id, { topaz: () => `topaz - 1` });
       }
 
-      return this.nextTurn(em, game);
+      return this.checkNextTurn(em, game);
     });
   }
 
@@ -367,7 +387,7 @@ export class PlayService {
 
       await em.getRepository(GameDevelopmentCard).softRemove(purchaseTarget);
 
-      return this.nextTurn(em, game);
+      return this.checkNextTurn(em, game);
     });
   }
 
@@ -404,7 +424,7 @@ export class PlayService {
       await em.getRepository(PlayerNobleCard).insert(PlayerNobleCard.ofPurchase(player, gameNobleCard));
       await em.getRepository(Player).update(player.id, { point: () => `point + ${gameNobleCard.point}` });
 
-      return this.nextTurn(em, game);
+      return this.checkNextTurn(em, game);
     });
   }
 }

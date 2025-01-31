@@ -51,6 +51,7 @@ export class GameService {
     const game = gameRepository.create({
       title: body.title,
       password: body.password ? bcrypt.hashSync(body.password, 10) : null,
+      finishPoint: body.finishPoint,
       waitTime: body.waitTime,
       maxPlayerCount: body.maxPlayerCount,
       playerCount: 1,

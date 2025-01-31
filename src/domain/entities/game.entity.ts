@@ -17,6 +17,9 @@ export class Game {
   @Column({ type: 'varchar', length: 255, default: null, comment: '방 비밀번호' })
   password: string | null;
 
+  @Column({ type: 'tinyint', unsigned: true, default: 15, comment: '종료 점수' })
+  finishPoint: number;
+
   @Column({ type: 'mediumint', unsigned: true, default: 60, comment: '턴 제한시간(초)' })
   waitTime: number;
 
