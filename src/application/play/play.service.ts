@@ -16,7 +16,8 @@ import { DataSource, EntityManager } from 'typeorm';
 
 import { KeepCardDTO } from './dto/keep-card.dto';
 import { PlayDetailDTO } from './dto/play-detail.dto';
-import { PurchaseCardDTO } from './dto/purchase-card.dto';
+import { PurchaseDevelopmentCardDTO } from './dto/purchase-development-card.dto';
+import { PurchaseNobleCardDTO } from './dto/purchase-noble-card.dto';
 import { TakeTokenDTO } from './dto/take-token.dto';
 
 @Injectable()
@@ -272,15 +273,8 @@ export class PlayService {
     });
   }
 
-  async purchaseDevelopmentCard(body: PurchaseCardDTO) {
+  async purchaseDevelopmentCard(body: PurchaseDevelopmentCardDTO) {
     const { player, game } = await this.checkTurn();
-
-    const gameDevelopmentCardRepository = this.dataSource.getRepository(GameDevelopmentCard);
-    const gameDevelopmentCard = await gameDevelopmentCardRepository.findOneBy({ game, cardId: body.cardId });
-
-    if (!gameDevelopmentCard) {
-      throw new BadRequestException('게임 발전 카드 없음');
-    }
 
     const playerTokenRepository = this.dataSource.getRepository(PlayerToken);
     const playerToken = await playerTokenRepository.findOneBy({ player });
@@ -296,18 +290,88 @@ export class PlayService {
       throw new BadRequestException('플레이어 보너스 정보 없음');
     }
 
-    // TODO 플레이어의 보너스 및 토큰 수량 파악(플레이어가 소지한 노란색 토큰 수량 고려)
-    // TODO 플레이어의 토근 수량 차감
-    // TODO 플레이어의 보너스 증가
-    // TODO 플레이어의 점수 증가
-    // TODO 덱에서 새로운 카드 뽑아서 필드에 추가
+    const gameDevelopmentCardRepository = this.dataSource.getRepository(GameDevelopmentCard);
+    const purchaseTarget = await gameDevelopmentCardRepository.findOneBy({
+      gameId: game.id,
+      cardId: body.cardId,
+      position: CardPosition.Field,
+    });
+
+    if (!purchaseTarget) {
+      throw new BadRequestException('게임 발전 카드 없음');
+    }
+
+    const cost = {
+      ruby: purchaseTarget.costOfRuby > 0 ? purchaseTarget.costOfRuby - playerBonus.ruby : 0,
+      emerald: purchaseTarget.costOfEmerald > 0 ? purchaseTarget.costOfEmerald - playerBonus.emerald : 0,
+      sapphire: purchaseTarget.costOfSapphire > 0 ? purchaseTarget.costOfSapphire - playerBonus.sapphire : 0,
+      onyx: purchaseTarget.costOfOnyx > 0 ? purchaseTarget.costOfOnyx - playerBonus.onyx : 0,
+      diamond: purchaseTarget.costOfDiamond > 0 ? purchaseTarget.costOfDiamond - playerBonus.diamond : 0,
+      topaz: 0,
+    };
+
+    const costs = [
+      playerToken.ruby - cost.ruby,
+      playerToken.emerald - cost.emerald,
+      playerToken.sapphire - cost.sapphire,
+      playerToken.onyx - cost.onyx,
+      playerToken.diamond - cost.diamond,
+    ];
+
+    const costOfLeek = -costs.reduce((total, cost) => {
+      if (cost < 0) {
+        total += cost;
+      }
+
+      return total;
+    }, 0);
+
+    if (costOfLeek) {
+      if (!body.useTopaz || playerToken.topaz - costOfLeek < 0) {
+        throw new BadRequestException('자원(토큰, 보너스) 부족');
+      }
+
+      cost.topaz += costOfLeek;
+    }
+
+    const openTarget = await gameDevelopmentCardRepository.findOneBy({
+      gameId: game.id,
+      level: purchaseTarget.level,
+      position: CardPosition.Deck,
+    });
 
     await this.dataSource.transaction(async (em) => {
+      await em.getRepository(PlayerBonus).update(player.id, {
+        ruby: () => `ruby + ${purchaseTarget.bonusOfRuby}`,
+        sapphire: () => `sapphire + ${purchaseTarget.bonusOfSapphire}`,
+        emerald: () => `emerald + ${purchaseTarget.bonusOfEmerald}`,
+        onyx: () => `onyx + ${purchaseTarget.bonusOfOnyx}`,
+        diamond: () => `diamond + ${purchaseTarget.bonusOfDiamond}`,
+      });
+
+      await em.getRepository(PlayerToken).update(player.id, {
+        ruby: () => `IF(ruby - ${cost.ruby} < 0, 0, ruby - ${cost.ruby})`,
+        sapphire: () => `IF(sapphire - ${cost.sapphire} < 0, 0, sapphire - ${cost.sapphire})`,
+        emerald: () => `IF(emerald - ${cost.emerald} < 0, 0, emerald - ${cost.emerald})`,
+        onyx: () => `IF(onyx - ${cost.onyx} < 0, 0, onyx - ${cost.onyx})`,
+        diamond: () => `IF(diamond - ${cost.diamond} < 0, 0, diamond - ${cost.diamond})`,
+        topaz: () => `IF(topaz - ${cost.topaz} < 0, 0, topaz - ${cost.topaz})`,
+      });
+
+      await em.getRepository(Player).update(player.id, { point: () => `point + ${purchaseTarget.point}` });
+      await em.getRepository(PlayerDevelopmentCard).insert(PlayerDevelopmentCard.ofPurchase(player, purchaseTarget));
+
+      if (openTarget) {
+        await em.getRepository(GameDevelopmentCard).update(openTarget.id, { position: CardPosition.Field });
+      }
+
+      await em.getRepository(GameDevelopmentCard).softRemove(purchaseTarget);
+
       return this.nextTurn(em, game);
     });
   }
 
-  async purchaseNobleCard(body: PurchaseCardDTO) {
+  async purchaseNobleCard(body: PurchaseNobleCardDTO) {
     const { player, game } = await this.checkTurn();
 
     const gameNobleCardRepository = this.dataSource.getRepository(GameNobleCard);

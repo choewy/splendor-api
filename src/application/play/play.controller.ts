@@ -3,7 +3,8 @@ import { ApiOperation } from '@nestjs/swagger';
 import { RequiredJwtGuard, RequiredPlayerGuard } from 'src/persistent/decorators';
 
 import { KeepCardDTO } from './dto/keep-card.dto';
-import { PurchaseCardDTO } from './dto/purchase-card.dto';
+import { PurchaseDevelopmentCardDTO } from './dto/purchase-development-card.dto';
+import { PurchaseNobleCardDTO } from './dto/purchase-noble-card.dto';
 import { TakeTokenDTO } from './dto/take-token.dto';
 import { PlayService } from './play.service';
 
@@ -33,13 +34,13 @@ export class PlayController {
 
   @Post('purchase/development-card')
   @ApiOperation({ summary: '개발 카드 구매하기' })
-  async purchaseDevelopmentCard(@Body() body: PurchaseCardDTO) {
+  async purchaseDevelopmentCard(@Body() body: PurchaseDevelopmentCardDTO) {
     return this.playService.purchaseDevelopmentCard(body);
   }
 
   @Post('purchase/noble-card')
   @ApiOperation({ summary: '귀족 카드 구매하기' })
-  async purchaseNobleCard(@Body() body: PurchaseCardDTO) {
+  async purchaseNobleCard(@Body() body: PurchaseNobleCardDTO) {
     return this.playService.purchaseNobleCard(body);
   }
 }
