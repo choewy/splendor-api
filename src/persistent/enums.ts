@@ -26,5 +26,7 @@ export enum ResponseHeader {
 }
 
 export enum MetadataKey {
-  RequiredJWTAuthGuard = 'required-jwt-auth-guard',
+  RequiredJwtAuthGuard = 'required-jwt-auth-guard',
+  RequiredPlayerAuthGuard = 'required-player-auth-guard',
+  RequiredEmptyPlayerAuthGuard = 'required-empty-player-auth-guard',
 }

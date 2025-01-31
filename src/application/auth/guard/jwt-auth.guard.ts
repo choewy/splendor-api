@@ -18,7 +18,7 @@ export class JwtAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     this.contextService.executionContext = context;
 
-    if (!this.reflector.getAllAndOverride(MetadataKey.RequiredJWTAuthGuard, [context.getClass(), context.getHandler()])) {
+    if (!this.reflector.getAllAndOverride(MetadataKey.RequiredJwtAuthGuard, [context.getClass(), context.getHandler()])) {
       return true;
     }
 
@@ -40,7 +40,6 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     this.contextService.requestUser = oauth;
-    this.contextService.requestPlayer = await this.authService.getPlayer(oauth);
 
     if (accessTokenVerifyResult.error instanceof TokenExpiredError) {
       const refreshToken = (request.headers[RequestHeader.XRefreshToken] ?? '').toString();

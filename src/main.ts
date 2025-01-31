@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './application/auth/guard/jwt-auth.guard';
+import { PlayerAuthGuard } from './application/auth/guard/player-auth.guard';
 import { ContextInterceptor } from './core/context/context.interceptor';
 import { LoggingInterceptor } from './core/logging/logging.interceptor';
 import { RequestHeader } from './persistent/enums';
@@ -39,7 +40,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.enableCors({ origin: new RegExp(configService.getOrThrow('CORS_ORIGIN')) });
-  app.useGlobalGuards(app.get(JwtAuthGuard));
+  app.useGlobalGuards(app.get(JwtAuthGuard), app.get(PlayerAuthGuard));
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {
       enableCircularCheck: true,

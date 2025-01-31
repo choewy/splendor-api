@@ -14,6 +14,7 @@ import { ChangePlayerReadyStatus } from './dto/change-player-ready-status.dto';
 import { CreateGameDTO } from './dto/create-game.dto';
 import { GameListDTO } from './dto/game-list.dto';
 import { GetGameListQueryParamDTO } from './dto/get-game-list-query-param.dto';
+import { JoinGameDTO } from './dto/join-game.dto';
 
 @Injectable()
 export class GameService {
@@ -71,7 +72,7 @@ export class GameService {
     await playerRepository.update(player.id, { isReady: body.isReady });
   }
 
-  async start() {
+  async startGame() {
     const player = this.contextService.requestPlayer;
 
     if (!player || !player.isHost || !player.isReady) {
@@ -127,7 +128,7 @@ export class GameService {
     });
   }
 
-  async join(gameId: string) {
+  async join(body: JoinGameDTO) {
     const oauth = this.contextService.requestUser;
     const player = this.contextService.requestPlayer;
 
@@ -136,7 +137,7 @@ export class GameService {
     }
 
     const gameRepository = this.dataSource.getRepository(Game);
-    const game = await gameRepository.findOneBy({ id: gameId });
+    const game = await gameRepository.findOneBy({ id: body.gameId });
 
     if (!game) {
       throw new BadRequestException();
