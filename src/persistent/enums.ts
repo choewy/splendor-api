@@ -8,6 +8,7 @@ export enum ContextPropertyKey {
   RequestId = 'request-id',
   RequestTimestamp = 'request-timestamp',
   RequestUser = 'request-user',
+  RequestPlayer = 'request-player',
   ExecutionContext = 'execution-context',
 }
 

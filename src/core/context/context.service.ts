@@ -1,6 +1,7 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { OAuth } from 'src/domain/entities/oauth.entity';
+import { Player } from 'src/domain/entities/player.entity';
 import { ContextPropertyKey, RequestHeader } from 'src/persistent/enums';
 
 @Injectable()
@@ -37,6 +38,14 @@ export class ContextService {
 
   set requestUser(oauth: OAuth) {
     this.clsService.set(ContextPropertyKey.RequestUser, oauth);
+  }
+
+  get requestPlayer() {
+    return this.clsService.get(ContextPropertyKey.RequestPlayer) ?? null;
+  }
+
+  set requestPlayer(player: Player | null) {
+    this.clsService.set(ContextPropertyKey.RequestPlayer, player);
   }
 
   getRequestLog(exception?: unknown) {

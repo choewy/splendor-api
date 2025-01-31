@@ -6,10 +6,11 @@ import { GameNobleCard } from 'src/domain/entities/game-noble-card.entity';
 import { GameToken } from 'src/domain/entities/game-token.entity';
 import { Game } from 'src/domain/entities/game.entity';
 import { Player } from 'src/domain/entities/player.entity';
-import { GameDevelopmentCardPosition, GameStatus, PlayerStatus } from 'src/domain/enums';
+import { GameDevelopmentCardPosition, GameStatus } from 'src/domain/enums';
 import { DEVELOPMENT_CARDS_OF_LEVEL_1, DEVELOPMENT_CARDS_OF_LEVEL_2, DEVELOPMENT_CARDS_OF_LEVEL_3, NOBLE_CARDS } from 'src/persistent/constants';
 import { DataSource } from 'typeorm';
 
+import { ChangePlayerReadyStatus } from './dto/change-player-ready-status.dto';
 import { CreateGameDTO } from './dto/create-game.dto';
 import { GameListDTO } from './dto/game-list.dto';
 import { GetGameListQueryParamDTO } from './dto/get-game-list-query-param.dto';
@@ -34,13 +35,13 @@ export class GameService {
 
   async create(body: CreateGameDTO) {
     const oauth = this.contextService.requestUser;
+    const player = this.contextService.requestPlayer;
 
-    const playerRepository = this.dataSource.getRepository(Player);
-
-    if (await playerRepository.findOneBy({ userId: oauth.userId, status: PlayerStatus.Activated })) {
+    if (player) {
       throw new ConflictException();
     }
 
+    const playerRepository = this.dataSource.getRepository(Player);
     const gameRepository = this.dataSource.getRepository(Game);
     const game = gameRepository.create({
       title: body.title,
@@ -59,37 +60,19 @@ export class GameService {
     await gameRepository.save(game);
   }
 
-  async ready() {
-    const oauth = this.contextService.requestUser;
-
-    const playerRepository = this.dataSource.getRepository(Player);
-    const player = await playerRepository.findOneBy({ userId: oauth.userId, status: PlayerStatus.Activated });
+  async changeReadyStatus(body: ChangePlayerReadyStatus) {
+    const player = this.contextService.requestPlayer;
 
     if (!player) {
       throw new BadRequestException();
     }
 
-    await playerRepository.update(player.id, { isReady: true });
-  }
-
-  async wating() {
-    const oauth = this.contextService.requestUser;
-
     const playerRepository = this.dataSource.getRepository(Player);
-    const player = await playerRepository.findOneBy({ userId: oauth.userId, status: PlayerStatus.Activated });
-
-    if (!player) {
-      throw new BadRequestException();
-    }
-
-    await playerRepository.update(player.id, { isReady: false });
+    await playerRepository.update(player.id, { isReady: body.isReady });
   }
 
   async start() {
-    const oauth = this.contextService.requestUser;
-
-    const playerRepository = this.dataSource.getRepository(Player);
-    const player = await playerRepository.findOneBy({ userId: oauth.userId, status: PlayerStatus.Activated });
+    const player = this.contextService.requestPlayer;
 
     if (!player || !player.isHost || !player.isReady) {
       throw new BadRequestException();
@@ -146,9 +129,7 @@ export class GameService {
 
   async join(gameId: string) {
     const oauth = this.contextService.requestUser;
-
-    const playerRepository = this.dataSource.getRepository(Player);
-    const player = await playerRepository.findOneBy({ userId: oauth.userId, status: PlayerStatus.Activated });
+    const player = this.contextService.requestPlayer;
 
     if (player) {
       throw new ConflictException();
@@ -181,10 +162,7 @@ export class GameService {
   }
 
   async leave() {
-    const oauth = this.contextService.requestUser;
-
-    const playerRepository = this.dataSource.getRepository(Player);
-    const player = await playerRepository.findOneBy({ userId: oauth.userId, status: PlayerStatus.Activated });
+    const player = this.contextService.requestPlayer;
 
     if (!player) {
       throw new BadRequestException();

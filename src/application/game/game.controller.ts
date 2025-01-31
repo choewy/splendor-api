@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, Put, Query } from '@nestjs/c
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { ApiPrivate } from 'src/persistent/decorators';
 
+import { ChangePlayerReadyStatus } from './dto/change-player-ready-status.dto';
 import { CreateGameDTO } from './dto/create-game.dto';
 import { GameListDTO } from './dto/game-list.dto';
 import { GetGameListQueryParamDTO } from './dto/get-game-list-query-param.dto';
@@ -26,15 +27,9 @@ export class GameController {
   }
 
   @Patch('ready')
-  @ApiOperation({ summary: '준비 상태로 변경' })
-  async ready() {
-    return this.gameService.ready();
-  }
-
-  @Patch('wating')
-  @ApiOperation({ summary: '대기 상태로 변경' })
-  async wating() {
-    return this.gameService.wating();
+  @ApiOperation({ summary: '준비 상태 변경' })
+  async changeReadyStatus(@Body() body: ChangePlayerReadyStatus) {
+    return this.gameService.changeReadyStatus(body);
   }
 
   @Put('join/:gameId')
