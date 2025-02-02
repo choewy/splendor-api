@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,8 +11,10 @@ import { OAuthModule } from './application/oauth/oauth.module';
 import { PlayModule } from './application/play/play.module';
 import { PlayerModule } from './application/player/player.module';
 import { ProfileModule } from './application/profile/profile.module';
+import { TypeOrmConfig } from './core/config/typeorm.config';
 import { ContextModule } from './core/context/context.module';
 import { LoggingModule } from './core/logging/logging.module';
+import { PubSubModule } from './core/pubsub/pubsub.module';
 
 @Module({
   imports: [
@@ -21,22 +22,13 @@ import { LoggingModule } from './core/logging/logging.module';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory(configService: ConfigService) {
-        return {
-          type: 'mysql',
-          host: configService.getOrThrow('DB_HOST'),
-          port: configService.getOrThrow('DB_PORT'),
-          username: configService.getOrThrow('DB_USERNAME'),
-          password: configService.getOrThrow('DB_PASSWORD'),
-          database: configService.getOrThrow('DB_DATABASE'),
-          synchronize: configService.get('DB_SYNCHRONIZE') === 'true',
-          namingStrategy: new SnakeNamingStrategy(),
-          entities: [`${process.cwd()}/dist/domain/entities/**/*.entity.{ts,js}`],
-          logging: true,
-        };
+        const typeOrmConfig = new TypeOrmConfig(configService);
+        return typeOrmConfig.getModuleOptions();
       },
     }),
     ContextModule.forRoot(),
     LoggingModule,
+    PubSubModule,
     KakaoApiModule,
     OAuthModule,
     AuthModule,

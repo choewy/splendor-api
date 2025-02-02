@@ -1,14 +1,18 @@
-import { BadRequestException, ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './application/auth/guard/jwt-auth.guard';
 import { PlayerAuthGuard } from './application/auth/guard/player-auth.guard';
+import { RedisConfig } from './core/config/redis.config';
+import { ServerConfig } from './core/config/server.config';
 import { ContextInterceptor } from './core/context/context.interceptor';
 import { LoggingInterceptor } from './core/logging/logging.interceptor';
 import { RequestHeader } from './persistent/enums';
+import { RedisIoAdapter } from './providers/redis-io.adapter';
+import { classSerializerInterceptor, validationPipe } from './providers/validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -38,36 +42,21 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, SwaggerModule.createDocument(app, swaggerDocument));
 
   const configService = app.get(ConfigService);
+  const redisConfig = new RedisConfig(configService);
+  const serverConfig = new ServerConfig(configService);
 
-  app.enableCors({ origin: new RegExp(configService.getOrThrow('CORS_ORIGIN')) });
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis(redisConfig.getRedisOptions());
+
+  app.useWebSocketAdapter(redisIoAdapter);
+  app.enableShutdownHooks();
+  app.enableCors(serverConfig.getCorsOptions);
+  app.use(cookieParser());
   app.useGlobalGuards(app.get(JwtAuthGuard), app.get(PlayerAuthGuard));
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector), {
-      enableCircularCheck: true,
-      enableImplicitConversion: true,
-    }),
-    app.get(ContextInterceptor),
-    app.get(LoggingInterceptor),
-  );
+  app.useGlobalInterceptors(classSerializerInterceptor(app.get(Reflector)), app.get(ContextInterceptor), app.get(LoggingInterceptor));
+  app.useGlobalPipes(validationPipe);
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: {
-        enableCircularCheck: true,
-        enableImplicitConversion: true,
-      },
-      stopAtFirstError: true,
-      exceptionFactory(errors) {
-        const error = errors.shift();
-        const message = Object.values(error?.constraints ?? {}).shift();
-
-        return new BadRequestException(message);
-      },
-    }),
-  );
-
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(serverConfig.getListenPort());
 }
 
 bootstrap();
