@@ -17,12 +17,14 @@ import { CreateGameDTO } from './dto/create-game.dto';
 import { GameListDTO } from './dto/game-list.dto';
 import { GetGameListQueryParamDTO } from './dto/get-game-list-query-param.dto';
 import { JoinGameDTO } from './dto/join-game.dto';
+import { GameGateway } from './game.gateway';
 
 @Injectable()
 export class GameService {
   constructor(
     private readonly contextService: ContextService,
     private readonly dataSource: DataSource,
+    private readonly gameGateway: GameGateway,
   ) {}
 
   async list(queryParam: GetGameListQueryParamDTO) {
@@ -59,6 +61,101 @@ export class GameService {
     });
 
     await gameRepository.save(game);
+
+    await this.gameGateway.join(hostPlayer, game);
+    await this.gameGateway.created(game);
+  }
+
+  async join(body: JoinGameDTO) {
+    const oauth = this.contextService.requestUser;
+    const player = this.contextService.requestPlayer;
+
+    if (player) {
+      throw new ConflictException();
+    }
+
+    const gameRepository = this.dataSource.getRepository(Game);
+    const game = await gameRepository.findOneBy({ id: body.gameId });
+
+    if (!game) {
+      throw new BadRequestException();
+    }
+
+    if (game.status !== GameStatus.Wating) {
+      throw new BadRequestException();
+    }
+
+    if (game.playerCount >= game.maxPlayerCount) {
+      throw new BadRequestException();
+    }
+
+    const newPlayer = await this.dataSource.transaction(async (em) => {
+      const playerRepository = em.getRepository(Player);
+      const player = playerRepository.create({ game, userId: oauth.userId, isHost: false });
+      await playerRepository.insert(player);
+
+      const gameRepository = em.getRepository(Game);
+      await gameRepository.update(game.id, { playerCount: game.playerCount + 1 });
+
+      return player;
+    });
+
+    game.players.push(newPlayer);
+
+    await this.gameGateway.join(newPlayer, game);
+    await this.gameGateway.updated(game);
+    await this.gameGateway.sync(game);
+  }
+
+  async leave() {
+    const player = this.contextService.requestPlayer;
+
+    if (!player) {
+      throw new BadRequestException();
+    }
+
+    const gameRepository = this.dataSource.getRepository(Game);
+    const game = await gameRepository.findOne({
+      relations: { players: true },
+      where: { id: player.gameId },
+    });
+
+    if (!game) {
+      throw new BadRequestException();
+    }
+
+    const isRemoved = await this.dataSource.transaction(async (em) => {
+      const gameRepository = em.getRepository(Game);
+      const playerRepository = em.getRepository(Player);
+
+      if (game.playerCount < 2) {
+        await playerRepository.softDelete({ gameId: player.gameId });
+        await gameRepository.softDelete(player.gameId);
+
+        return true;
+      }
+
+      const nextHost = game.players.find(({ id }) => id !== player.id);
+
+      if (player.isHost && nextHost) {
+        await playerRepository.update(nextHost.id, { isHost: true });
+      }
+
+      await playerRepository.softDelete(player.id);
+
+      return false;
+    });
+
+    game.players = game.players.filter((player) => player.id !== player.id);
+
+    await this.gameGateway.leave(player, game);
+
+    if (isRemoved) {
+      await this.gameGateway.removed(game.id);
+    } else {
+      await this.gameGateway.sync(game);
+      await this.gameGateway.updated(game);
+    }
   }
 
   async changeReadyStatus(body: ChangePlayerReadyStatus) {
@@ -70,6 +167,18 @@ export class GameService {
 
     const playerRepository = this.dataSource.getRepository(Player);
     await playerRepository.update(player.id, { isReady: body.isReady });
+
+    const gameRepository = this.dataSource.getRepository(Game);
+    const game = await gameRepository.findOne({
+      relations: { players: true },
+      where: { id: player.gameId },
+    });
+
+    if (!game) {
+      throw new BadRequestException();
+    }
+
+    await this.gameGateway.sync(game);
   }
 
   async startGame() {
@@ -130,73 +239,6 @@ export class GameService {
       await em.getRepository(GameNobleCard).insert(gameNobleCards);
       await em.getRepository(GameDevelopmentCard).insert(gameDevelopmentCards);
       await em.getRepository(Game).update(game.id, { status: GameStatus.Playing, maxPlayerIndex: players.length - 1 });
-    });
-  }
-
-  async join(body: JoinGameDTO) {
-    const oauth = this.contextService.requestUser;
-    const player = this.contextService.requestPlayer;
-
-    if (player) {
-      throw new ConflictException();
-    }
-
-    const gameRepository = this.dataSource.getRepository(Game);
-    const game = await gameRepository.findOneBy({ id: body.gameId });
-
-    if (!game) {
-      throw new BadRequestException();
-    }
-
-    if (game.status !== GameStatus.Wating) {
-      throw new BadRequestException();
-    }
-
-    if (game.playerCount >= game.maxPlayerCount) {
-      throw new BadRequestException();
-    }
-
-    await this.dataSource.transaction(async (em) => {
-      await em.getRepository(Player).insert({ game, userId: oauth.userId, isHost: false });
-      await em.getRepository(Game).update(game.id, { playerCount: game.playerCount + 1 });
-    });
-  }
-
-  async leave() {
-    const player = this.contextService.requestPlayer;
-
-    if (!player) {
-      throw new BadRequestException();
-    }
-
-    const gameRepository = this.dataSource.getRepository(Game);
-    const game = await gameRepository.findOne({
-      relations: { players: true },
-      where: { id: player.gameId },
-    });
-
-    if (!game) {
-      throw new BadRequestException();
-    }
-
-    await this.dataSource.transaction(async (em) => {
-      const gameRepository = em.getRepository(Game);
-      const playerRepository = em.getRepository(Player);
-
-      if (game.playerCount < 2) {
-        await playerRepository.softDelete({ gameId: player.gameId });
-        await gameRepository.softDelete(player.gameId);
-
-        return;
-      }
-
-      const nextHost = game.players.find(({ id }) => id !== player.id);
-
-      if (player.isHost && nextHost) {
-        await playerRepository.update(nextHost.id, { isHost: true });
-      }
-
-      await playerRepository.softDelete(player.id);
     });
   }
 }
