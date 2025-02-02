@@ -1,11 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
+import { ContextService } from 'src/core/context/context.service';
 import { OAuth } from 'src/domain/entities/oauth.entity';
 import { Player } from 'src/domain/entities/player.entity';
 import { PlayerStatus } from 'src/domain/enums';
 import { DataSource } from 'typeorm';
 
+import { AuthDTO } from './dto/auth.dto';
 import { JwtAccessPayload, JwtRefreshPayload, JwtVerifyResult } from './dto/interfaces';
 import { ServiceTokenDTO } from './dto/service-token.dto';
 
@@ -15,6 +17,7 @@ export class AuthService {
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly contextService: ContextService,
   ) {}
 
   private issueAccessToken(oauth: OAuth) {
@@ -113,5 +116,12 @@ export class AuthService {
     const refreshToken = this.issueRefreshToken(accessToken);
 
     return new ServiceTokenDTO(accessToken, refreshToken);
+  }
+
+  async getAuth() {
+    const oauth = this.contextService.requestUser;
+    const player = this.contextService.requestPlayer;
+
+    return new AuthDTO(oauth, player);
   }
 }

@@ -42,6 +42,7 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, SwaggerModule.createDocument(app, swaggerDocument));
 
   const configService = app.get(ConfigService);
+
   const redisConfig = new RedisConfig(configService);
   const serverConfig = new ServerConfig(configService);
 
@@ -50,7 +51,7 @@ async function bootstrap() {
 
   app.useWebSocketAdapter(redisIoAdapter);
   app.enableShutdownHooks();
-  app.enableCors(serverConfig.getCorsOptions);
+  app.enableCors(serverConfig.getCorsOptions());
   app.use(cookieParser());
   app.useGlobalGuards(app.get(JwtAuthGuard), app.get(PlayerAuthGuard));
   app.useGlobalInterceptors(classSerializerInterceptor(app.get(Reflector)), app.get(ContextInterceptor), app.get(LoggingInterceptor));
