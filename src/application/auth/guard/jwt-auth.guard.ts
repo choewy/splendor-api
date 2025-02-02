@@ -43,8 +43,9 @@ export class JwtAuthGuard implements CanActivate {
 
     if (accessTokenVerifyResult.error instanceof TokenExpiredError) {
       const refreshToken = (request.headers[RequestHeader.XRefreshToken] ?? '').toString();
+      const refreshTokenVerifyResult = this.authService.verifyRefreshToken(accessToken, refreshToken);
 
-      if (!this.authService.verifyRefreshToken(accessToken, refreshToken)) {
+      if (!refreshTokenVerifyResult) {
         throw new UnauthorizedException();
       }
 

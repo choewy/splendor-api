@@ -72,7 +72,7 @@ export class AuthService {
         secret: this.configService.getOrThrow('JWT_REFRESH_SECRET'),
       });
 
-      return payload.payload.signature === accessToken.split('.').pop();
+      return payload.signature === accessToken.split('.').pop();
     } catch {
       return false;
     }
