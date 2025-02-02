@@ -19,6 +19,15 @@ services:
     networks:
       - splendor
 
+  redis:
+    image: redis:7.2
+    container_name: splendor-redis
+    ports:
+      - 6380:6379
+    restart: unless-stopped
+    networks:
+      - splendor
+
 networks:
   splendor:
     driver: bridge
