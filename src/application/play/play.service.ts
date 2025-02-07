@@ -327,7 +327,7 @@ export class PlayService {
       sapphire: purchaseTarget.costOfSapphire > 0 ? purchaseTarget.costOfSapphire - playerBonus.sapphire : 0,
       onyx: purchaseTarget.costOfOnyx > 0 ? purchaseTarget.costOfOnyx - playerBonus.onyx : 0,
       diamond: purchaseTarget.costOfDiamond > 0 ? purchaseTarget.costOfDiamond - playerBonus.diamond : 0,
-      gold: 0,
+      gold: body.gold ?? 0,
     };
 
     const costs = [
@@ -336,6 +336,7 @@ export class PlayService {
       playerToken.sapphire - cost.sapphire,
       playerToken.onyx - cost.onyx,
       playerToken.diamond - cost.diamond,
+      -cost.gold,
     ];
 
     const costOfLeek = -costs.reduce((total, cost) => {
@@ -346,12 +347,8 @@ export class PlayService {
       return total;
     }, 0);
 
-    if (costOfLeek) {
-      if (!body.useTopaz || playerToken.gold - costOfLeek < 0) {
-        throw new BadRequestException('자원(토큰, 보너스) 부족');
-      }
-
-      cost.gold += costOfLeek;
+    if (costOfLeek > 0) {
+      throw new BadRequestException('자원(토큰, 보너스) 부족');
     }
 
     const openTarget = await gameDevelopmentCardRepository.findOneBy({
