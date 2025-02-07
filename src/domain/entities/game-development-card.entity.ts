@@ -71,16 +71,16 @@ export class GameDevelopmentCard {
     gameDevelopmentCard.cardId = card.id;
     gameDevelopmentCard.level = card.level;
     gameDevelopmentCard.point = card.point;
-    gameDevelopmentCard.costOfRuby = card.cost.red;
-    gameDevelopmentCard.costOfSapphire = card.cost.green;
-    gameDevelopmentCard.costOfEmerald = card.cost.blue;
-    gameDevelopmentCard.costOfOnyx = card.cost.black;
-    gameDevelopmentCard.costOfDiamond = card.cost.white;
-    gameDevelopmentCard.bonusOfRuby = card.bonus.red;
-    gameDevelopmentCard.bonusOfSapphire = card.bonus.green;
-    gameDevelopmentCard.bonusOfEmerald = card.bonus.blue;
-    gameDevelopmentCard.bonusOfOnyx = card.bonus.black;
-    gameDevelopmentCard.bonusOfDiamond = card.bonus.white;
+    gameDevelopmentCard.costOfRuby = card.cost.ruby;
+    gameDevelopmentCard.costOfSapphire = card.cost.sapphire;
+    gameDevelopmentCard.costOfEmerald = card.cost.emerald;
+    gameDevelopmentCard.costOfOnyx = card.cost.onyx;
+    gameDevelopmentCard.costOfDiamond = card.cost.diamond;
+    gameDevelopmentCard.bonusOfRuby = card.bonus.ruby;
+    gameDevelopmentCard.bonusOfSapphire = card.bonus.sapphire;
+    gameDevelopmentCard.bonusOfEmerald = card.bonus.emerald;
+    gameDevelopmentCard.bonusOfOnyx = card.bonus.onyx;
+    gameDevelopmentCard.bonusOfDiamond = card.bonus.diamond;
 
     return gameDevelopmentCard;
   }

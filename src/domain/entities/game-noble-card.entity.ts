@@ -45,11 +45,11 @@ export class GameNobleCard {
     gameNobleCard.game = game;
     gameNobleCard.point = 3;
     gameNobleCard.cardId = card.id;
-    gameNobleCard.costOfRuby = card.cost.red;
-    gameNobleCard.costOfSapphire = card.cost.green;
-    gameNobleCard.costOfEmerald = card.cost.blue;
-    gameNobleCard.costOfOnyx = card.cost.black;
-    gameNobleCard.costOfDiamond = card.cost.white;
+    gameNobleCard.costOfRuby = card.cost.ruby;
+    gameNobleCard.costOfSapphire = card.cost.sapphire;
+    gameNobleCard.costOfEmerald = card.cost.emerald;
+    gameNobleCard.costOfOnyx = card.cost.onyx;
+    gameNobleCard.costOfDiamond = card.cost.diamond;
 
     return gameNobleCard;
   }

@@ -105,14 +105,14 @@ export class PlayService {
   async takeToken(body: TakeTokenDTO) {
     const { player, game } = await this.checkTurn();
 
-    const countOfZeroTokens: Array<keyof Omit<TokenProperty, 'topaz'>> = [];
-    const countOfOneTokens: Array<keyof Omit<TokenProperty, 'topaz'>> = [];
-    const countOfTwoTokens: Array<keyof Omit<TokenProperty, 'topaz'>> = [];
+    const countOfZeroTokens: Array<keyof Omit<TokenProperty, 'gold'>> = [];
+    const countOfOneTokens: Array<keyof Omit<TokenProperty, 'gold'>> = [];
+    const countOfTwoTokens: Array<keyof Omit<TokenProperty, 'gold'>> = [];
 
     const bodyKeys = Object.keys(body).sort((x) => (body[x]?.optional ? 1 : -1));
 
     for (const k of bodyKeys) {
-      const key = k as keyof Omit<TokenProperty, 'topaz'>;
+      const key = k as keyof Omit<TokenProperty, 'gold'>;
 
       switch (body[key]?.count) {
         case TakeTokenCount.One:
@@ -147,7 +147,7 @@ export class PlayService {
       throw new BadRequestException('플레이어 토큰 정보 없음');
     }
 
-    let playerTokenTotalCount = playerToken.ruby + playerToken.emerald + playerToken.sapphire + playerToken.onyx + playerToken.diamond + playerToken.topaz;
+    let playerTokenTotalCount = playerToken.ruby + playerToken.emerald + playerToken.sapphire + playerToken.onyx + playerToken.diamond + playerToken.gold;
 
     if (playerTokenTotalCount > 9) {
       throw new BadRequestException('플레이어 토큰 소지 수량 10개 이상');
@@ -284,9 +284,9 @@ export class PlayService {
       await em.getRepository(GameDevelopmentCard).softRemove(keepTarget);
       await em.getRepository(PlayerDevelopmentCard).insert(PlayerDevelopmentCard.ofKeep(player, keepTarget));
 
-      if (gameToken.topaz > 0) {
-        await em.getRepository(PlayerToken).update(player.id, { topaz: () => `topaz + 1` });
-        await em.getRepository(GameToken).update(game.id, { topaz: () => `topaz - 1` });
+      if (gameToken.gold > 0) {
+        await em.getRepository(PlayerToken).update(player.id, { gold: () => `gold + 1` });
+        await em.getRepository(GameToken).update(game.id, { gold: () => `gold - 1` });
       }
 
       return this.checkNextTurn(em, game);
@@ -327,7 +327,7 @@ export class PlayService {
       sapphire: purchaseTarget.costOfSapphire > 0 ? purchaseTarget.costOfSapphire - playerBonus.sapphire : 0,
       onyx: purchaseTarget.costOfOnyx > 0 ? purchaseTarget.costOfOnyx - playerBonus.onyx : 0,
       diamond: purchaseTarget.costOfDiamond > 0 ? purchaseTarget.costOfDiamond - playerBonus.diamond : 0,
-      topaz: 0,
+      gold: 0,
     };
 
     const costs = [
@@ -347,11 +347,11 @@ export class PlayService {
     }, 0);
 
     if (costOfLeek) {
-      if (!body.useTopaz || playerToken.topaz - costOfLeek < 0) {
+      if (!body.useTopaz || playerToken.gold - costOfLeek < 0) {
         throw new BadRequestException('자원(토큰, 보너스) 부족');
       }
 
-      cost.topaz += costOfLeek;
+      cost.gold += costOfLeek;
     }
 
     const openTarget = await gameDevelopmentCardRepository.findOneBy({
@@ -375,7 +375,7 @@ export class PlayService {
         emerald: () => `IF(emerald - ${cost.emerald} < 0, 0, emerald - ${cost.emerald})`,
         onyx: () => `IF(onyx - ${cost.onyx} < 0, 0, onyx - ${cost.onyx})`,
         diamond: () => `IF(diamond - ${cost.diamond} < 0, 0, diamond - ${cost.diamond})`,
-        topaz: () => `IF(topaz - ${cost.topaz} < 0, 0, topaz - ${cost.topaz})`,
+        gold: () => `IF(gold - ${cost.gold} < 0, 0, gold - ${cost.gold})`,
       });
 
       await em.getRepository(Player).update(player.id, { point: () => `point + ${purchaseTarget.point}` });

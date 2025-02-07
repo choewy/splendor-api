@@ -4,7 +4,7 @@ import { Player } from './player.entity';
 import { TokenProperty } from '../types';
 
 @Entity({ name: 'player_bonus', comment: '플레이어 보너스' })
-export class PlayerBonus implements Omit<TokenProperty, 'topaz'> {
+export class PlayerBonus implements Omit<TokenProperty, 'gold'> {
   @PrimaryColumn({ type: 'varchar', length: 36, comment: '플레이어 PK' })
   playerId: string;
 

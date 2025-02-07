@@ -21,7 +21,7 @@ export class PlayDetailGameTokenDTO {
   diamond: number;
 
   @ApiResponseProperty({ type: Number })
-  topaz: number;
+  gold: number;
 
   constructor(gameToken: GameToken) {
     this.ruby = gameToken.ruby;
@@ -29,7 +29,7 @@ export class PlayDetailGameTokenDTO {
     this.emerald = gameToken.emerald;
     this.onyx = gameToken.onyx;
     this.diamond = gameToken.diamond;
-    this.topaz = gameToken.topaz;
+    this.gold = gameToken.gold;
   }
 }
 

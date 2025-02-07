@@ -4,7 +4,7 @@ export type TokenProperty = {
   emerald: number;
   onyx: number;
   diamond: number;
-  topaz: number;
+  gold: number;
 };
 
 export type TokenPropertyKey = keyof TokenProperty;

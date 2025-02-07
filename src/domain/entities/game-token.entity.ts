@@ -23,8 +23,8 @@ export class GameToken implements TokenProperty {
   @Column({ type: 'tinyint', unsigned: true, comment: '다이아몬드' })
   diamond: number;
 
-  @Column({ type: 'tinyint', unsigned: true, comment: '토파즈' })
-  topaz: number;
+  @Column({ type: 'tinyint', unsigned: true, comment: '황금' })
+  gold: number;
 
   @OneToOne(() => Game, (e) => e.token, { onDelete: 'CASCADE' })
   @JoinColumn()
@@ -42,7 +42,7 @@ export class GameToken implements TokenProperty {
     gameToken.emerald = tokenCount;
     gameToken.onyx = tokenCount;
     gameToken.diamond = tokenCount;
-    gameToken.topaz = 5;
+    gameToken.gold = 5;
 
     return gameToken;
   }

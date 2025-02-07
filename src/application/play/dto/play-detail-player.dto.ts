@@ -26,16 +26,16 @@ export class PlayDetailPlayerTokenDTO {
   diamond: number;
 
   @ApiResponseProperty({ type: Number })
-  topaz: number;
+  gold: number;
 
   constructor(playerToken: PlayerToken) {
-    this.total = playerToken.ruby + playerToken.sapphire + playerToken.emerald + playerToken.onyx + playerToken.diamond + playerToken.topaz;
+    this.total = playerToken.ruby + playerToken.sapphire + playerToken.emerald + playerToken.onyx + playerToken.diamond + playerToken.gold;
     this.ruby = playerToken.ruby;
     this.sapphire = playerToken.sapphire;
     this.emerald = playerToken.emerald;
     this.onyx = playerToken.onyx;
     this.diamond = playerToken.diamond;
-    this.topaz = playerToken.topaz;
+    this.gold = playerToken.gold;
   }
 }
 

@@ -1,8 +1,8 @@
 export type TokenConstructorArgs = Partial<{
-  red: number;
-  green: number;
-  blue: number;
-  white: number;
-  black: number;
-  yellow: number;
+  ruby: number;
+  sapphire: number;
+  emerald: number;
+  diamond: number;
+  onyx: number;
+  gold: number;
 }>;
